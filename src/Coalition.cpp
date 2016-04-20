@@ -70,7 +70,7 @@ void Coalition::setup_8(double abilityDistance, bool isEnemy, const Coalition &e
 			if (vecArrayIndex[i].x < lowX)
 				lowX = vecArrayIndex[i].x;                       // 找到最 low 的 X
 			else if (vecArrayIndex[i].x > highX)
-				highX = vecArrayIndex[i].y;                      // 找到最 high 的 X
+				highX = vecArrayIndex[i].x;                      // 找到最 high 的 X
 
 			if (vecArrayIndex[i].y < lowY)
 				lowY = vecArrayIndex[i].y;						 // 找到最 low 的 Y
@@ -81,6 +81,7 @@ void Coalition::setup_8(double abilityDistance, bool isEnemy, const Coalition &e
 		BF_UL.y = (highY + ABILITY_DISTANCE <= HEIGHT - 1) ? highY + ABILITY_DISTANCE : HEIGHT - 1;
 		BF_LR.x = (highX + ABILITY_DISTANCE <= WIDTH - 1) ? highX + ABILITY_DISTANCE : WIDTH - 1;
 		BF_LR.y = (lowY - ABILITY_DISTANCE >= 0) ? lowY - ABILITY_DISTANCE : 0;
+		cout << "Upper Left: " << BF_UL << "     Lower Right: " << BF_LR << endl;
 	}
 	else
 	{
