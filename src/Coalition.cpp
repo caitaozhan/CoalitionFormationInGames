@@ -5,6 +5,7 @@ Coalition::Coalition()
 	m_coalition.resize(INDIVIDUAL_SIZE);
 }
 
+// 这种方法，在 INDIVIDUAL_SIZE 比较小（比如 8）的时候，效率不错；但是如果 INDIVIDUAL_SIZE，比较大（比如 40）的时候，效率可能不佳
 void Coalition::setup_8(double abilityDistance, bool isEnemy, const Coalition &enemy)
 {
 	vector<ofVec2f> vecArrayIndex;      // 保存生成的二维坐标
@@ -13,7 +14,7 @@ void Coalition::setup_8(double abilityDistance, bool isEnemy, const Coalition &e
 	{
 		startPoint = ofVec2f((int)ofRandom(0, 16), (int)ofRandom(0, 16));
 	}
-	else
+	else                                // 我军选地点的时候，不能和 enemy 重合
 	{
 		startPoint = ofVec2f((int)ofRandom(BF_UL.x, BF_LR.x), (int)ofRandom(BF_LR.y, BF_UL.y));// 随机选择一个初始二维坐标 
 		while (contain(enemy, startPoint) == true)
@@ -21,10 +22,7 @@ void Coalition::setup_8(double abilityDistance, bool isEnemy, const Coalition &e
 			startPoint.set((int)ofRandom(BF_UL.x, BF_LR.x), (int)ofRandom(BF_LR.y, BF_UL.y));
 		}
 	}
-
-	// vecArrayIndex.push_back(startPoint);                              // BUG: 随机找初始点的时候，也要检查是否和敌人区域重合；思维漏洞，检查日志检查了好久才找到
-	
-	vecArrayIndex.push_back(startPoint);
+	vecArrayIndex.push_back(startPoint);  // BUG: 随机找初始点的时候，也要检查是否和敌人区域重合；思维漏洞，检查日志检查了好久才找到
 
 	while (vecArrayIndex.size() < INDIVIDUAL_SIZE)
 	{
@@ -32,7 +30,7 @@ void Coalition::setup_8(double abilityDistance, bool isEnemy, const Coalition &e
 		ofVec2f startPoint = vecArrayIndex[i];
 		vector<ofVec2f> newArrayIndex;
 
-		for (int j = 0; j < 8; ++j)                                  // 找到所有没有占用的二维坐标 
+		for (int j = 0; j < 8; ++j)                                  // 找到八连通区域中所有没有占用的二维坐标 
 		{
 			ofVec2f tempArrayIndex;
 			tempArrayIndex.x = startPoint.x + MOVE_X[j];
@@ -61,9 +59,9 @@ void Coalition::setup_8(double abilityDistance, bool isEnemy, const Coalition &e
 	{
 		m_coalition[i].setup(vecArrayIndex[i], abilityDistance, isEnemy);
 	}
-	if (isEnemy)
+	setColor(isEnemy);
+	if (isEnemy) // 这里可以提取出一个方法
 	{
-		m_color.set(ofColor::red);
 		int lowX = WIDTH, highX = 0, lowY = HEIGHT, highY = 0;
 		for (int i = 0; i < vecArrayIndex.size(); ++i)           // 寻找战场范围
 		{
@@ -83,10 +81,38 @@ void Coalition::setup_8(double abilityDistance, bool isEnemy, const Coalition &e
 		BF_LR.y = (lowY - ABILITY_DISTANCE >= 0) ? lowY - ABILITY_DISTANCE : 0;
 		cout << "Upper Left: " << BF_UL << "     Lower Right: " << BF_LR << endl;
 	}
-	else
+}
+
+// Complete Random 生成一个联盟，可以想象效果不佳
+void Coalition::setup_CR(double abilityDistance, bool isEnemy, const Coalition &enemy)
+{
+	vector<ofVec2f> vecArrayIndex;
+	ofVec2f temp;
+	
+	while (vecArrayIndex.size() < INDIVIDUAL_SIZE)
 	{
-		m_color.set(ofRandom(0, 128), ofRandom(32, 255), ofRandom(32, 255));
+		temp = ofVec2f(ofRandom(0, WIDTH), ofRandom(0, HEIGHT));
+
+		if (isEnemy && contain(vecArrayIndex, temp) == false)
+			vecArrayIndex.push_back(temp);
+
+		if (isEnemy == false && contain(vecArrayIndex, temp) == false && contain(enemy, temp) == false)
+			vecArrayIndex.push_back(temp);
 	}
+
+	for (int i = 0; i < INDIVIDUAL_SIZE; ++i)
+	{
+		m_coalition[i].setup(vecArrayIndex[i], abilityDistance, isEnemy);
+	}
+	setColor(isEnemy);
+}
+
+void Coalition::setColor(bool isEnemy)
+{
+	if (isEnemy)
+		m_color.set(ofColor::red);
+	else
+		m_color.set(ofRandom(0, 128), ofRandom(32, 255), ofRandom(32, 255));
 }
 
 void Coalition::draw()
@@ -97,6 +123,11 @@ void Coalition::draw()
 	}
 }
 
+/*
+	@para vecArrayIndex: 一个二维坐标vector
+	@para arrayIndex: 一个二维坐标
+	return 一个二维坐标vector中是否contian一个二维坐标
+*/
 bool Coalition::contain(const vector<ofVec2f> &vecArrayIndex, const ofVec2f &arrayIndex)
 {
 	for (int i = 0; i < vecArrayIndex.size(); ++i)
@@ -107,6 +138,11 @@ bool Coalition::contain(const vector<ofVec2f> &vecArrayIndex, const ofVec2f &arr
 	return false;
 }
 
+/*
+	@para enemy: 一个敌人的联盟
+	@para arrayIndex: 一个二维坐标
+	return 一个Coalition中是否contain一个arrayIndex
+*/
 bool Coalition::contain(const Coalition &enemy, const ofVec2f &arrayIndex)
 {
 	for (int i = 0; i < enemy.getCoalition().size(); ++i)

@@ -8,6 +8,8 @@ class Coalition
 public:
 	Coalition();                                       // 默认构造函数
 	void setup_8(double abilityDistance, bool isEnemy, const Coalition &enemy);  // 初始化一个联盟，随机的8联通区域
+	void setup_CR(double abilityDistance, bool isEnemy, const Coalition &enemy); // 初始化一个联盟，Complete Random
+	void setColor(bool isEnemy);
 	void draw();
 	bool contain(const vector<ofVec2f> &vecArrayIndex, const ofVec2f &arrayIndex);
 	bool contain(const Coalition &enemy, const ofVec2f &arrayIndex);

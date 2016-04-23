@@ -37,11 +37,12 @@ void ofApp::setup(){
 	ofile.open("log_simpleEvaluate.txt");
 
 	m_enemy.setup_8(ABILITY_DISTANCE, true, Coalition());
+	//m_enemy.setup_CR(ABILITY_DISTANCE, true, Coalition());
 
 	m_population.resize(POPULATION_SIZE);
 	for (int i = 0; i < m_population.size(); ++i)
 	{
-		m_population[i].setup_8(ABILITY_DISTANCE, false, m_enemy);
+		m_population[i].setup_CR(ABILITY_DISTANCE, false, m_enemy);
 	}
 
 }
@@ -76,7 +77,7 @@ void ofApp::keyPressed(int key){
 	{
 		for (int i = 0; i < m_population.size(); ++i)
 		{
-			m_population[i].setup_8(ABILITY_DISTANCE, false, m_enemy);
+			m_population[i].setup_CR(ABILITY_DISTANCE, false, m_enemy);
 			m_population[i].setSimpleEvaluate(Coalition::simpleEvalute(m_enemy, m_population[i]));
 		}
 	}
