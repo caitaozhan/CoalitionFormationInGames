@@ -1,4 +1,5 @@
-﻿    正在创建库 bin\Coalition_debug.lib 和对象 bin\Coalition_debug.exp
+﻿  LINK : 没有找到 bin\Coalition_debug.exe 或上一个增量链接没有生成它；正在执行完全链接
+    正在创建库 bin\Coalition_debug.lib 和对象 bin\Coalition_debug.exp
   Coalition.vcxproj -> D:\Dev\of_v0.9.3_vs_release\apps\myApps\Coalition\bin\Coalition_debug.exe
   
   	                   9	D:\Dev\of_v0.9.3_vs_release\export\vs\Win32\

@@ -3,6 +3,7 @@
 Coalition::Coalition()
 {
 	m_coalition.resize(INDIVIDUAL_SIZE);
+	m_simpleEvaluate = m_fitness = m_weight = 0;
 }
 
 // 这种方法，在 INDIVIDUAL_SIZE 比较小（比如 8）的时候，效率不错；但是如果 INDIVIDUAL_SIZE，比较大（比如 40）的时候，效率可能不佳
@@ -134,14 +135,9 @@ bool Coalition::contain(const Coalition &enemy, const ofVec2f &arrayIndex)
 {
 	for (int i = 0; i < enemy.getCoalition().size(); ++i)
 	{
-		//ofile << arrayIndex << "-" << enemy.getCoalition().at(i).getArrayIndex() << "|";
 		if (arrayIndex == enemy.getCoalition().at(i).getArrayIndex())  // 和coalition中的第i个Tank的二维坐标相等
-		{
-			//ofile << "true" << endl;
 			return true;
-		}
 	}
-	//ofile << "false" << endl;
 	return false;
 }
 
@@ -229,23 +225,40 @@ int Coalition::simpleEvalute(const Coalition & enemy, const Coalition & me)
 	return meSeeEnemy - enemySeeMe;
 }
 
-inline double Coalition::calculateFitness(double evaluate, double maxEvaluate, double minEvaluate)
+/*
+	BUG: 这个方法加一个 inline 这门就跪了？
+	从联盟的估值，转换到适应值
+	@para evalute: 本联盟的估值
+	@para maxEvaluate: 所有联盟的最大估值
+	@para minEvaluate: 所有联盟的最小估值
+	return 适应值 (越大越好)
+*/
+double Coalition::calculateFitness(double evaluate, double maxEvaluate, double minEvaluate)
 {
-	return (maxEvaluate - evaluate + 1) / (maxEvaluate - minEvaluate + 1);
+	return (evaluate - minEvaluate + 1) / (maxEvaluate - minEvaluate + 1);
 }
 
-inline double Coalition::calculateWeight(double fitness)
+double Coalition::calculateWeight(double fitness)
 {
 	return 1.0 / (1 + pow(E, -fitness));
 }
 
+/*
+	自我描述
+	@para evaluteKind: 评估种类
+	return string 自我描述
+*/
 string Coalition::toString(string evaluateKind)
 {
 	string msg("");
 	if (evaluateKind == "simpleEvaluate")
 	{
-		msg += "Evaluate = ";
-		msg += ofToString(m_simpleEvaluate);
+		msg.append("E: ");
+		msg.append(ofToString(m_simpleEvaluate));
+		msg.append(", F: ");
+		msg.append(ofToString(m_fitness));
+		msg.append(", W: ");
+		msg.append(ofToString(m_weight));
 	}
 	return msg;
 }

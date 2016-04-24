@@ -22,7 +22,8 @@ public:
 	void dragEvent(ofDragInfo dragInfo);
 	void gotMessage(ofMessage msg);
 
-	void statistic();             // 统计工作，生成概率矩阵
+	void updatePMatrix();             // 统计工作，生成概率矩阵
+	void updatePopluation();          // 更新种群
 
 private:
 	vector<Coalition> m_population;

@@ -80,6 +80,21 @@ void ofApp::keyPressed(int key){
 			m_population[i].setup_CR(ABILITY_DISTANCE, false, m_enemy);
 			m_population[i].setSimpleEvaluate(Coalition::simpleEvalute(m_enemy, m_population[i]));
 		}
+		int maxE = -INDIVIDUAL_SIZE;
+		int minE = INDIVIDUAL_SIZE;
+		for (Coalition &c : m_population)                  // 找到种群里所有联盟的最大最小估值
+		{
+			if (c.getSimpleEvaluate() > maxE)
+				maxE = c.getSimpleEvaluate();
+
+			if (c.getSimpleEvaluate() < minE)
+				minE = c.getSimpleEvaluate();
+		}
+		for (Coalition &c : m_population)                  // 估值 --> 适应值 --> 权值
+		{
+			c.setFitness(c.calculateFitness(c.getSimpleEvaluate(), maxE, minE));
+			c.setWeight(c.calculateWeight(c.getFitness()));
+		}
 	}
 	if (key == 'e')
 	{
@@ -130,6 +145,14 @@ void ofApp::windowResized(int w, int h){
 //--------------------------------------------------------------
 void ofApp::gotMessage(ofMessage msg){
 
+}
+
+void ofApp::updatePMatrix()
+{
+}
+
+void ofApp::updatePopluation()
+{
 }
 
 //--------------------------------------------------------------
