@@ -1,6 +1,8 @@
 #pragma once
 #include "ofMain.h"
 
+const double E = 2.718281828;
+
 extern const int HEIGHT;
 extern const int WIDTH;
 extern const double EPSILON;

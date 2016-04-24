@@ -16,7 +16,7 @@ void Coalition::setup_8(double abilityDistance, bool isEnemy, const Coalition &e
 	}
 	else                                // 我军选地点的时候，不能和 enemy 重合
 	{
-		startPoint = ofVec2f((int)ofRandom(BF_UL.x, BF_LR.x), (int)ofRandom(BF_LR.y, BF_UL.y));// 随机选择一个初始二维坐标 
+		startPoint = ofVec2f((int)ofRandom(BF_UL.x, BF_LR.x + 1), (int)ofRandom(BF_LR.y, BF_UL.y + 1));// 随机选择一个初始二维坐标 
 		while (contain(enemy, startPoint) == true)
 		{
 			startPoint.set((int)ofRandom(BF_UL.x, BF_LR.x), (int)ofRandom(BF_LR.y, BF_UL.y));
@@ -59,28 +59,11 @@ void Coalition::setup_8(double abilityDistance, bool isEnemy, const Coalition &e
 	{
 		m_coalition[i].setup(vecArrayIndex[i], abilityDistance, isEnemy);
 	}
-	setColor(isEnemy);
-	if (isEnemy) // 这里可以提取出一个方法
-	{
-		int lowX = WIDTH, highX = 0, lowY = HEIGHT, highY = 0;
-		for (int i = 0; i < vecArrayIndex.size(); ++i)           // 寻找战场范围
-		{
-			if (vecArrayIndex[i].x < lowX)
-				lowX = vecArrayIndex[i].x;                       // 找到最 low 的 X
-			else if (vecArrayIndex[i].x > highX)
-				highX = vecArrayIndex[i].x;                      // 找到最 high 的 X
 
-			if (vecArrayIndex[i].y < lowY)
-				lowY = vecArrayIndex[i].y;						 // 找到最 low 的 Y
-			else if (vecArrayIndex[i].y > highY)
-				highY = vecArrayIndex[i].y;						 // 找到最 high 的 Y
-		}
-		BF_UL.x = (lowX - ABILITY_DISTANCE >= 0) ? lowX - ABILITY_DISTANCE : 0;
-		BF_UL.y = (highY + ABILITY_DISTANCE <= HEIGHT - 1) ? highY + ABILITY_DISTANCE : HEIGHT - 1;
-		BF_LR.x = (highX + ABILITY_DISTANCE <= WIDTH - 1) ? highX + ABILITY_DISTANCE : WIDTH - 1;
-		BF_LR.y = (lowY - ABILITY_DISTANCE >= 0) ? lowY - ABILITY_DISTANCE : 0;
-		cout << "Upper Left: " << BF_UL << "     Lower Right: " << BF_LR << endl;
-	}
+	setColor(isEnemy);
+
+	if (isEnemy)
+		update_BF(vecArrayIndex);
 }
 
 // Complete Random 生成一个联盟，可以想象效果不佳
@@ -91,7 +74,7 @@ void Coalition::setup_CR(double abilityDistance, bool isEnemy, const Coalition &
 	
 	while (vecArrayIndex.size() < INDIVIDUAL_SIZE)
 	{
-		temp = ofVec2f(ofRandom(0, WIDTH), ofRandom(0, HEIGHT));
+		temp = ofVec2f((int)ofRandom(BF_UL.x, BF_LR.x + 1), (int)ofRandom(BF_LR.y, BF_UL.y + 1));
 
 		if (isEnemy && contain(vecArrayIndex, temp) == false)
 			vecArrayIndex.push_back(temp);
@@ -104,7 +87,11 @@ void Coalition::setup_CR(double abilityDistance, bool isEnemy, const Coalition &
 	{
 		m_coalition[i].setup(vecArrayIndex[i], abilityDistance, isEnemy);
 	}
+
 	setColor(isEnemy);
+
+	if (isEnemy)
+		update_BF(vecArrayIndex);
 }
 
 void Coalition::setColor(bool isEnemy)
@@ -168,9 +155,29 @@ const double Coalition::getSimpleEvaluate() const
 	return m_simpleEvaluate;
 }
 
+const double Coalition::getFitness() const
+{
+	return m_fitness;
+}
+
+const double Coalition::getWeight() const
+{
+	return m_weight;
+}
+
 void Coalition::setSimpleEvaluate(const double evaluate)
 {
 	m_simpleEvaluate = evaluate;
+}
+
+void Coalition::setFitness(double fit)
+{
+	m_fitness = fit;
+}
+
+void Coalition::setWeight(double weight)
+{
+	m_weight = weight;
 }
 
 /*
@@ -222,6 +229,16 @@ int Coalition::simpleEvalute(const Coalition & enemy, const Coalition & me)
 	return meSeeEnemy - enemySeeMe;
 }
 
+inline double Coalition::calculateFitness(double evaluate, double maxEvaluate, double minEvaluate)
+{
+	return (maxEvaluate - evaluate + 1) / (maxEvaluate - minEvaluate + 1);
+}
+
+inline double Coalition::calculateWeight(double fitness)
+{
+	return 1.0 / (1 + pow(E, -fitness));
+}
+
 string Coalition::toString(string evaluateKind)
 {
 	string msg("");
@@ -231,5 +248,27 @@ string Coalition::toString(string evaluateKind)
 		msg += ofToString(m_simpleEvaluate);
 	}
 	return msg;
+}
+
+void Coalition::update_BF(vector<ofVec2f> vecArrayIndex)
+{
+	int lowX = WIDTH, highX = 0, lowY = HEIGHT, highY = 0;
+	for (int i = 0; i < vecArrayIndex.size(); ++i)           // 寻找战场范围
+	{
+		if (vecArrayIndex[i].x < lowX)
+			lowX = vecArrayIndex[i].x;                       // 找到最 low 的 X
+		else if (vecArrayIndex[i].x > highX)
+			highX = vecArrayIndex[i].x;                      // 找到最 high 的 X
+
+		if (vecArrayIndex[i].y < lowY)
+			lowY = vecArrayIndex[i].y;						 // 找到最 low 的 Y
+		else if (vecArrayIndex[i].y > highY)
+			highY = vecArrayIndex[i].y;						 // 找到最 high 的 Y
+	}
+	BF_UL.x = (lowX - ABILITY_DISTANCE >= 0) ? lowX - ABILITY_DISTANCE : 0;
+	BF_UL.y = (highY + ABILITY_DISTANCE <= HEIGHT - 1) ? highY + ABILITY_DISTANCE : HEIGHT - 1;
+	BF_LR.x = (highX + ABILITY_DISTANCE <= WIDTH - 1) ? highX + ABILITY_DISTANCE : WIDTH - 1;
+	BF_LR.y = (lowY - ABILITY_DISTANCE >= 0) ? lowY - ABILITY_DISTANCE : 0;
+	cout << "Upper Left: " << BF_UL << "     Lower Right: " << BF_LR << endl;
 }
 

@@ -34,7 +34,7 @@ void ofApp::setup(){
 	BF_UL = ofVec2f(0, HEIGHT - 1);
 	BF_LR = ofVec2f(WIDTH - 1, 0);
 
-	ofile.open("log_simpleEvaluate.txt");
+	// ofile.open("log_simpleEvaluate.txt");
 
 	m_enemy.setup_8(ABILITY_DISTANCE, true, Coalition());
 	//m_enemy.setup_CR(ABILITY_DISTANCE, true, Coalition());
