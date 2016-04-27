@@ -8,7 +8,15 @@ Tank::Tank()
 	m_isEnemy = false;
 }
 
-void Tank::setup(ofVec2f arrayIndex, double abilityDistance, bool isEnemy)
+Tank::Tank(const Tank & t)
+{
+	m_position = t.getPosition();
+	m_arrayIndex = t.getArrayIndex();
+	m_abilityDistance = t.getAbilityDistance();
+	m_isEnemy = t.getIsEnemy();
+}
+
+void Tank::setup(const ofVec2f &arrayIndex, double abilityDistance, bool isEnemy)
 {
 	m_arrayIndex = arrayIndex;
 	m_position.set(xArrayIndx2Coordi(m_arrayIndex.x), yArrayIndx2Coordi(m_arrayIndex.y), 0);
@@ -33,9 +41,44 @@ void Tank::setTankArrayIndex(int x, int y)
 	m_arrayIndex.y = y;
 }
 
+void Tank::setAbilityDistance(double ability)
+{
+	m_abilityDistance = ability;
+}
+
+void Tank::setIsEnemy(bool isEnemy)
+{
+	m_isEnemy = isEnemy;
+}
+
+const ofPoint & Tank::getPosition() const
+{
+	return m_position;
+}
+
 const ofVec2f & Tank::getArrayIndex() const
 {
 	return m_arrayIndex;
+}
+
+const double Tank::getAbilityDistance() const
+{
+	return m_abilityDistance;
+}
+
+const bool Tank::getIsEnemy() const
+{
+	return m_isEnemy;
+}
+
+bool Tank::operator!=(const Tank & t) const
+{
+	return m_arrayIndex != t.m_arrayIndex;
+}
+
+bool Tank::operator==(const Tank & t) const
+{
+	return m_arrayIndex == t.m_arrayIndex;
 }
 
 inline int Tank::xCoordi2ArrayIndx(double xCoordi)
@@ -64,9 +107,18 @@ inline double Tank::yArrayIndx2Coordi(int y)
 	return (y - HEIGHT / 2) * 10.0;
 }
 
-bool Tank::checkInBoundary(ofVec2f arrayIndex)
+bool Tank::checkInBoundary(const ofVec2f &arrayIndex)
 {
 	if (arrayIndex.x < 0 || arrayIndex.x >= WIDTH || arrayIndex.y < 0 || arrayIndex.y >= HEIGHT)
+	{
+		return false;
+	}
+	return true;
+}
+
+bool Tank::ckeckInBF(const ofVec2f & arrayIndex)
+{
+	if (arrayIndex.x < BF_LR.x || arrayIndex.x > BF_UL.x || arrayIndex.y < BF_LR.y || arrayIndex.y > BF_UL.y)
 	{
 		return false;
 	}

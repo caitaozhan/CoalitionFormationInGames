@@ -22,11 +22,11 @@ public:
 	void dragEvent(ofDragInfo dragInfo);
 	void gotMessage(ofMessage msg);
 
-	void updatePMatrix();             // 统计工作，生成概率矩阵
+	void updatePMatrix();             // 统计工作，更新概率矩阵
 	void updatePopluation();          // 更新种群
 
 private:
-	vector<Coalition> m_population;
+	vector<Coalition> m_population;   // 论文中的 archive
 	Coalition m_bestCoalition;
 	Coalition m_enemy;
 	ofMesh    m_mesh;

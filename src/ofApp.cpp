@@ -147,12 +147,59 @@ void ofApp::gotMessage(ofMessage msg){
 
 }
 
+/*
+更新Propability Matrix (这是个全局变量)
+无法保证每一行的概率和 = 1 --> 没有除以一个“总和”之类的必要
+
+*/
 void ofApp::updatePMatrix()
 {
+	for (auto &vec_double : PROBABILITY_MATRIX)  // 问题：vector有没有一行代码解决？
+	{
+		for (double &p : vec_double)
+		{
+			p = 0;								 // 清零
+		}
+	}
+	for (const Coalition &c : m_population)
+	{
+		for (const Tank &tank : c.getCoalition())
+		{
+			int x = tank.getArrayIndex().x;
+			int y = tank.getArrayIndex().y;
+			PROBABILITY_MATRIX[x][y] += c.getWeight();
+		}
+	}
 }
 
 void ofApp::updatePopluation()
 {
+	for (Coalition &c : m_population)            // c     是论文中的 Si
+	{
+		vector<Tank> tanks = c.getCoalition();   // tanks 是论文中的 Xi
+		vector<Tank> tempTanks(tanks.size());    // tempTanks 论文中 Xt。 问题：从写代码的角度，这个 Xt 可以不要
+		for (int i = 0; i < tanks.size(); ++i)
+		{
+			if (ofRandom(0, 1) < PL)  // todo: 这里还有一个&&
+			{
+				tempTanks[i] = tanks[i];
+			}
+			else
+			{
+				ofVec2f arrayIndex = Coalition::getPlaceFromPMatrix();  // todo: 防止重复
+				Tank newTank;
+				newTank.setup(arrayIndex, ABILITY_DISTANCE, false);
+				tempTanks[i] = newTank;
+			}
+			if (tanks[i] != tempTanks[i])
+			{
+				tanks[i] = tempTanks[i];
+			}
+			//if()
+		}
+
+
+	}
 }
 
 //--------------------------------------------------------------

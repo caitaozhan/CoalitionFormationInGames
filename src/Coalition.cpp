@@ -6,6 +6,15 @@ Coalition::Coalition()
 	m_simpleEvaluate = m_fitness = m_weight = 0;
 }
 
+Coalition::Coalition(const Coalition & c)
+{
+	m_coalition = c.getCoalition();
+	m_color = c.getColor();
+	m_simpleEvaluate = c.getSimpleEvaluate();
+	m_fitness = c.getFitness();
+	m_weight = c.getWeight();
+}
+
 // 这种方法，在 INDIVIDUAL_SIZE 比较小（比如 8）的时候，效率不错；但是如果 INDIVIDUAL_SIZE，比较大（比如 40）的时候，效率可能不佳
 void Coalition::setup_8(double abilityDistance, bool isEnemy, const Coalition &enemy)
 {
@@ -20,7 +29,7 @@ void Coalition::setup_8(double abilityDistance, bool isEnemy, const Coalition &e
 		startPoint = ofVec2f((int)ofRandom(BF_UL.x, BF_LR.x + 1), (int)ofRandom(BF_LR.y, BF_UL.y + 1));// 随机选择一个初始二维坐标 
 		while (contain(enemy, startPoint) == true)
 		{
-			startPoint.set((int)ofRandom(BF_UL.x, BF_LR.x), (int)ofRandom(BF_LR.y, BF_UL.y));
+			startPoint.set((int)ofRandom(BF_UL.x, BF_LR.x + 1), (int)ofRandom(BF_LR.y, BF_UL.y + 1));
 		}
 	}
 	vecArrayIndex.push_back(startPoint);  // BUG: 随机找初始点的时候，也要检查是否和敌人区域重合；思维漏洞，检查日志检查了好久才找到
@@ -42,8 +51,9 @@ void Coalition::setup_8(double abilityDistance, bool isEnemy, const Coalition &e
 				{                                                     // 是敌人的情况下，生成的位置没有限制
 					newArrayIndex.push_back(tempArrayIndex);
 				}
-				if (isEnemy == false && contain(vecArrayIndex, tempArrayIndex) == false && contain(enemy, tempArrayIndex) == false)
-				{                                                     // 我军的情况下
+				if (isEnemy == false && Tank::ckeckInBF(tempArrayIndex) &&
+					contain(vecArrayIndex, tempArrayIndex) == false && contain(enemy, tempArrayIndex) == false)
+				{                                                     // 我军的情况下，要求在Battle Field里面
 					newArrayIndex.push_back(tempArrayIndex);          // 生成的位置不能和敌军的重合
 				}
 			}
@@ -159,6 +169,11 @@ const double Coalition::getFitness() const
 const double Coalition::getWeight() const
 {
 	return m_weight;
+}
+
+const ofColor & Coalition::getColor() const
+{
+	return m_color;
 }
 
 void Coalition::setSimpleEvaluate(const double evaluate)
@@ -283,5 +298,11 @@ void Coalition::update_BF(vector<ofVec2f> vecArrayIndex)
 	BF_LR.x = (highX + ABILITY_DISTANCE <= WIDTH - 1) ? highX + ABILITY_DISTANCE : WIDTH - 1;
 	BF_LR.y = (lowY - ABILITY_DISTANCE >= 0) ? lowY - ABILITY_DISTANCE : 0;
 	cout << "Upper Left: " << BF_UL << "     Lower Right: " << BF_LR << endl;
+}
+
+ofVec2f Coalition::getPlaceFromPMatrix()
+{
+
+	return ofVec2f();
 }
 
