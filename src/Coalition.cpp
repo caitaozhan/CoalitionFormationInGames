@@ -2,7 +2,7 @@
 
 Coalition::Coalition()
 {
-	m_coalition.resize(INDIVIDUAL_SIZE);
+	m_coalition.resize(0);
 	m_simpleEvaluate = m_fitness = m_weight = 0;
 }
 
@@ -15,9 +15,27 @@ Coalition::Coalition(const Coalition & c)
 	m_weight = c.getWeight();
 }
 
+Coalition & Coalition::operator=(const Coalition & c)
+{
+	if (this == &c)    // 取地址
+		return *this;
+	
+	m_coalition = c.getCoalition();
+	m_color = c.getColor();
+	m_simpleEvaluate = c.getSimpleEvaluate();
+	m_fitness = c.getFitness();
+	m_weight = c.getWeight();
+	m_abilityDistance = c.getAbilityDistance();
+	m_isEnemy = c.getIsEnemy();
+	return *this;
+}
+
 // 这种方法，在 INDIVIDUAL_SIZE 比较小（比如 8）的时候，效率不错；但是如果 INDIVIDUAL_SIZE，比较大（比如 40）的时候，效率可能不佳
 void Coalition::setup_8(double abilityDistance, bool isEnemy, const Coalition &enemy)
 {
+	m_abilityDistance = abilityDistance;
+	m_isEnemy = isEnemy;
+
 	vector<ofVec2f> vecArrayIndex;      // 保存生成的二维坐标
 	ofVec2f startPoint;                                              
 	if (isEnemy)						// enemy 随机选择一个初始二维坐标
@@ -75,6 +93,8 @@ void Coalition::setup_8(double abilityDistance, bool isEnemy, const Coalition &e
 
 	if (isEnemy)
 		update_BF(vecArrayIndex);
+
+
 }
 
 // Complete Random 生成一个联盟，可以想象效果不佳
@@ -111,6 +131,21 @@ void Coalition::setColor(bool isEnemy)
 		m_color.set(ofColor::red);
 	else
 		m_color.set(ofRandom(0, 128), ofRandom(32, 255), ofRandom(32, 255));
+}
+
+void Coalition::setAbilityDistance(double abilityDistance)
+{
+	m_abilityDistance = abilityDistance;
+}
+
+void Coalition::setIsEnemy(bool isEnemy)
+{
+	m_isEnemy = isEnemy;
+}
+
+void Coalition::setCoalition(int i, const Tank &t)
+{
+	m_coalition[i] = t;
 }
 
 void Coalition::draw()
@@ -156,6 +191,11 @@ const vector<Tank>& Coalition::getCoalition() const
 	return m_coalition;
 }
 
+const Tank & Coalition::getCoalition(int i) const
+{
+	return m_coalition[i];
+}
+
 const double Coalition::getSimpleEvaluate() const
 {
 	return m_simpleEvaluate;
@@ -174,6 +214,26 @@ const double Coalition::getWeight() const
 const ofColor & Coalition::getColor() const
 {
 	return m_color;
+}
+
+const int Coalition::getSize() const
+{
+	return m_coalition.size();
+}
+
+const double Coalition::getAbilityDistance() const
+{
+	return m_abilityDistance;
+}
+
+const bool Coalition::getIsEnemy() const
+{
+	return m_isEnemy;
+}
+
+void Coalition::pushBackTank(const Tank &t)
+{
+	m_coalition.push_back(t);
 }
 
 void Coalition::setSimpleEvaluate(const double evaluate)
@@ -302,7 +362,21 @@ void Coalition::update_BF(vector<ofVec2f> vecArrayIndex)
 
 ofVec2f Coalition::getPlaceFromPMatrix()
 {
-
-	return ofVec2f();
+	int x1 = BF_UL.x, x2 = BF_LR.x;
+	int y1 = BF_LR.y, y2 = BF_UL.y;
+	double sumTotal = 0.0;                           // 总和
+	vector<double> sumOfRow(y2 - y1 + 1, 0.0);       // 每一行之和
+	for (int y = y1; y <= y2; ++y)
+	{
+		for (int x = x1; x <= x2; ++x)
+		{
+			sumTotal += PROBABILITY_MATRIX[y][x];
+			sumOfRow[y1] += PROBABILITY_MATRIX[y][x];
+		}
+	}
+	double choose = ofRandom(0, sumTotal);
+	int row = lower_bound(sumOfRow.begin(), sumOfRow.end(), choose) - sumOfRow.begin();  // 行 --> y
+	int column = lower_bound(PROBABILITY_MATRIX[row].begin(), PROBABILITY_MATRIX[row].end(), choose) - PROBABILITY_MATRIX[row].begin();	 // 列 --> x
+	return ofVec2f(column, row);  // (x, y)
 }
 

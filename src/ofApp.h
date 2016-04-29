@@ -22,6 +22,7 @@ public:
 	void dragEvent(ofDragInfo dragInfo);
 	void gotMessage(ofMessage msg);
 
+	void updateWeight();
 	void updatePMatrix();             // 统计工作，更新概率矩阵
 	void updatePopluation();          // 更新种群
 

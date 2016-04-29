@@ -44,11 +44,12 @@ void ofApp::setup(){
 	{
 		m_population[i].setup_CR(ABILITY_DISTANCE, false, m_enemy);
 	}
-
+	updatePMatrix();  // 依据初始化的种群，生成一个初始化的概率矩阵
 }
 
 //--------------------------------------------------------------
 void ofApp::update(){
+
 
 
 
@@ -77,28 +78,19 @@ void ofApp::keyPressed(int key){
 	{
 		for (int i = 0; i < m_population.size(); ++i)
 		{
-			m_population[i].setup_CR(ABILITY_DISTANCE, false, m_enemy);
-			m_population[i].setSimpleEvaluate(Coalition::simpleEvalute(m_enemy, m_population[i]));
+			m_population[i].setup_CR(ABILITY_DISTANCE, false, m_enemy);  // 更新联盟里所有 tank 的位置
 		}
-		int maxE = -INDIVIDUAL_SIZE;
-		int minE = INDIVIDUAL_SIZE;
-		for (Coalition &c : m_population)                  // 找到种群里所有联盟的最大最小估值
-		{
-			if (c.getSimpleEvaluate() > maxE)
-				maxE = c.getSimpleEvaluate();
-
-			if (c.getSimpleEvaluate() < minE)
-				minE = c.getSimpleEvaluate();
-		}
-		for (Coalition &c : m_population)                  // 估值 --> 适应值 --> 权值
-		{
-			c.setFitness(c.calculateFitness(c.getSimpleEvaluate(), maxE, minE));
-			c.setWeight(c.calculateWeight(c.getFitness()));
-		}
+		updateWeight(); // 新的位置 --> 新的 weight
 	}
-	if (key == 'e')
+	else if (key == 'e')
 	{
 		m_enemy.setup_8(ABILITY_DISTANCE, true, m_enemy);
+	}
+	else if (key == 'u')
+	{
+		updatePopluation();   //  新的全局概率矩阵 --> 更新种群位置
+		updateWeight();       //  新的种群位置     --> 更新种群的权值
+		updatePMatrix();      //  新的种群权值     --> 更新全局的概率矩阵
 	}
 }
 
@@ -148,6 +140,36 @@ void ofApp::gotMessage(ofMessage msg){
 }
 
 /*
+更新权值的过程：
+1. 更新 评估值
+2. 更新 适应值
+3. 更新 权值
+*/
+void ofApp::updateWeight()
+{
+	for (Coalition &c : m_population)                  // 更新每一个联盟的评估值
+	{
+		c.setSimpleEvaluate(Coalition::simpleEvalute(m_enemy, c));
+	}
+	
+	int maxE = -INDIVIDUAL_SIZE;
+	int minE = INDIVIDUAL_SIZE;
+	for (Coalition &c : m_population)                  // 找到种群里所有联盟的最大最小估值
+	{
+		if (c.getSimpleEvaluate() > maxE)
+			maxE = c.getSimpleEvaluate();
+
+		if (c.getSimpleEvaluate() < minE)
+			minE = c.getSimpleEvaluate();
+	}
+	for (Coalition &c : m_population)                  // 估值 --> 适应值 --> 权值
+	{
+		c.setFitness(c.calculateFitness(c.getSimpleEvaluate(), maxE, minE));
+		c.setWeight(c.calculateWeight(c.getFitness()));
+	}
+}
+
+/*
 更新Propability Matrix (这是个全局变量)
 无法保证每一行的概率和 = 1 --> 没有除以一个“总和”之类的必要
 
@@ -172,33 +194,38 @@ void ofApp::updatePMatrix()
 	}
 }
 
+/*
+更新种群的位置
+*/
 void ofApp::updatePopluation()
 {
-	for (Coalition &c : m_population)            // c     是论文中的 Si
+	for (Coalition &c : m_population)     // c          是论文中的 Si
 	{
-		vector<Tank> tanks = c.getCoalition();   // tanks 是论文中的 Xi
-		vector<Tank> tempTanks(tanks.size());    // tempTanks 论文中 Xt。 问题：从写代码的角度，这个 Xt 可以不要
-		for (int i = 0; i < tanks.size(); ++i)
+		Coalition backupC(c);             // backupC    是论文中的 Xi
+		Coalition constructC;             // constructC 是论文中的 Xt。 问题：从写代码的角度，这个 Xt 可以不要
+		for (int i = 0; i < backupC.getSize(); ++i)
 		{
-			if (ofRandom(0, 1) < PL)  // todo: 这里还有一个&&
+			if (ofRandom(0, 1) < PL)      // todo: 这里还有一个&&
 			{
-				tempTanks[i] = tanks[i];
+				
+				constructC.pushBackTank(backupC.getCoalition(i));
 			}
 			else
 			{
 				ofVec2f arrayIndex = Coalition::getPlaceFromPMatrix();  // todo: 防止重复
 				Tank newTank;
 				newTank.setup(arrayIndex, ABILITY_DISTANCE, false);
-				tempTanks[i] = newTank;
+				constructC.pushBackTank(newTank);
 			}
-			if (tanks[i] != tempTanks[i])
+			if (backupC.getCoalition()[i] != constructC.getCoalition()[i])
 			{
-				tanks[i] = tempTanks[i];
+				backupC.setCoalition(i, constructC.getCoalition(i));
 			}
-			//if()
+			if (Coalition::simpleEvalute(m_enemy, backupC))
+			{
+				c = backupC;
+			}
 		}
-
-
 	}
 }
 
