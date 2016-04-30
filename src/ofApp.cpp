@@ -35,16 +35,26 @@ void ofApp::setup(){
 	BF_LR = ofVec2f(WIDTH - 1, 0);
 
 	// ofile.open("log_simpleEvaluate.txt");
-
-	m_enemy.setup_8(ABILITY_DISTANCE, true, Coalition());
+	
+	m_enemy.initialize(INDIVIDUAL_SIZE);                   // 修正BUG：之前 m_enemy 调用重载的默认构造函数，导致vector大小=0
+	m_enemy.setup_8(ABILITY_DISTANCE, true, Coalition()); 
 	//m_enemy.setup_CR(ABILITY_DISTANCE, true, Coalition());
 
-	m_population.resize(POPULATION_SIZE);
+	m_population.resize(POPULATION_SIZE);                  // 初始化 m_population
 	for (int i = 0; i < m_population.size(); ++i)
 	{
+		m_population[i].initialize(INDIVIDUAL_SIZE);       // 修正BUG：之前 m_population[i] 调用重载的默认构造函数，导致vector大小=0
 		m_population[i].setup_CR(ABILITY_DISTANCE, false, m_enemy);
 	}
-	updatePMatrix();  // 依据初始化的种群，生成一个初始化的概率矩阵
+
+	PROBABILITY_MATRIX.resize(HEIGHT);                     // 初始化 概率矩阵
+	vector<double> tmpVector(WIDTH, 0.0);
+	for (auto & vec_double : PROBABILITY_MATRIX)
+	{
+		vec_double = tmpVector;
+	}
+	updateWeight();   // 初始化的种群 --> 计算其权值
+	updatePMatrix();  // 初始化的种群的权值 --> 生成一个初始化的概率矩阵
 }
 
 //--------------------------------------------------------------
@@ -80,7 +90,8 @@ void ofApp::keyPressed(int key){
 		{
 			m_population[i].setup_CR(ABILITY_DISTANCE, false, m_enemy);  // 更新联盟里所有 tank 的位置
 		}
-		updateWeight(); // 新的位置 --> 新的 weight
+		updateWeight();   // 新的位置 --> 新的 weight
+		updatePMatrix();  
 	}
 	else if (key == 'e')
 	{
@@ -221,8 +232,8 @@ void ofApp::updatePopluation()
 			{
 				backupC.setCoalition(i, constructC.getCoalition(i));
 			}
-			if (Coalition::simpleEvalute(m_enemy, backupC))
-			{
+			if (Coalition::simpleEvalute(m_enemy, backupC) > Coalition::simpleEvalute(m_enemy, c))
+			{// 如果 backup 比 m_population 中的 c 更好了，就更新 c
 				c = backupC;
 			}
 		}

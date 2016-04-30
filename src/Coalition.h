@@ -9,6 +9,7 @@ public:
 	Coalition();                                       // 重载默认构造函数
 	Coalition(const Coalition &c);                     // 重载拷贝构造函数
 	Coalition& operator=(const Coalition& c);          // 重载赋值函数
+	void initialize(int individualSize);               // 初始化，参数是联盟里面的元素个数
 	void setup_8(double abilityDistance, bool isEnemy, const Coalition &enemy);  // 初始化一个联盟，随机的8联通区域
 	void setup_CR(double abilityDistance, bool isEnemy, const Coalition &enemy); // 初始化一个联盟，Complete Random
 	

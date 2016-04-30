@@ -13,6 +13,8 @@ Coalition::Coalition(const Coalition & c)
 	m_simpleEvaluate = c.getSimpleEvaluate();
 	m_fitness = c.getFitness();
 	m_weight = c.getWeight();
+	m_abilityDistance = c.getAbilityDistance();
+	m_isEnemy = c.getIsEnemy();
 }
 
 Coalition & Coalition::operator=(const Coalition & c)
@@ -28,6 +30,12 @@ Coalition & Coalition::operator=(const Coalition & c)
 	m_abilityDistance = c.getAbilityDistance();
 	m_isEnemy = c.getIsEnemy();
 	return *this;
+}
+
+void Coalition::initialize(int individualSize)
+{
+	m_coalition.resize(individualSize);
+	m_simpleEvaluate = m_fitness = m_weight = 0;
 }
 
 // 这种方法，在 INDIVIDUAL_SIZE 比较小（比如 8）的时候，效率不错；但是如果 INDIVIDUAL_SIZE，比较大（比如 40）的时候，效率可能不佳
@@ -100,6 +108,9 @@ void Coalition::setup_8(double abilityDistance, bool isEnemy, const Coalition &e
 // Complete Random 生成一个联盟，可以想象效果不佳
 void Coalition::setup_CR(double abilityDistance, bool isEnemy, const Coalition &enemy)
 {
+	m_abilityDistance = abilityDistance;
+	m_isEnemy = isEnemy;
+
 	vector<ofVec2f> vecArrayIndex;
 	ofVec2f temp;
 	
@@ -346,7 +357,7 @@ void Coalition::update_BF(vector<ofVec2f> vecArrayIndex)
 		if (vecArrayIndex[i].x < lowX)
 			lowX = vecArrayIndex[i].x;                       // 找到最 low 的 X
 		else if (vecArrayIndex[i].x > highX)
-			highX = vecArrayIndex[i].x;                      // 找到最 high 的 X
+			highX = vecArrayIndex[i].x;                      // 找到最 high 的 X； 修正BUG：下标错误
 
 		if (vecArrayIndex[i].y < lowY)
 			lowY = vecArrayIndex[i].y;						 // 找到最 low 的 Y
@@ -360,23 +371,41 @@ void Coalition::update_BF(vector<ofVec2f> vecArrayIndex)
 	cout << "Upper Left: " << BF_UL << "     Lower Right: " << BF_LR << endl;
 }
 
+/*
+这里出现了大量下标错误：PROBABILITY_MATRIX这个“大矩形”里面有一个BattleField“小矩形”
+要搞清楚这里的相对差“offset”
+
+可以优化：累和的时候，使用一维数组
+*/
 ofVec2f Coalition::getPlaceFromPMatrix()
 {
 	int x1 = BF_UL.x, x2 = BF_LR.x;
 	int y1 = BF_LR.y, y2 = BF_UL.y;
 	double sumTotal = 0.0;                           // 总和
-	vector<double> sumOfRow(y2 - y1 + 1, 0.0);       // 每一行之和
+	vector<double> sumOfRow(y2 - y1 + 1, 0.0);       // 累积到该行之和
 	for (int y = y1; y <= y2; ++y)
 	{
+		if (y - 1 >= y1)                             // 先加上前面行的和        
+		{
+			sumOfRow[y - y1] = sumOfRow[y - y1 - 1]; // 修正BUG：下标错误
+		}
 		for (int x = x1; x <= x2; ++x)
 		{
 			sumTotal += PROBABILITY_MATRIX[y][x];
-			sumOfRow[y1] += PROBABILITY_MATRIX[y][x];
+			sumOfRow[y - y1] += PROBABILITY_MATRIX[y][x];  // 修正BUG：下标错误
 		}
 	}
 	double choose = ofRandom(0, sumTotal);
 	int row = lower_bound(sumOfRow.begin(), sumOfRow.end(), choose) - sumOfRow.begin();  // 行 --> y
-	int column = lower_bound(PROBABILITY_MATRIX[row].begin(), PROBABILITY_MATRIX[row].end(), choose) - PROBABILITY_MATRIX[row].begin();	 // 列 --> x
-	return ofVec2f(column, row);  // (x, y)
+	choose -= sumOfRow[row - 1];                                        // 这里思维不够缜密，出现了大BUG；现在要找 choose 在第 row 行的位置
+	vector<double> sumOfChosenRow(x2 - x1 + 1, 0);
+	sumOfChosenRow[0] = PROBABILITY_MATRIX[row + y1][x1];               // 修正BUG：下标错误
+	for (int i = 1; i < sumOfChosenRow.size(); ++i)
+	{
+		sumOfChosenRow[i] = sumOfChosenRow[i - 1] + PROBABILITY_MATRIX[row + y1][x1 + i];  // 修复BUG：下标错误 + 思维不缜密
+	}
+	int column = lower_bound(sumOfChosenRow.begin(), sumOfChosenRow.end(), choose) - sumOfChosenRow.begin();
+
+	return ofVec2f(column + x1, row + y1);  // (x, y)
 }
 
