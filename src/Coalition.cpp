@@ -395,9 +395,11 @@ ofVec2f Coalition::getPlaceFromPMatrix()
 			sumOfRow[y - y1] += PROBABILITY_MATRIX[y][x];  // 修正BUG：下标错误
 		}
 	}
-	double choose = ofRandom(0, sumTotal);
+	double choose = ofRandom(0, sumTotal);                              // 产生一个随机数
+	// 先找到行，后找到列
 	int row = lower_bound(sumOfRow.begin(), sumOfRow.end(), choose) - sumOfRow.begin();  // 行 --> y
-	choose -= sumOfRow[row - 1];                                        // 这里思维不够缜密，出现了大BUG；现在要找 choose 在第 row 行的位置
+	if (row >= 1)
+		choose -= sumOfRow[row - 1];                                    // 这里思维不够缜密，出现了大BUG；现在要找 choose 在第 row 行的位置
 	vector<double> sumOfChosenRow(x2 - x1 + 1, 0);
 	sumOfChosenRow[0] = PROBABILITY_MATRIX[row + y1][x1];               // 修正BUG：下标错误
 	for (int i = 1; i < sumOfChosenRow.size(); ++i)
