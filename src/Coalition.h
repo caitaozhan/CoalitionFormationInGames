@@ -9,6 +9,7 @@ public:
 	Coalition();                                       // 重载默认构造函数
 	Coalition(const Coalition &c);                     // 重载拷贝构造函数
 	Coalition& operator=(const Coalition& c);          // 重载赋值函数
+	// 问题：是否要重载，比如析构函数
 	void initialize(int individualSize);               // 初始化，参数是联盟里面的元素个数
 	void setup_8(double abilityDistance, bool isEnemy, const Coalition &enemy);  // 初始化一个联盟，随机的8联通区域
 	void setup_CR(double abilityDistance, bool isEnemy, const Coalition &enemy); // 初始化一个联盟，Complete Random
@@ -26,12 +27,12 @@ public:
 	void  setCoalition(int i, const Tank &t);
 	void  pushBackTank(const Tank &t);
 	const vector<Tank>& getCoalition() const;
-	const Tank& getCoalition(int i)const;
+	const Tank&  getCoalition(int i)const;
 	const double getSimpleEvaluate() const;
 	const double getFitness()const;
 	const double getWeight()const;
 	const ofColor& getColor()const;
-	const int getSize()const;
+	const int    getSize()const;
 	const double getAbilityDistance()const;
 	const bool   getIsEnemy()const;
 
@@ -43,6 +44,10 @@ public:
 	static void update_BF(vector<ofVec2f> vecArrayIndex);
 
 	static ofVec2f getPlaceFromPMatrix();
+	
+	void writeLog();
+
+	static int logNumber;
 
 private:
 	vector<Tank> m_coalition;
@@ -52,5 +57,6 @@ private:
 	double  m_weight;
 	double  m_abilityDistance;
 	bool    m_isEnemy;
+	ofstream m_logPlace;
 
 };

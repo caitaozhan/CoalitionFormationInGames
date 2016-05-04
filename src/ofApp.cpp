@@ -34,15 +34,17 @@ void ofApp::setup(){
 	BF_UL = ofVec2f(0, HEIGHT - 1);
 	BF_LR = ofVec2f(WIDTH - 1, 0);
 
-	// ofile.open("log_simpleEvaluate.txt");
-	
+	LOG_PM.open("../log/log_simpleEvaluate.txt");
+
 	m_enemy.initialize(INDIVIDUAL_SIZE);                   // 修正BUG：之前 m_enemy 调用重载的默认构造函数，导致vector大小=0
 	m_enemy.setup_8(ABILITY_DISTANCE, true, Coalition()); 
 	//m_enemy.setup_CR(ABILITY_DISTANCE, true, Coalition());
 
 	m_population.resize(POPULATION_SIZE);                  // 初始化 m_population
+	
 	for (int i = 0; i < m_population.size(); ++i)
 	{
+		Coalition::logNumber++;
 		m_population[i].initialize(INDIVIDUAL_SIZE);       // 修正BUG：之前 m_population[i] 调用重载的默认构造函数，导致vector大小=0
 		m_population[i].setup_CR(ABILITY_DISTANCE, false, m_enemy);
 	}
@@ -203,6 +205,22 @@ void ofApp::updatePMatrix()
 			PROBABILITY_MATRIX[x][y] += c.getWeight();
 		}
 	}
+	writeLogMatrix();
+}
+
+void ofApp::writeLogMatrix()
+{
+	LOG_PM << fixed << setprecision(4);
+	LOG_PM << '\n';
+	for (const auto & vecDouble : PROBABILITY_MATRIX)
+	{
+		for (double p : vecDouble)
+		{
+			LOG_PM << left << setw(7) << p;
+		}
+		LOG_PM << '\n';
+	}
+	LOG_PM << '\n' << "*******************" << endl;
 }
 
 /*
@@ -218,7 +236,6 @@ void ofApp::updatePopluation()
 		{
 			if (ofRandom(0, 1) < PL)      // todo: 这里还有一个&&
 			{
-				
 				constructC.pushBackTank(backupC.getCoalition(i));
 			}
 			else
@@ -237,6 +254,7 @@ void ofApp::updatePopluation()
 				c = backupC;
 			}
 		}
+		c.writeLog();
 	}
 }
 

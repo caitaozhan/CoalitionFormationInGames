@@ -22,9 +22,11 @@ public:
 	void dragEvent(ofDragInfo dragInfo);
 	void gotMessage(ofMessage msg);
 
-	void updateWeight();
-	void updatePMatrix();             // 统计工作，更新概率矩阵
 	void updatePopluation();          // 更新种群
+	void updateWeight();              // 计算估值 --> 适应值 --> 权值
+	void updatePMatrix();             // 统计工作，更新概率矩阵
+
+	void writeLogMatrix();            // 打印矩阵到log
 
 private:
 	vector<Coalition> m_population;   // 论文中的 archive

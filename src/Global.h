@@ -19,4 +19,4 @@ extern int ABILITY_DISTANCE;
 extern double PL;
 extern vector<vector<double>> PROBABILITY_MATRIX;
 
-extern ofstream ofile;
+extern ofstream LOG_PM;
