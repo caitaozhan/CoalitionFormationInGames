@@ -208,15 +208,31 @@ void ofApp::updatePMatrix()
 	writeLogMatrix();
 }
 
+bool ofApp::isZero(double d)
+{
+	if (d<EPSILON && d>-EPSILON)
+		return true;
+	
+	return false;
+}
+
 void ofApp::writeLogMatrix()
 {
-	LOG_PM << fixed << setprecision(4);
+	
 	LOG_PM << '\n';
-	for (const auto & vecDouble : PROBABILITY_MATRIX)
+	for (int y = HEIGHT - 1; y >= 0; --y)
 	{
-		for (double p : vecDouble)
+		for (int x = 0; x < WIDTH - 1; ++x)
 		{
-			LOG_PM << left << setw(7) << p;
+			if (isZero(PROBABILITY_MATRIX[x][y]))
+			{
+				LOG_PM << setprecision(0);
+			}
+			else
+			{
+				LOG_PM << setprecision(3);
+			}
+			LOG_PM << left << setw(7) << PROBABILITY_MATRIX[x][y];  // 历史遗留问题，(y,x) --> (x,y)
 		}
 		LOG_PM << '\n';
 	}

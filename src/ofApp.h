@@ -25,7 +25,7 @@ public:
 	void updatePopluation();          // 更新种群
 	void updateWeight();              // 计算估值 --> 适应值 --> 权值
 	void updatePMatrix();             // 统计工作，更新概率矩阵
-
+	bool isZero(double d);
 	void writeLogMatrix();            // 打印矩阵到log
 
 private:
