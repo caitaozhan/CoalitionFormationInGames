@@ -38,16 +38,16 @@ public:
 
 	void draw();
 	bool contain(const vector<ofVec2f> &vecArrayIndex, const ofVec2f &arrayIndex);
-	bool contain(const Coalition &enemy, const ofVec2f &arrayIndex);
+	bool contain(const Coalition &c, const ofVec2f &arrayIndex);
 
 	string toString(string evaluateKind);
-	static void update_BF(vector<ofVec2f> vecArrayIndex);
+	static void update_BF(const vector<ofVec2f> &vecArrayIndex);
 
 	static ofVec2f getPlaceFromPMatrix();
 	
 	void writeLog();
 
-	static int logNumber;
+	static int logNumber;  // 每一个Coalition对象都有一个自己的日志文件，通过这个静态的序号区分日志的名字
 
 private:
 	vector<Tank> m_coalition;

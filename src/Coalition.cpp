@@ -194,11 +194,11 @@ bool Coalition::contain(const vector<ofVec2f> &vecArrayIndex, const ofVec2f &arr
 	@para arrayIndex: 一个二维坐标
 	return 一个Coalition中是否contain一个arrayIndex
 */
-bool Coalition::contain(const Coalition &enemy, const ofVec2f &arrayIndex)
+bool Coalition::contain(const Coalition &c, const ofVec2f &arrayIndex)
 {
-	for (int i = 0; i < enemy.getCoalition().size(); ++i)
+	for (int i = 0; i < c.getCoalition().size(); ++i)
 	{
-		if (arrayIndex == enemy.getCoalition().at(i).getArrayIndex())  // 和coalition中的第i个Tank的二维坐标相等
+		if (arrayIndex == c.getCoalition().at(i).getArrayIndex())  // 和coalition中的第i个Tank的二维坐标相等
 			return true;
 	}
 	return false;
@@ -356,7 +356,7 @@ string Coalition::toString(string evaluateKind)
 	return msg;
 }
 
-void Coalition::update_BF(vector<ofVec2f> vecArrayIndex)
+void Coalition::update_BF(const vector<ofVec2f> &vecArrayIndex)
 {
 	int lowX = WIDTH, highX = 0, lowY = HEIGHT, highY = 0;
 	for (int i = 0; i < vecArrayIndex.size(); ++i)           // 寻找战场范围

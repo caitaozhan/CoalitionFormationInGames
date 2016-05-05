@@ -34,6 +34,8 @@ private:
 	Coalition m_enemy;
 	ofMesh    m_mesh;
 	ofEasyCam m_easyCam;
+
+	bool m_update;
 };
 
 //Universal function which sets normals for the triangle mesh

@@ -57,14 +57,18 @@ void ofApp::setup(){
 	}
 	updateWeight();   // 初始化的种群 --> 计算其权值
 	updatePMatrix();  // 初始化的种群的权值 --> 生成一个初始化的概率矩阵
+	m_update = false;
 }
 
 //--------------------------------------------------------------
 void ofApp::update(){
-
-
-
-
+	
+	if (m_update)
+	{
+		updatePopluation();   //  新的全局概率矩阵 --> 更新种群位置
+		updateWeight();       //  新的种群位置     --> 更新种群的权值
+		updatePMatrix();      //  新的种群权值     --> 更新全局的概率矩阵
+	}
 }
 
 //--------------------------------------------------------------
@@ -76,7 +80,7 @@ void ofApp::draw(){
 	for (int i = 0; i < m_population.size(); ++i)
 	{
 		m_population[i].draw();
-		ofDrawBitmapString(m_population[i].toString("simpleEvaluate"), -150, -15 * i + 80);
+		ofDrawBitmapString(m_population[i].toString("simpleEvaluate"), -180, -15 * i + 120);
 		
 	}
 	m_easyCam.end();
@@ -101,9 +105,21 @@ void ofApp::keyPressed(int key){
 	}
 	else if (key == 'u')
 	{
+		if (m_update == false)
+		{
+			m_update = true;
+			cout << "update = " << m_update << endl;
+		}
+		else
+		{ 
+			m_update = false;
+			cout << "update = " << m_update << endl;
+		}
+		/*
 		updatePopluation();   //  新的全局概率矩阵 --> 更新种群位置
 		updateWeight();       //  新的种群位置     --> 更新种群的权值
 		updatePMatrix();      //  新的种群权值     --> 更新全局的概率矩阵
+		*/
 	}
 }
 
@@ -256,7 +272,11 @@ void ofApp::updatePopluation()
 			}
 			else
 			{
-				ofVec2f arrayIndex = Coalition::getPlaceFromPMatrix();  // todo: 防止重复
+				ofVec2f arrayIndex;
+				do
+				{ 
+					arrayIndex = Coalition::getPlaceFromPMatrix();  // 问题：可供选择的点越来越少，可能一些很好的点，就“消失”了
+				} while(c.contain(c, arrayIndex) == true);   // 当新选的点，如果是该联盟中已存在的点的话，继续选；如果点很少的话，循环次数陡增
 				Tank newTank;
 				newTank.setup(arrayIndex, ABILITY_DISTANCE, false);
 				constructC.pushBackTank(newTank);
