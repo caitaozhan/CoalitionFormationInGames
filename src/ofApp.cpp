@@ -49,6 +49,8 @@ void ofApp::setup(){
 		m_population[i].setup_CR(ABILITY_DISTANCE, false, m_enemy);
 	}
 
+	m_bestCoalition = getBestCoalition();                  // 从初始化的种群中获得最好的种群
+
 	PROBABILITY_MATRIX.resize(HEIGHT);                     // 初始化 概率矩阵
 	vector<double> tmpVector(WIDTH, 0.0);
 	for (auto & vec_double : PROBABILITY_MATRIX)
@@ -65,9 +67,10 @@ void ofApp::update(){
 	
 	if (m_update)
 	{
-		updatePopluation();   //  新的全局概率矩阵 --> 更新种群位置
-		updateWeight();       //  新的种群位置     --> 更新种群的权值
-		updatePMatrix();      //  新的种群权值     --> 更新全局的概率矩阵
+		updatePopluation();     //  新的全局概率矩阵 --> 更新种群位置
+		updateWeight();         //  新的种群位置     --> 更新种群的权值
+		updatePMatrix();        //  新的种群权值     --> 更新全局的概率矩阵
+		updateBestCoalition();  //  更新最好的Coalition
 	}
 }
 
@@ -79,12 +82,28 @@ void ofApp::draw(){
 	m_enemy.draw();
 	for (int i = 0; i < m_population.size(); ++i)
 	{
-		m_population[i].draw();
+		//m_population[i].draw();
+		m_bestCoalition.draw();
 		ofDrawBitmapString(m_population[i].toString("simpleEvaluate"), -180, -15 * i + 120);
 		
 	}
 	m_easyCam.end();
 
+}
+
+const Coalition & ofApp::getBestCoalition() const
+{
+	int bestIndex = 0;
+	int bestValue = -m_population[0].getSize();  // 越大越好，初始值设为最小
+	for (int i = 0; i < m_population.size(); i++)
+	{
+		if (m_population.at(i).getSimpleEvaluate() > bestValue)
+		{
+			bestIndex = i;
+			bestValue = m_population.at(i).getSimpleEvaluate();
+		}
+	}
+	return m_population.at(bestIndex);
 }
 
 //--------------------------------------------------------------
@@ -98,6 +117,7 @@ void ofApp::keyPressed(int key){
 		}
 		updateWeight();   // 新的位置 --> 新的 weight
 		updatePMatrix();  
+		m_bestCoalition = getBestCoalition();
 	}
 	else if (key == 'e')
 	{
@@ -291,6 +311,17 @@ void ofApp::updatePopluation()
 			}
 		}
 		c.writeLog();
+	}
+}
+
+void ofApp::updateBestCoalition()
+{
+	for (const Coalition & c : m_population)
+	{
+		if (c.getSimpleEvaluate() > m_bestCoalition.getSimpleEvaluate())
+		{
+			m_bestCoalition = c;
+		}
 	}
 }
 

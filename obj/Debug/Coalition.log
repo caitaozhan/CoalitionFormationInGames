@@ -1,6 +1,7 @@
-﻿  ofApp.cpp
+﻿  Global.cpp
 d:\dev\of_v0.9.3_vs_release\libs\openframeworks\math\ofVec3f.h : warning C4819: 该文件包含不能在当前代码页(936)中表示的字符。请将该文件保存为 Unicode 格式以防止数据丢失
 d:\dev\of_v0.9.3_vs_release\libs\openframeworks\math\ofVec2f.h : warning C4819: 该文件包含不能在当前代码页(936)中表示的字符。请将该文件保存为 Unicode 格式以防止数据丢失
+    正在创建库 bin\Coalition_debug.lib 和对象 bin\Coalition_debug.exp
   Coalition.vcxproj -> D:\Dev\of_v0.9.3_vs_release\apps\myApps\Coalition\bin\Coalition_debug.exe
   
   	                   9	D:\Dev\of_v0.9.3_vs_release\export\vs\Win32\

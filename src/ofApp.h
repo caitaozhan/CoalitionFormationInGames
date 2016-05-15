@@ -9,6 +9,7 @@ public:
 	void setup();
 	void update();
 	void draw();
+	const Coalition& getBestCoalition()const;
 
 	void keyPressed(int key);
 	void keyReleased(int key);
@@ -23,6 +24,7 @@ public:
 	void gotMessage(ofMessage msg);
 
 	void updatePopluation();          // 更新种群
+	void updateBestCoalition();       // 更新最好的联盟
 	void updateWeight();              // 计算估值 --> 适应值 --> 权值
 	void updatePMatrix();             // 统计工作，更新概率矩阵
 	bool isZero(double d);

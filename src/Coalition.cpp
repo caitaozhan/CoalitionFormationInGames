@@ -148,7 +148,8 @@ void Coalition::setColor(bool isEnemy)
 	if (isEnemy)
 		m_color.set(ofColor::red);
 	else
-		m_color.set(ofRandom(0, 128), ofRandom(32, 255), ofRandom(32, 255));
+		m_color.set(ofColor::black);
+		//m_color.set(ofRandom(0, 128), ofRandom(32, 255), ofRandom(32, 255));
 }
 
 void Coalition::setAbilityDistance(double abilityDistance)
@@ -348,10 +349,10 @@ string Coalition::toString(string evaluateKind)
 	{
 		msg.append("E: ");
 		msg.append(ofToString(m_simpleEvaluate));
-		msg.append(", F: ");
+		/*msg.append(", F: ");
 		msg.append(ofToString(m_fitness));
 		msg.append(", W: ");
-		msg.append(ofToString(m_weight));
+		msg.append(ofToString(m_weight));*/
 	}
 	return msg;
 }
