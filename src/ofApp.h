@@ -38,6 +38,7 @@ private:
 	ofEasyCam m_easyCam;
 
 	bool m_update;
+	int  m_updateCounter;
 };
 
 //Universal function which sets normals for the triangle mesh

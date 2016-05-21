@@ -61,6 +61,7 @@ void ofApp::setup(){
 	updateWeight();   // 初始化的种群 --> 计算其权值
 	updatePMatrix();  // 初始化的种群的权值 --> 生成一个初始化的概率矩阵
 	m_update = false;
+	m_updateCounter = 0;
 }
 
 //--------------------------------------------------------------
@@ -68,6 +69,7 @@ void ofApp::update(){
 	
 	if (m_update)
 	{
+		m_updateCounter++;
 		updatePopluation();     //  新的全局概率矩阵 --> 更新种群位置
 		updateWeight();         //  新的种群位置     --> 更新种群的权值
 		updatePMatrix();        //  新的种群权值     --> 更新全局的概率矩阵
@@ -123,6 +125,7 @@ void ofApp::keyPressed(int key){
 		updateWeight();   // 新的位置 --> 新的 weight
 		updatePMatrix();  
 		m_bestCoalition = getBestCoalition();
+		m_updateCounter = 0;
 	}
 	else if (key == 'e')
 	{
@@ -234,7 +237,7 @@ void ofApp::updatePMatrix()
 	{
 		for (double &p : vec_double)
 		{
-			p = 0;								 // 清零
+			p = SMALL_NUMBER;		             // 不再清零，初始化一个很小的数
 		}
 	}
 	for (const Coalition &c : m_population)
@@ -327,6 +330,7 @@ void ofApp::updateBestCoalition()
 		if (c.getSimpleEvaluate() > m_bestCoalition.getSimpleEvaluate())
 		{
 			m_bestCoalition = c;
+			cout << m_updateCounter << "  " << c.getSimpleEvaluate() << '\n';
 		}
 	}
 }
