@@ -301,7 +301,7 @@ void ofApp::updatePopluation()
 				do
 				{ 
 					arrayIndex = Coalition::getPlaceFromPMatrix();  // 问题：可供选择的点越来越少，可能一些很好的点，就“消失”了
-				} while (c.contain(c, arrayIndex) == true || c.contain(m_enemy, arrayIndex));  // 修复一个bug
+				} while (c.contain(backupC, arrayIndex) == true || c.contain(m_enemy, arrayIndex) == true);  // 修复一个bug
 				// 当新选的点，如果是该联盟中已存在的点的话，继续选；如果可选择的点很少的话，循环次数较多
 				Tank newTank;
 				newTank.setup(arrayIndex, ABILITY_DISTANCE, false);
