@@ -16,4 +16,5 @@ int ABILITY_DISTANCE = 3;
 double PL = 0.9;
 vector<vector<double>> PROBABILITY_MATRIX;
 double SMALL_NUMBER = 0.1;
-ofstream LOG_PM;  // 概率矩阵的日志
+ofstream LOG_PM;       // 概率矩阵的日志
+ofstream LOG_ANALYSE;  // 算法分析日志

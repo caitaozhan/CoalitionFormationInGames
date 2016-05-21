@@ -35,6 +35,7 @@ void ofApp::setup(){
 	BF_LR = ofVec2f(WIDTH - 1, 0);
 
 	LOG_PM.open("../log/log_simpleEvaluate.txt");
+	LOG_ANALYSE.open("../log/log_analyze.txt");
 
 	m_enemy.initialize(INDIVIDUAL_SIZE);                   // 修正BUG：之前 m_enemy 调用重载的默认构造函数，导致vector大小=0
 	//m_enemy.setup_8(ABILITY_DISTANCE, true, Coalition()); 
@@ -61,7 +62,7 @@ void ofApp::setup(){
 	updateWeight();   // 初始化的种群 --> 计算其权值
 	updatePMatrix();  // 初始化的种群的权值 --> 生成一个初始化的概率矩阵
 	m_update = false;
-	m_updateCounter = 0;
+	m_updateCounter = -1;
 }
 
 //--------------------------------------------------------------
@@ -69,11 +70,12 @@ void ofApp::update(){
 	
 	if (m_update)
 	{
-		m_updateCounter++;
-		updatePopluation();     //  新的全局概率矩阵 --> 更新种群位置
-		updateWeight();         //  新的种群位置     --> 更新种群的权值
-		updatePMatrix();        //  新的种群权值     --> 更新全局的概率矩阵
-		updateBestCoalition();  //  更新最好的Coalition
+		if (++m_updateCounter % 10 == 0)  //  每隔更新10代分析平均 Evalation
+			writeLogAnalyse(m_updateCounter);
+		updatePopluation();          //  新的全局概率矩阵 --> 更新种群位置
+		updateWeight();              //  新的种群位置     --> 更新种群的权值
+		updatePMatrix();             //  新的种群权值     --> 更新全局的概率矩阵
+		updateBestCoalition();       //  更新最好的Coalition
 	}
 }
 
@@ -249,7 +251,7 @@ void ofApp::updatePMatrix()
 			PROBABILITY_MATRIX[x][y] += c.getWeight();
 		}
 	}
-	writeLogMatrix();
+	writeLogMatrix(m_updateCounter);
 }
 
 bool ofApp::isZero(double d)
@@ -260,10 +262,9 @@ bool ofApp::isZero(double d)
 	return false;
 }
 
-void ofApp::writeLogMatrix()
+void ofApp::writeLogMatrix(int updateCounter)
 {
-	
-	LOG_PM << '\n';
+	LOG_PM << '\n' << "update counter: " << updateCounter << '\n';
 	for (int y = HEIGHT - 1; y >= 0; --y)
 	{
 		for (int x = 0; x < WIDTH - 1; ++x)
@@ -281,6 +282,16 @@ void ofApp::writeLogMatrix()
 		LOG_PM << '\n';
 	}
 	LOG_PM << '\n' << "*******************" << endl;
+}
+
+void ofApp::writeLogAnalyse(int updateCounter)
+{
+	double sum = 0.0;
+	for (const Coalition &c : m_population)
+	{
+		sum += c.getSimpleEvaluate();
+	}
+	cout << updateCounter << ": " << sum / m_population.size() << '\n';;
 }
 
 /*
@@ -330,7 +341,7 @@ void ofApp::updateBestCoalition()
 		if (c.getSimpleEvaluate() > m_bestCoalition.getSimpleEvaluate())
 		{
 			m_bestCoalition = c;
-			cout << m_updateCounter << "  " << c.getSimpleEvaluate() << '\n';
+			cout << "Best @"<< m_updateCounter << "  " << c.getSimpleEvaluate() << '\n';
 		}
 	}
 }

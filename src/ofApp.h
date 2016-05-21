@@ -28,7 +28,8 @@ public:
 	void updateWeight();              // 计算估值 --> 适应值 --> 权值
 	void updatePMatrix();             // 统计工作，更新概率矩阵
 	bool isZero(double d);
-	void writeLogMatrix();            // 打印矩阵到log
+	void writeLogMatrix(int updateCounter);      // 打印矩阵到log
+	void writeLogAnalyse(int updateCounter);     // 打印算法的分析
 
 private:
 	vector<Coalition> m_population;   // 论文中的 archive
