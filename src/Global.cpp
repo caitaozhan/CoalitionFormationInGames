@@ -13,8 +13,6 @@ int POPULATION_SIZE = 24;
 int INDIVIDUAL_SIZE = 10;
 int ABILITY_DISTANCE = 3;
 
-//Coalition BEST_COALITION;
-
 double PL = 0.9;
 vector<vector<double>> PROBABILITY_MATRIX;
 ofstream LOG_PM;  // 概率矩阵的日志

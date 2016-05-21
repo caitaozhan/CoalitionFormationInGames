@@ -143,6 +143,40 @@ void Coalition::setup_CR(double abilityDistance, bool isEnemy, const Coalition &
 		update_BF(vecArrayIndex);
 }
 
+//  用于固定敌军的编队
+void Coalition::setup_file(double abilityDistance, bool isEnemy, const string &filename)
+{
+	m_abilityDistance = abilityDistance;
+	m_isEnemy = isEnemy;
+
+	ifstream ifile(filename);
+	if (!ifile)
+	{
+		cerr << "fail to open " << filename << " at Coalition::setup_file";
+		return;
+	}
+	int n;
+	ifile >> n;
+	INDIVIDUAL_SIZE = n;
+	vector<ofVec2f> vecArrayIndex;
+	ofVec2f temp;
+	while (ifile >> temp)
+	{
+		vecArrayIndex.push_back(temp);
+	}
+	ifile.close();
+
+	for (int i = 0; i < INDIVIDUAL_SIZE; ++i)
+	{
+		m_coalition[i].setup(vecArrayIndex[i], abilityDistance, isEnemy);
+	}
+
+	setColor(isEnemy);
+
+	if (isEnemy)
+		update_BF(vecArrayIndex);
+}
+
 void Coalition::setColor(bool isEnemy)
 {
 	if (isEnemy)

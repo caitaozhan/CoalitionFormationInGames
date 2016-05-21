@@ -37,8 +37,9 @@ void ofApp::setup(){
 	LOG_PM.open("../log/log_simpleEvaluate.txt");
 
 	m_enemy.initialize(INDIVIDUAL_SIZE);                   // 修正BUG：之前 m_enemy 调用重载的默认构造函数，导致vector大小=0
-	m_enemy.setup_8(ABILITY_DISTANCE, true, Coalition()); 
+	//m_enemy.setup_8(ABILITY_DISTANCE, true, Coalition()); 
 	//m_enemy.setup_CR(ABILITY_DISTANCE, true, Coalition());
+	m_enemy.setup_file(ABILITY_DISTANCE, true, "../sample/1_case_10.txt");
 
 	m_population.resize(POPULATION_SIZE);                  // 初始化 m_population
 	
@@ -78,13 +79,17 @@ void ofApp::update(){
 void ofApp::draw(){
 
 	m_easyCam.begin();
+
+	string msg = "fps: " + ofToString(ofGetFrameRate(), 2);
+	ofDrawBitmapString(msg, ofPoint(100, 100));
+
 	m_mesh.drawWireframe();
 	m_enemy.draw();
 	for (int i = 0; i < m_population.size(); ++i)
 	{
 		//m_population[i].draw();
 		m_bestCoalition.draw();
-		ofDrawBitmapString(m_population[i].toString("simpleEvaluate"), -180, -15 * i + 120);
+		ofDrawBitmapString(m_population[i].toString("simpleEvaluate"), -180, -10 * i + 120);
 		
 	}
 	m_easyCam.end();
@@ -296,7 +301,8 @@ void ofApp::updatePopluation()
 				do
 				{ 
 					arrayIndex = Coalition::getPlaceFromPMatrix();  // 问题：可供选择的点越来越少，可能一些很好的点，就“消失”了
-				} while(c.contain(c, arrayIndex) == true);   // 当新选的点，如果是该联盟中已存在的点的话，继续选；如果点很少的话，循环次数陡增
+				} while (c.contain(c, arrayIndex) == true || c.contain(m_enemy, arrayIndex));  // 修复一个bug
+				// 当新选的点，如果是该联盟中已存在的点的话，继续选；如果可选择的点很少的话，循环次数较多
 				Tank newTank;
 				newTank.setup(arrayIndex, ABILITY_DISTANCE, false);
 				constructC.pushBackTank(newTank);

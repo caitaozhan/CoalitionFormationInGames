@@ -11,9 +11,9 @@ public:
 	Coalition& operator=(const Coalition& c);          // 重载赋值函数
 	// 问题：是否要重载，比如析构函数
 	void initialize(int individualSize);               // 初始化，参数是联盟里面的元素个数
-	void setup_8(double abilityDistance, bool isEnemy, const Coalition &enemy);  // 初始化一个联盟，随机的8联通区域
-	void setup_CR(double abilityDistance, bool isEnemy, const Coalition &enemy); // 初始化一个联盟，Complete Random
-	
+	void setup_8(double abilityDistance, bool isEnemy, const Coalition &enemy);     // 初始化一个联盟，随机的8联通区域
+	void setup_CR(double abilityDistance, bool isEnemy, const Coalition &enemy);    // 初始化一个联盟，Complete Random
+	void setup_file(double abilityDistance, bool isEnemy, const string &filename);  // 从文件中输入一个联盟
 	static int simpleEvalute(const Coalition &enemy, const Coalition &me);  // 简单的评价一个联盟的好坏：依据双方的识别个数
 	double calculateFitness(double evaluate, double maxEvaluate, double minEvaluate);
 	double calculateWeight(double fitness);
@@ -55,7 +55,7 @@ private:
 	double  m_simpleEvaluate;
 	double  m_fitness;
 	double  m_weight;
-	double  m_abilityDistance;
+	double  m_abilityDistance;  // 放在这里合理么？Tank 类中也有此属性
 	bool    m_isEnemy;
 	ofstream m_logPlace;
 
