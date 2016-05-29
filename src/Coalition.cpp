@@ -418,6 +418,8 @@ void Coalition::update_BF(const vector<ofVec2f> &vecArrayIndex)
 要搞清楚这里的相对差“offset”
 
 可以优化：累和的时候，使用一维数组
+
+不使用轮盘赌？
 */
 ofVec2f Coalition::getPlaceFromPMatrix()
 {

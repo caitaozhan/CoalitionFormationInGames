@@ -63,6 +63,11 @@ void ofApp::setup(){
 	updatePMatrix();  // 初始化的种群的权值 --> 生成一个初始化的概率矩阵
 	m_update = false;
 	m_updateCounter = -1;
+
+	sumAvgAfter30 = 0;
+	sum6AppearAfter30 = 0;
+	appear6 = false;
+	experimentTimes = 0;
 }
 
 //--------------------------------------------------------------
@@ -70,8 +75,25 @@ void ofApp::update(){
 	
 	if (m_update)
 	{
-		if (++m_updateCounter % 10 == 0)  //  每隔更新10代分析平均 Evalation
+		m_updateCounter++;
+
+		if (experimentTimes == 30)  // 准备做30次实验
+		{
+			cout << "\n-------------------------------------\nresult:" << endl;
+			cout << endl << sumAvgAfter30 << endl;
+			cout << endl << sumAvgAfter30 / 30 << endl;
+		}
+
+		if (m_updateCounter == 500) // 每一次实验进化500代
+		{
+			experimentTimes++;
+			cout << experimentTimes << ": ";
 			writeLogAnalyse(m_updateCounter);
+			resetMe();
+		}
+
+		//if (++m_updateCounter % 10 == 0)  //  每隔更新10代分析平均 Evalation
+			//writeLogAnalyse(m_updateCounter);
 		updatePopluation();          //  新的全局概率矩阵 --> 更新种群位置
 		updateWeight();              //  新的种群位置     --> 更新种群的权值
 		updatePMatrix();             //  新的种群权值     --> 更新全局的概率矩阵
@@ -97,7 +119,6 @@ void ofApp::draw(){
 		
 	}
 	m_easyCam.end();
-
 }
 
 const Coalition & ofApp::getBestCoalition() const
@@ -115,19 +136,25 @@ const Coalition & ofApp::getBestCoalition() const
 	return m_population.at(bestIndex);
 }
 
+void ofApp::resetMe()
+{
+	for (int i = 0; i < m_population.size(); ++i)
+	{
+		m_population[i].setup_CR(ABILITY_DISTANCE, false, m_enemy);  // 更新联盟里所有 tank 的位置
+	}
+	updateWeight();   // 新的位置 --> 新的 weight
+	updatePMatrix();
+	m_bestCoalition = getBestCoalition();
+	m_updateCounter = -1;
+	appear6 = false;  // 为下一次实验做准备
+}
+
 //--------------------------------------------------------------
 void ofApp::keyPressed(int key){
 
 	if (key == 'm')   // coalition Setup
 	{
-		for (int i = 0; i < m_population.size(); ++i)
-		{
-			m_population[i].setup_CR(ABILITY_DISTANCE, false, m_enemy);  // 更新联盟里所有 tank 的位置
-		}
-		updateWeight();   // 新的位置 --> 新的 weight
-		updatePMatrix();  
-		m_bestCoalition = getBestCoalition();
-		m_updateCounter = 0;
+		resetMe();
 	}
 	else if (key == 'e')
 	{
@@ -242,6 +269,14 @@ void ofApp::updatePMatrix()
 			p = SMALL_NUMBER;		             // 不再清零，初始化一个很小的数
 		}
 	}
+	
+	for (const Tank &t : m_enemy.getCoalition()) // 敌人的地方，还是零
+	{
+		int x = t.getArrayIndex().x;
+		int y = t.getArrayIndex().y;
+		PROBABILITY_MATRIX[x][y] = 0;
+	}
+
 	for (const Coalition &c : m_population)
 	{
 		for (const Tank &tank : c.getCoalition())
@@ -251,7 +286,7 @@ void ofApp::updatePMatrix()
 			PROBABILITY_MATRIX[x][y] += c.getWeight();
 		}
 	}
-	writeLogMatrix(m_updateCounter);
+	//writeLogMatrix(m_updateCounter);
 }
 
 bool ofApp::isZero(double d)
@@ -284,14 +319,22 @@ void ofApp::writeLogMatrix(int updateCounter)
 	LOG_PM << '\n' << "*******************" << endl;
 }
 
-void ofApp::writeLogAnalyse(int updateCounter)
+/*
+   @param:  更新的次数
+   @return: 此时整个population的平均估值
+*/
+int ofApp::writeLogAnalyse(int updateCounter)
 {
 	double sum = 0.0;
+	double avg = 0.0;
 	for (const Coalition &c : m_population)
 	{
 		sum += c.getSimpleEvaluate();
 	}
-	cout << updateCounter << ": " << sum / m_population.size() << '\n';;
+	avg = sum / m_population.size();
+	sumAvgAfter30 += sum;
+	LOG_ANALYSE << updateCounter << ": " << avg << '\n';
+	return avg;
 }
 
 /*
@@ -342,6 +385,11 @@ void ofApp::updateBestCoalition()
 		{
 			m_bestCoalition = c;
 			cout << "Best @"<< m_updateCounter << "  " << c.getSimpleEvaluate() << '\n';
+			if (appear6 = false && isZero(c.getSimpleEvaluate() - 6.0))
+			{
+				sum6AppearAfter30 += m_updateCounter;  // 在一次实验中，记录第一次出现6时候的更新次数
+				appear6 = true;
+			}
 		}
 	}
 }
