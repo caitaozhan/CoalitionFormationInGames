@@ -33,6 +33,9 @@ public:
 	void writeLogMatrix(int updateCounter);      // 打印矩阵到log
 	int  writeLogAnalyse(int updateCounter);     // 打印算法的分析
 
+	static const int MAX_UPDATE;
+	static const int MAX_EXPERIMENT;
+
 private:
 	vector<Coalition> m_population;   // 论文中的 archive
 	Coalition m_bestCoalition;
@@ -43,10 +46,8 @@ private:
 	bool m_update;
 	int  m_updateCounter;
 
-	double sumAvgAfter30;
-	double sum6AppearAfter30;
-	bool   appear6;
-	int    experimentTimes;
+	bool m_appearTarget;
+	int  m_experimentTimes;
 };
 
 //Universal function which sets normals for the triangle mesh

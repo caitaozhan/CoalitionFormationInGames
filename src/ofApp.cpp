@@ -1,6 +1,9 @@
 #include "ofApp.h"
 #include "Global.h"
 
+const int ofApp::MAX_EXPERIMENT = 3;
+const int ofApp::MAX_UPDATE = 500;
+
 //--------------------------------------------------------------
 void ofApp::setup(){
 
@@ -34,8 +37,8 @@ void ofApp::setup(){
 	BF_UL = ofVec2f(0, HEIGHT - 1);
 	BF_LR = ofVec2f(WIDTH - 1, 0);
 
-	LOG_PM.open("../log/log_simpleEvaluate.txt");
-	LOG_ANALYSE.open("../log/log_analyze.txt");
+	LOG_PM.open("../../log/log_simpleEvaluate.txt");
+	LOG_ANALYSE.open("../../log/log_analyze.txt");
 
 	m_enemy.initialize(INDIVIDUAL_SIZE);                   // 修正BUG：之前 m_enemy 调用重载的默认构造函数，导致vector大小=0
 	//m_enemy.setup_8(ABILITY_DISTANCE, true, Coalition()); 
@@ -62,12 +65,10 @@ void ofApp::setup(){
 	updateWeight();   // 初始化的种群 --> 计算其权值
 	updatePMatrix();  // 初始化的种群的权值 --> 生成一个初始化的概率矩阵
 	m_update = false;
-	m_updateCounter = -1;
+	m_updateCounter = 0;
 
-	sumAvgAfter30 = 0;
-	sum6AppearAfter30 = 0;
-	appear6 = false;
-	experimentTimes = 0;
+	m_appearTarget = false;
+	m_experimentTimes = 0;
 }
 
 //--------------------------------------------------------------
@@ -77,19 +78,25 @@ void ofApp::update(){
 	{
 		m_updateCounter++;
 
-		if (experimentTimes == 30)  // 准备做30次实验
+		if (m_updateCounter == ofApp::MAX_UPDATE)   // 每一次实验进化 MAX_UPDATE 代
 		{
-			cout << "\n-------------------------------------\nresult:" << endl;
-			cout << endl << sumAvgAfter30 << endl;
-			cout << endl << sumAvgAfter30 / 30 << endl;
-		}
-
-		if (m_updateCounter == 500) // 每一次实验进化500代
-		{
-			experimentTimes++;
-			cout << experimentTimes << ": ";
+			if (m_appearTarget == false)            // MAX_UPDATE 次之内没有找到 target
+			{
+				cout << "target not found in " << m_updateCounter << '\n';
+				LOG_ANALYSE << "target not found @" << m_updateCounter << '\n';
+			}
+			m_experimentTimes++;                      // 做完了一次实验
+			cout << m_experimentTimes << "次实验\n------\n";
 			writeLogAnalyse(m_updateCounter);
 			resetMe();
+			m_updateCounter = 0;                    // 为下一次实验做准备
+			m_appearTarget = false;
+		}
+
+		if (m_experimentTimes == ofApp::MAX_EXPERIMENT)  // 准备做 MAX_EXPERIMENT 次实验
+		{
+			cout << "end of experiment!" << endl;
+			m_update = 0;
 		}
 
 		//if (++m_updateCounter % 10 == 0)  //  每隔更新10代分析平均 Evalation
@@ -145,8 +152,6 @@ void ofApp::resetMe()
 	updateWeight();   // 新的位置 --> 新的 weight
 	updatePMatrix();
 	m_bestCoalition = getBestCoalition();
-	m_updateCounter = -1;
-	appear6 = false;  // 为下一次实验做准备
 }
 
 //--------------------------------------------------------------
@@ -165,6 +170,8 @@ void ofApp::keyPressed(int key){
 		if (m_update == false)
 		{
 			m_update = true;
+			ofApp::m_experimentTimes = 0;
+			ofApp::m_updateCounter = 0;
 			cout << "update = " << m_update << endl;
 		}
 		else
@@ -332,8 +339,7 @@ int ofApp::writeLogAnalyse(int updateCounter)
 		sum += c.getSimpleEvaluate();
 	}
 	avg = sum / m_population.size();
-	sumAvgAfter30 += sum;
-	LOG_ANALYSE << updateCounter << ": " << avg << '\n';
+	LOG_ANALYSE << updateCounter << ": " << avg << "\n\n";
 	return avg;
 }
 
@@ -384,11 +390,11 @@ void ofApp::updateBestCoalition()
 		if (c.getSimpleEvaluate() > m_bestCoalition.getSimpleEvaluate())
 		{
 			m_bestCoalition = c;
-			cout << "Best @"<< m_updateCounter << "  " << c.getSimpleEvaluate() << '\n';
-			if (appear6 = false && isZero(c.getSimpleEvaluate() - 6.0))
-			{
-				sum6AppearAfter30 += m_updateCounter;  // 在一次实验中，记录第一次出现6时候的更新次数
-				appear6 = true;
+			cout << "Best @" << m_updateCounter << "  " << c.getSimpleEvaluate() << '\n';
+			if (m_appearTarget == false && isZero(c.getSimpleEvaluate() - Coalition::target))
+			{// 分别在控制台和log中输出找到targe时候的进化代数
+				LOG_ANALYSE << "Best @"<< m_updateCounter << "  " << c.getSimpleEvaluate() << '\n';
+				m_appearTarget = true;
 			}
 		}
 	}

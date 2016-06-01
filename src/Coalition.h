@@ -48,6 +48,7 @@ public:
 	void writeLog();
 
 	static int logNumber;  // 每一个Coalition对象都有一个自己的日志文件，通过这个静态的序号区分日志的名字
+	static double target;  // 针对某一enemy，若能进化出 evulation = target，则认为达到目标了
 
 private:
 	vector<Tank> m_coalition;
