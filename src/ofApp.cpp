@@ -1,7 +1,7 @@
 #include "ofApp.h"
 #include "Global.h"
 
-const int ofApp::MAX_EXPERIMENT = 3;
+const int ofApp::MAX_EXPERIMENT = 30;
 const int ofApp::MAX_UPDATE = 500;
 
 //--------------------------------------------------------------
@@ -82,10 +82,10 @@ void ofApp::update(){
 		{
 			if (m_appearTarget == false)            // MAX_UPDATE 次之内没有找到 target
 			{
-				cout << "target not found in " << m_updateCounter << '\n';
+				cout << "target not found @" << m_updateCounter << '\n';
 				LOG_ANALYSE << "target not found @" << m_updateCounter << '\n';
 			}
-			m_experimentTimes++;                      // 做完了一次实验
+			m_experimentTimes++;                    // 做完了一次实验
 			cout << m_experimentTimes << "次实验\n------\n";
 			writeLogAnalyse(m_updateCounter);
 			resetMe();
@@ -110,6 +110,8 @@ void ofApp::update(){
 
 //--------------------------------------------------------------
 void ofApp::draw(){
+
+	ofToDouble();
 
 	m_easyCam.begin();
 
