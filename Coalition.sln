@@ -1,8 +1,12 @@
 Microsoft Visual Studio Solution File, Format Version 12.00
 # Visual Studio 14
+VisualStudioVersion = 14.0.25123.0
+MinimumVisualStudioVersion = 10.0.40219.1
 Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "Coalition", "Coalition.vcxproj", "{7FD42DF7-442E-479A-BA76-D0022F99702A}"
 EndProject
 Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "openframeworksLib", "..\..\..\libs\openFrameworksCompiled\project\vs\openframeworksLib.vcxproj", "{5837595D-ACA9-485C-8E76-729040CE4B0B}"
+EndProject
+Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "AnalyzeLog", "..\AnalyzeLog\AnalyzeLog.vcxproj", "{B54068A1-7E58-4B0D-9ED0-25659D741526}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -28,6 +32,14 @@ Global
 		{5837595D-ACA9-485C-8E76-729040CE4B0B}.Release|Win32.Build.0 = Release|Win32
 		{5837595D-ACA9-485C-8E76-729040CE4B0B}.Release|x64.ActiveCfg = Release|x64
 		{5837595D-ACA9-485C-8E76-729040CE4B0B}.Release|x64.Build.0 = Release|x64
+		{B54068A1-7E58-4B0D-9ED0-25659D741526}.Debug|Win32.ActiveCfg = Debug|Win32
+		{B54068A1-7E58-4B0D-9ED0-25659D741526}.Debug|Win32.Build.0 = Debug|Win32
+		{B54068A1-7E58-4B0D-9ED0-25659D741526}.Debug|x64.ActiveCfg = Debug|x64
+		{B54068A1-7E58-4B0D-9ED0-25659D741526}.Debug|x64.Build.0 = Debug|x64
+		{B54068A1-7E58-4B0D-9ED0-25659D741526}.Release|Win32.ActiveCfg = Release|Win32
+		{B54068A1-7E58-4B0D-9ED0-25659D741526}.Release|Win32.Build.0 = Release|Win32
+		{B54068A1-7E58-4B0D-9ED0-25659D741526}.Release|x64.ActiveCfg = Release|x64
+		{B54068A1-7E58-4B0D-9ED0-25659D741526}.Release|x64.Build.0 = Release|x64
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

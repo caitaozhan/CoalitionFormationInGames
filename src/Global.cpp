@@ -9,12 +9,12 @@ const int MOVE_Y[8] = { 1, 1, 0, -1, -1, -1, 0, 1 };
 ofVec2f BF_UL;    // battlefield 的左上角, upper left
 ofVec2f BF_LR;    // battlefield 的右下角, lower right
 
-int POPULATION_SIZE = 16;
-int INDIVIDUAL_SIZE = 8;
+int POPULATION_SIZE = 24;
+int INDIVIDUAL_SIZE = 10;
 int ABILITY_DISTANCE = 3;
-
-//Coalition BEST_COALITION;
 
 double PL = 0.9;
 vector<vector<double>> PROBABILITY_MATRIX;
-ofstream LOG_PM;  // 概率矩阵的日志
+double SMALL_NUMBER = 0.1;
+ofstream LOG_PM;       // 概率矩阵的日志
+ofstream LOG_ANALYSE;  // 算法分析日志

@@ -1,6 +1,9 @@
 #include "ofApp.h"
 #include "Global.h"
 
+const int ofApp::MAX_EXPERIMENT = 30;
+const int ofApp::MAX_UPDATE = 500;
+
 //--------------------------------------------------------------
 void ofApp::setup(){
 
@@ -34,11 +37,13 @@ void ofApp::setup(){
 	BF_UL = ofVec2f(0, HEIGHT - 1);
 	BF_LR = ofVec2f(WIDTH - 1, 0);
 
-	LOG_PM.open("../log/log_simpleEvaluate.txt");
+	LOG_PM.open("../../log/log_simpleEvaluate.txt");
+	LOG_ANALYSE.open("../../log/log_analyze.txt");
 
 	m_enemy.initialize(INDIVIDUAL_SIZE);                   // 修正BUG：之前 m_enemy 调用重载的默认构造函数，导致vector大小=0
-	m_enemy.setup_8(ABILITY_DISTANCE, true, Coalition()); 
+	//m_enemy.setup_8(ABILITY_DISTANCE, true, Coalition()); 
 	//m_enemy.setup_CR(ABILITY_DISTANCE, true, Coalition());
+	m_enemy.setup_file(ABILITY_DISTANCE, true, "../sample/1_case_10.txt");
 
 	m_population.resize(POPULATION_SIZE);                  // 初始化 m_population
 	
@@ -49,6 +54,8 @@ void ofApp::setup(){
 		m_population[i].setup_CR(ABILITY_DISTANCE, false, m_enemy);
 	}
 
+	m_bestCoalition = getBestCoalition();                  // 从初始化的种群中获得最好的种群
+
 	PROBABILITY_MATRIX.resize(HEIGHT);                     // 初始化 概率矩阵
 	vector<double> tmpVector(WIDTH, 0.0);
 	for (auto & vec_double : PROBABILITY_MATRIX)
@@ -58,6 +65,10 @@ void ofApp::setup(){
 	updateWeight();   // 初始化的种群 --> 计算其权值
 	updatePMatrix();  // 初始化的种群的权值 --> 生成一个初始化的概率矩阵
 	m_update = false;
+	m_updateCounter = 0;
+
+	m_appearTarget = false;
+	m_experimentTimes = 0;
 }
 
 //--------------------------------------------------------------
@@ -65,9 +76,35 @@ void ofApp::update(){
 	
 	if (m_update)
 	{
-		updatePopluation();   //  新的全局概率矩阵 --> 更新种群位置
-		updateWeight();       //  新的种群位置     --> 更新种群的权值
-		updatePMatrix();      //  新的种群权值     --> 更新全局的概率矩阵
+		m_updateCounter++;
+
+		if (m_updateCounter == ofApp::MAX_UPDATE)   // 每一次实验进化 MAX_UPDATE 代
+		{
+			if (m_appearTarget == false)            // MAX_UPDATE 次之内没有找到 target
+			{
+				cout << "target not found @" << m_updateCounter << '\n';
+				LOG_ANALYSE << "target not found @" << m_updateCounter << '\n';
+			}
+			m_experimentTimes++;                    // 做完了一次实验
+			cout << m_experimentTimes << "次实验\n------\n";
+			writeLogAnalyse(m_updateCounter);
+			resetMe();
+			m_updateCounter = 0;                    // 为下一次实验做准备
+			m_appearTarget = false;
+		}
+
+		if (m_experimentTimes == ofApp::MAX_EXPERIMENT)  // 准备做 MAX_EXPERIMENT 次实验
+		{
+			cout << "end of experiment!" << endl;
+			m_update = 0;
+		}
+
+		//if (++m_updateCounter % 10 == 0)  //  每隔更新10代分析平均 Evalation
+			//writeLogAnalyse(m_updateCounter);
+		updatePopluation();          //  新的全局概率矩阵 --> 更新种群位置
+		updateWeight();              //  新的种群位置     --> 更新种群的权值
+		updatePMatrix();             //  新的种群权值     --> 更新全局的概率矩阵
+		updateBestCoalition();       //  更新最好的Coalition
 	}
 }
 
@@ -75,16 +112,48 @@ void ofApp::update(){
 void ofApp::draw(){
 
 	m_easyCam.begin();
+
+	string msg = "fps: " + ofToString(ofGetFrameRate(), 2);
+	ofDrawBitmapString(msg, ofPoint(100, 100));
+
 	m_mesh.drawWireframe();
 	m_enemy.draw();
 	for (int i = 0; i < m_population.size(); ++i)
 	{
-		m_population[i].draw();
-		ofDrawBitmapString(m_population[i].toString("simpleEvaluate"), -180, -15 * i + 120);
+		//m_population[i].draw();
+		m_bestCoalition.draw();
+		ofDrawBitmapString(m_population[i].toString("simpleEvaluate"), -180, -10 * i + 120);
 		
 	}
 	m_easyCam.end();
+}
 
+const Coalition & ofApp::getBestCoalition() const
+{
+	int bestIndex = 0;
+	int bestValue = -m_population[0].getSize();  // 越大越好，初始值设为最小
+	for (int i = 0; i < m_population.size(); i++)
+	{
+		if (m_population.at(i).getSimpleEvaluate() > bestValue)
+		{
+			bestIndex = i;
+			bestValue = m_population.at(i).getSimpleEvaluate();
+		}
+	}
+	return m_population.at(bestIndex);
+}
+
+void ofApp::resetMe()
+{
+	for (int i = 0; i < m_population.size(); ++i)
+	{
+		m_population[i].setup_CR(ABILITY_DISTANCE, false, m_enemy);  // 更新联盟里所有 tank 的位置
+		m_population[i].setIsStangate(true);                         // 修复一个BUG
+		m_population[i].setStagnate0(0);
+	}
+	updateWeight();   // 新的位置 --> 新的 weight
+	updatePMatrix();
+	m_bestCoalition = getBestCoalition();
 }
 
 //--------------------------------------------------------------
@@ -92,12 +161,7 @@ void ofApp::keyPressed(int key){
 
 	if (key == 'm')   // coalition Setup
 	{
-		for (int i = 0; i < m_population.size(); ++i)
-		{
-			m_population[i].setup_CR(ABILITY_DISTANCE, false, m_enemy);  // 更新联盟里所有 tank 的位置
-		}
-		updateWeight();   // 新的位置 --> 新的 weight
-		updatePMatrix();  
+		resetMe();
 	}
 	else if (key == 'e')
 	{
@@ -108,6 +172,8 @@ void ofApp::keyPressed(int key){
 		if (m_update == false)
 		{
 			m_update = true;
+			ofApp::m_experimentTimes = 0;
+			ofApp::m_updateCounter = 0;
 			cout << "update = " << m_update << endl;
 		}
 		else
@@ -179,6 +245,23 @@ void ofApp::updateWeight()
 	for (Coalition &c : m_population)                  // 更新每一个联盟的评估值
 	{
 		c.setSimpleEvaluate(Coalition::simpleEvalute(m_enemy, c));
+
+		// todo: 这里可以重构一个方法
+		if (c.getIsStagnate() == true && isZero(c.getSimpleEvaluate() - 0.0))  // 首先判断是否可能停滞，如果已经不可能了（E > 1），这不进入 if statement
+		{
+			c.setStagnate0(c.getStagnate0() + 1);      // 记录一个联盟在 Evaluation = 0 停滞的代数
+			if (c.getStagnate0() > 150)                // 连续 150 代都处于 Evaluation = 0 的滞胀
+			{
+				c.setup_CR(c.getAbilityDistance(), c.getIsEnemy(), m_enemy);   // 重新初始化
+				c.setIsStangate(0);                                            // 这里修复一个小BUG
+				c.setSimpleEvaluate(Coalition::simpleEvalute(m_enemy, c));
+				cout << "reset one coalition at " << m_updateCounter << " " << c.getSimpleEvaluate() << endl;
+			}
+		}
+		if (c.getIsStagnate() == true && c.getSimpleEvaluate() > 0.5)
+		{
+			c.setIsStangate(false);                   // 评估值已经 > 0 了，不可能再在 E = 0 这个坑里面停滞了
+		}
 	}
 	
 	int maxE = -INDIVIDUAL_SIZE;
@@ -209,9 +292,17 @@ void ofApp::updatePMatrix()
 	{
 		for (double &p : vec_double)
 		{
-			p = 0;								 // 清零
+			p = SMALL_NUMBER;		             // 不再清零，初始化一个很小的数
 		}
 	}
+	
+	for (const Tank &t : m_enemy.getCoalition()) // 敌人的地方，还是零
+	{
+		int x = t.getArrayIndex().x;
+		int y = t.getArrayIndex().y;
+		PROBABILITY_MATRIX[x][y] = 0;
+	}
+
 	for (const Coalition &c : m_population)
 	{
 		for (const Tank &tank : c.getCoalition())
@@ -221,7 +312,7 @@ void ofApp::updatePMatrix()
 			PROBABILITY_MATRIX[x][y] += c.getWeight();
 		}
 	}
-	writeLogMatrix();
+	//writeLogMatrix(m_updateCounter);
 }
 
 bool ofApp::isZero(double d)
@@ -232,10 +323,9 @@ bool ofApp::isZero(double d)
 	return false;
 }
 
-void ofApp::writeLogMatrix()
+void ofApp::writeLogMatrix(int updateCounter)
 {
-	
-	LOG_PM << '\n';
+	LOG_PM << '\n' << "update counter: " << updateCounter << '\n';
 	for (int y = HEIGHT - 1; y >= 0; --y)
 	{
 		for (int x = 0; x < WIDTH - 1; ++x)
@@ -253,6 +343,23 @@ void ofApp::writeLogMatrix()
 		LOG_PM << '\n';
 	}
 	LOG_PM << '\n' << "*******************" << endl;
+}
+
+/*
+   @param:  更新的次数
+   @return: 此时整个population的平均估值
+*/
+int ofApp::writeLogAnalyse(int updateCounter)
+{
+	double sum = 0.0;
+	double avg = 0.0;
+	for (const Coalition &c : m_population)
+	{
+		sum += c.getSimpleEvaluate();
+	}
+	avg = sum / m_population.size();
+	LOG_ANALYSE << updateCounter << ": " << avg << "\n\n";
+	return avg;
 }
 
 /*
@@ -276,7 +383,8 @@ void ofApp::updatePopluation()
 				do
 				{ 
 					arrayIndex = Coalition::getPlaceFromPMatrix();  // 问题：可供选择的点越来越少，可能一些很好的点，就“消失”了
-				} while(c.contain(c, arrayIndex) == true);   // 当新选的点，如果是该联盟中已存在的点的话，继续选；如果点很少的话，循环次数陡增
+				} while (c.contain(backupC, arrayIndex) == true || c.contain(m_enemy, arrayIndex) == true);  // 修复一个bug
+				// 当新选的点，如果是该联盟中已存在的点的话，继续选；如果可选择的点很少的话，循环次数较多
 				Tank newTank;
 				newTank.setup(arrayIndex, ABILITY_DISTANCE, false);
 				constructC.pushBackTank(newTank);
@@ -291,6 +399,23 @@ void ofApp::updatePopluation()
 			}
 		}
 		c.writeLog();
+	}
+}
+
+void ofApp::updateBestCoalition()
+{
+	for (const Coalition & c : m_population)
+	{
+		if (c.getSimpleEvaluate() > m_bestCoalition.getSimpleEvaluate())
+		{
+			m_bestCoalition = c;
+			cout << "Best @" << m_updateCounter << "  " << c.getSimpleEvaluate() << '\n';
+			if (m_appearTarget == false && isZero(c.getSimpleEvaluate() - Coalition::target))
+			{// 分别在控制台和log中输出找到targe时候的进化代数
+				LOG_ANALYSE << "Best @"<< m_updateCounter << "  " << c.getSimpleEvaluate() << '\n';
+				m_appearTarget = true;
+			}
+		}
 	}
 }
 

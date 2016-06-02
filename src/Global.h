@@ -18,5 +18,7 @@ extern int ABILITY_DISTANCE;
 
 extern double PL;
 extern vector<vector<double>> PROBABILITY_MATRIX;
+extern double SMALL_NUMBER;
 
 extern ofstream LOG_PM;
+extern ofstream LOG_ANALYSE;

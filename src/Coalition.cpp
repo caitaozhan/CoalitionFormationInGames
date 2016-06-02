@@ -1,11 +1,13 @@
 #include "Coalition.h"
 
 int Coalition::logNumber = 0;
+double Coalition::target = 6.0;
 
 Coalition::Coalition()
 {
 	m_coalition.resize(0);
-	m_simpleEvaluate = m_fitness = m_weight = 0;
+	m_simpleEvaluate = m_fitness = m_weight = m_stagnate0 = 0;
+	m_isStagnate = true;
 }
 
 Coalition::Coalition(const Coalition & c)
@@ -17,6 +19,8 @@ Coalition::Coalition(const Coalition & c)
 	m_weight = c.getWeight();
 	m_abilityDistance = c.getAbilityDistance();
 	m_isEnemy = c.getIsEnemy();
+	m_stagnate0 = c.getStagnate0();
+	m_isStagnate = c.getIsStagnate();
 }
 
 Coalition & Coalition::operator=(const Coalition & c)
@@ -31,13 +35,16 @@ Coalition & Coalition::operator=(const Coalition & c)
 	m_weight = c.getWeight();
 	m_abilityDistance = c.getAbilityDistance();
 	m_isEnemy = c.getIsEnemy();
+	m_stagnate0 = c.getStagnate0();
+	m_isStagnate = c.getIsStagnate();
 	return *this;
 }
 
 void Coalition::initialize(int individualSize)
 {
 	m_coalition.resize(individualSize);
-	m_simpleEvaluate = m_fitness = m_weight = 0;
+	m_simpleEvaluate = m_fitness = m_weight = m_stagnate0 = 0;
+	m_isStagnate = true;
 
 	string logName("../log/coalition_");
 	logName.append(ofToString(Coalition::logNumber));  // 初始化该 Coalition 自己的日志
@@ -109,7 +116,6 @@ void Coalition::setup_8(double abilityDistance, bool isEnemy, const Coalition &e
 	if (isEnemy)
 		update_BF(vecArrayIndex);
 
-
 }
 
 // Complete Random 生成一个联盟，可以想象效果不佳
@@ -143,12 +149,47 @@ void Coalition::setup_CR(double abilityDistance, bool isEnemy, const Coalition &
 		update_BF(vecArrayIndex);
 }
 
+//  用于固定敌军的编队
+void Coalition::setup_file(double abilityDistance, bool isEnemy, const string &filename)
+{
+	m_abilityDistance = abilityDistance;
+	m_isEnemy = isEnemy;
+
+	ifstream ifile(filename);
+	if (!ifile)
+	{
+		cerr << "fail to open " << filename << " at Coalition::setup_file";
+		return;
+	}
+	int n;
+	ifile >> n;
+	INDIVIDUAL_SIZE = n;
+	vector<ofVec2f> vecArrayIndex;
+	ofVec2f temp;
+	while (ifile >> temp)
+	{
+		vecArrayIndex.push_back(temp);
+	}
+	ifile.close();
+
+	for (int i = 0; i < INDIVIDUAL_SIZE; ++i)
+	{
+		m_coalition[i].setup(vecArrayIndex[i], abilityDistance, isEnemy);
+	}
+
+	setColor(isEnemy);
+
+	if (isEnemy)
+		update_BF(vecArrayIndex);
+}
+
 void Coalition::setColor(bool isEnemy)
 {
 	if (isEnemy)
 		m_color.set(ofColor::red);
 	else
-		m_color.set(ofRandom(0, 128), ofRandom(32, 255), ofRandom(32, 255));
+		m_color.set(ofColor::black);
+		//m_color.set(ofRandom(0, 128), ofRandom(32, 255), ofRandom(32, 255));
 }
 
 void Coalition::setAbilityDistance(double abilityDistance)
@@ -164,6 +205,16 @@ void Coalition::setIsEnemy(bool isEnemy)
 void Coalition::setCoalition(int i, const Tank &t)
 {
 	m_coalition[i] = t;
+}
+
+void Coalition::setStagnate0(int s)
+{
+	m_stagnate0 = s;
+}
+
+void Coalition::setIsStangate(bool iS)
+{
+	m_isStagnate = iS;
 }
 
 void Coalition::draw()
@@ -247,6 +298,16 @@ const double Coalition::getAbilityDistance() const
 const bool Coalition::getIsEnemy() const
 {
 	return m_isEnemy;
+}
+
+const int Coalition::getStagnate0() const
+{
+	return m_stagnate0;
+}
+
+const bool Coalition::getIsStagnate() const
+{
+	return m_isStagnate;
 }
 
 void Coalition::pushBackTank(const Tank &t)
@@ -348,10 +409,10 @@ string Coalition::toString(string evaluateKind)
 	{
 		msg.append("E: ");
 		msg.append(ofToString(m_simpleEvaluate));
-		msg.append(", F: ");
+		/*msg.append(", F: ");
 		msg.append(ofToString(m_fitness));
 		msg.append(", W: ");
-		msg.append(ofToString(m_weight));
+		msg.append(ofToString(m_weight));*/
 	}
 	return msg;
 }
@@ -383,6 +444,8 @@ void Coalition::update_BF(const vector<ofVec2f> &vecArrayIndex)
 要搞清楚这里的相对差“offset”
 
 可以优化：累和的时候，使用一维数组
+
+不使用轮盘赌？
 */
 ofVec2f Coalition::getPlaceFromPMatrix()
 {
