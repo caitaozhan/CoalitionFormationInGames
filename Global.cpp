@@ -13,7 +13,8 @@ int POPULATION_SIZE = 24;
 int INDIVIDUAL_SIZE = 10;
 int ABILITY_DISTANCE = 3;
 
-double PL = 0.9;
+double PL = 0.9;  // Probability Learning
+double LS = 0.9;  // Local Search
 vector<vector<double>> PROBABILITY_MATRIX;
 double SMALL_NUMBER = 0.1;
 ofstream LOG_PM;       // 概率矩阵的日志

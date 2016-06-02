@@ -45,7 +45,10 @@ public:
 	bool contain(const Coalition &c, const ofVec2f &arrayIndex);
 
 	string toString(string evaluateKind);
-	static void update_BF(const vector<ofVec2f> &vecArrayIndex);
+	static void update_BF(const vector<ofVec2f> &vecArrayIndex);\
+
+	ofVec2f localSearch_small(const Coalition &enemy, int i);  // backupC 是调用者
+	ofVec2f localSearch_big(const Coalition &enemy);           // backupC 是调用者
 
 	static ofVec2f getPlaceFromPMatrix();
 	

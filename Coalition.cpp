@@ -440,6 +440,47 @@ void Coalition::update_BF(const vector<ofVec2f> &vecArrayIndex)
 }
 
 /*
+	调用者： backupC
+	功能：   在backupC[i]周围进行 local search
+	@para:  敌人的编队
+	@para:  第 i 元素（坦克）
+	return: 一个二维坐标，作为 local search 的结果
+*/
+ofVec2f Coalition::localSearch_small(const Coalition & enemy, int i)
+{
+	ofVec2f localSArrayIndex;
+	ofVec2f startpoint = m_coalition[i].getArrayIndex();  // 在backupC[i]进行“原地”局部搜索
+	vector<ofVec2f> newArrayIndex;
+	newArrayIndex.push_back(startpoint);                  // 保证 newArrayIndex 里面至少有一个点可以选择
+	
+	for (int i = 0; i < 8; ++i)
+	{
+		ofVec2f tempArrayIndex;
+		tempArrayIndex.x = startpoint.x + MOVE_X[i];
+		tempArrayIndex.y = startpoint.y + MOVE_Y[i];
+		if (Tank::ckeckInBF(tempArrayIndex) && contain(*this, tempArrayIndex) == false
+			&& contain(enemy, tempArrayIndex) == false)
+		{
+			newArrayIndex.push_back(tempArrayIndex);
+		}
+	}
+
+	int choose = (int)ofRandom(0, newArrayIndex.size());
+	return newArrayIndex[choose];
+}
+
+/*
+	调用者： backupC
+	功能：   在整个backupC周围进行 local search
+	@para:  敌人的编队
+	return: 一个二维坐标，作为 local search 的结果
+*/
+ofVec2f Coalition::localSearch_big(const Coalition & enemy)
+{// 使用 set
+	return ofVec2f();
+}
+
+/*
 这里出现了大量下标错误：PROBABILITY_MATRIX这个“大矩形”里面有一个BattleField“小矩形”
 要搞清楚这里的相对差“offset”
 

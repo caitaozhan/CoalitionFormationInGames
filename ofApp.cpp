@@ -373,9 +373,22 @@ void ofApp::updatePopluation()
 		Coalition constructC;             // constructC 是论文中的 Xt。 问题：从写代码的角度，这个 Xt 可以不要
 		for (int i = 0; i < backupC.getSize(); ++i)
 		{
+			bool localSearch = false;
 			if (ofRandom(0, 1) < PL)      // todo: 这里还有一个&&
 			{
-				constructC.pushBackTank(backupC.getCoalition(i));
+				if (ofRandom(0, 1) < LS)
+				{
+					constructC.pushBackTank(backupC.getCoalition(i));
+				}
+				else
+				{// local search
+					localSearch = true;
+					ofVec2f arrayIndex;
+					arrayIndex = backupC.localSearch_small(m_enemy, i);
+					Tank newTank;
+					newTank.setup(arrayIndex, ABILITY_DISTANCE, false);
+					constructC.pushBackTank(newTank);
+				}
 			}
 			else
 			{
@@ -393,9 +406,19 @@ void ofApp::updatePopluation()
 			{
 				backupC.setCoalition(i, constructC.getCoalition(i));
 			}
-			if (Coalition::simpleEvalute(m_enemy, backupC) > Coalition::simpleEvalute(m_enemy, c))
-			{// 如果 backup 比 m_population 中的 c 更好了，就更新 c
+
+			int evaluateBackupC = Coalition::simpleEvalute(m_enemy, backupC);
+			int evaluateC = Coalition::simpleEvalute(m_enemy, c);
+			if (evaluateBackupC > evaluateC)  // 如果 backup 比 m_population 中的 c 更好，就更新 c
+			{
 				c = backupC;
+			}
+			else if(evaluateBackupC == evaluateC && localSearch == true)  // 相等，但是如果是 local search
+			{
+				if (ofRandom(0, 2) < 1.0)                                 // 给 50% 概率更新
+				{
+					c = backupC;
+				}
 			}
 		}
 		c.writeLog();

@@ -17,6 +17,7 @@ extern int INDIVIDUAL_SIZE;
 extern int ABILITY_DISTANCE;
 
 extern double PL;
+extern double LS;
 extern vector<vector<double>> PROBABILITY_MATRIX;
 extern double SMALL_NUMBER;
 
