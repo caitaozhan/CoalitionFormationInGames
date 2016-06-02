@@ -111,8 +111,6 @@ void ofApp::update(){
 //--------------------------------------------------------------
 void ofApp::draw(){
 
-	ofToDouble();
-
 	m_easyCam.begin();
 
 	string msg = "fps: " + ofToString(ofGetFrameRate(), 2);
@@ -150,6 +148,8 @@ void ofApp::resetMe()
 	for (int i = 0; i < m_population.size(); ++i)
 	{
 		m_population[i].setup_CR(ABILITY_DISTANCE, false, m_enemy);  // 更新联盟里所有 tank 的位置
+		m_population[i].setIsStangate(true);                         // 修复一个BUG
+		m_population[i].setStagnate0(0);
 	}
 	updateWeight();   // 新的位置 --> 新的 weight
 	updatePMatrix();
@@ -245,6 +245,23 @@ void ofApp::updateWeight()
 	for (Coalition &c : m_population)                  // 更新每一个联盟的评估值
 	{
 		c.setSimpleEvaluate(Coalition::simpleEvalute(m_enemy, c));
+
+		// todo: 这里可以重构一个方法
+		if (c.getIsStagnate() == true && isZero(c.getSimpleEvaluate() - 0.0))  // 首先判断是否可能停滞，如果已经不可能了（E > 1），这不进入 if statement
+		{
+			c.setStagnate0(c.getStagnate0() + 1);      // 记录一个联盟在 Evaluation = 0 停滞的代数
+			if (c.getStagnate0() > 150)                // 连续 150 代都处于 Evaluation = 0 的滞胀
+			{
+				c.setup_CR(c.getAbilityDistance(), c.getIsEnemy(), m_enemy);   // 重新初始化
+				c.setIsStangate(0);                                            // 这里修复一个小BUG
+				c.setSimpleEvaluate(Coalition::simpleEvalute(m_enemy, c));
+				cout << "reset one coalition at " << m_updateCounter << " " << c.getSimpleEvaluate() << endl;
+			}
+		}
+		if (c.getIsStagnate() == true && c.getSimpleEvaluate() > 0.5)
+		{
+			c.setIsStangate(false);                   // 评估值已经 > 0 了，不可能再在 E = 0 这个坑里面停滞了
+		}
 	}
 	
 	int maxE = -INDIVIDUAL_SIZE;

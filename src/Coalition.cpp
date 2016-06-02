@@ -6,7 +6,8 @@ double Coalition::target = 6.0;
 Coalition::Coalition()
 {
 	m_coalition.resize(0);
-	m_simpleEvaluate = m_fitness = m_weight = 0;
+	m_simpleEvaluate = m_fitness = m_weight = m_stagnate0 = 0;
+	m_isStagnate = true;
 }
 
 Coalition::Coalition(const Coalition & c)
@@ -18,6 +19,8 @@ Coalition::Coalition(const Coalition & c)
 	m_weight = c.getWeight();
 	m_abilityDistance = c.getAbilityDistance();
 	m_isEnemy = c.getIsEnemy();
+	m_stagnate0 = c.getStagnate0();
+	m_isStagnate = c.getIsStagnate();
 }
 
 Coalition & Coalition::operator=(const Coalition & c)
@@ -32,13 +35,16 @@ Coalition & Coalition::operator=(const Coalition & c)
 	m_weight = c.getWeight();
 	m_abilityDistance = c.getAbilityDistance();
 	m_isEnemy = c.getIsEnemy();
+	m_stagnate0 = c.getStagnate0();
+	m_isStagnate = c.getIsStagnate();
 	return *this;
 }
 
 void Coalition::initialize(int individualSize)
 {
 	m_coalition.resize(individualSize);
-	m_simpleEvaluate = m_fitness = m_weight = 0;
+	m_simpleEvaluate = m_fitness = m_weight = m_stagnate0 = 0;
+	m_isStagnate = true;
 
 	string logName("../log/coalition_");
 	logName.append(ofToString(Coalition::logNumber));  // 初始化该 Coalition 自己的日志
@@ -109,7 +115,6 @@ void Coalition::setup_8(double abilityDistance, bool isEnemy, const Coalition &e
 
 	if (isEnemy)
 		update_BF(vecArrayIndex);
-
 
 }
 
@@ -202,6 +207,16 @@ void Coalition::setCoalition(int i, const Tank &t)
 	m_coalition[i] = t;
 }
 
+void Coalition::setStagnate0(int s)
+{
+	m_stagnate0 = s;
+}
+
+void Coalition::setIsStangate(bool iS)
+{
+	m_isStagnate = iS;
+}
+
 void Coalition::draw()
 {
 	for (int i = 0; i < INDIVIDUAL_SIZE; ++i)
@@ -283,6 +298,16 @@ const double Coalition::getAbilityDistance() const
 const bool Coalition::getIsEnemy() const
 {
 	return m_isEnemy;
+}
+
+const int Coalition::getStagnate0() const
+{
+	return m_stagnate0;
+}
+
+const bool Coalition::getIsStagnate() const
+{
+	return m_isStagnate;
 }
 
 void Coalition::pushBackTank(const Tank &t)
