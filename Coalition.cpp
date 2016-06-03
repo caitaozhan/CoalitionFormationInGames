@@ -467,7 +467,7 @@ ofVec2f Coalition::localSearch_small(const Coalition & enemy, int i)
 	int choose = (int)ofRandom(0, newArrayIndex.size());
 	return newArrayIndex[choose];
 }
-
+ 
 /*
 	调用者： backupC
 	功能：   在整个backupC周围进行 local search
