@@ -478,7 +478,6 @@ ofVec2f Coalition::localSearch_big(const Coalition & enemy)
 {
 	vector<Tank> tanks = this->getCoalition();
 	vector<ofVec2f> newArrayIndex;
-	
 	ofVec2f tempArrayIndex;
 	for (int i = 0; i < tanks.size(); ++i)
 	{
