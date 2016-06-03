@@ -384,7 +384,7 @@ void ofApp::updatePopluation()
 				{// local search
 					localSearch = true;
 					ofVec2f arrayIndex;
-					arrayIndex = backupC.localSearch_small(m_enemy, i);
+					arrayIndex = backupC.localSearch_big(m_enemy);
 					Tank newTank;
 					newTank.setup(arrayIndex, ABILITY_DISTANCE, false);
 					constructC.pushBackTank(newTank);

@@ -452,9 +452,9 @@ ofVec2f Coalition::localSearch_small(const Coalition & enemy, int i)
 	vector<ofVec2f> newArrayIndex;
 	newArrayIndex.push_back(startpoint);                  // 保证 newArrayIndex 里面至少有一个点可以选择
 	
+	ofVec2f tempArrayIndex;
 	for (int i = 0; i < 8; ++i)
 	{
-		ofVec2f tempArrayIndex;
 		tempArrayIndex.x = startpoint.x + MOVE_X[i];
 		tempArrayIndex.y = startpoint.y + MOVE_Y[i];
 		if (Tank::ckeckInBF(tempArrayIndex) && contain(*this, tempArrayIndex) == false
@@ -478,13 +478,14 @@ ofVec2f Coalition::localSearch_big(const Coalition & enemy)
 {
 	vector<Tank> tanks = this->getCoalition();
 	vector<ofVec2f> newArrayIndex;
+	
 	ofVec2f tempArrayIndex;
 	for (int i = 0; i < tanks.size(); ++i)
 	{
 		for (int j = 0; j < 8; ++j)
 		{
 			tempArrayIndex.x = tanks[i].getArrayIndex().x + MOVE_X[j];
-			tempArrayIndex.y = tanks[i].getArrayIndex().y + MOVE_X[j];
+			tempArrayIndex.y = tanks[i].getArrayIndex().y + MOVE_Y[j];
 			if (Tank::ckeckInBF(tempArrayIndex) && contain(*this, tempArrayIndex) == false
 				&& contain(enemy, tempArrayIndex) == false)
 			{
