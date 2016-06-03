@@ -118,8 +118,8 @@ bool Tank::checkInBoundary(const ofVec2f &arrayIndex)
 
 bool Tank::ckeckInBF(const ofVec2f & arrayIndex)
 {
-	if (arrayIndex.x < BF_LR.x || arrayIndex.x > BF_UL.x || arrayIndex.y < BF_LR.y || arrayIndex.y > BF_UL.y)
-	{
+	if (arrayIndex.x > BF_LR.x || arrayIndex.x < BF_UL.x || arrayIndex.y < BF_LR.y || arrayIndex.y > BF_UL.y)
+	{// 修复一个BUG，我怎么经常在这种“很长的if”里面犯错。。
 		return false;
 	}
 	return true;

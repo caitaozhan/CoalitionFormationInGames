@@ -448,7 +448,6 @@ void Coalition::update_BF(const vector<ofVec2f> &vecArrayIndex)
 */
 ofVec2f Coalition::localSearch_small(const Coalition & enemy, int i)
 {
-	ofVec2f localSArrayIndex;
 	ofVec2f startpoint = m_coalition[i].getArrayIndex();  // 在backupC[i]进行“原地”局部搜索
 	vector<ofVec2f> newArrayIndex;
 	newArrayIndex.push_back(startpoint);                  // 保证 newArrayIndex 里面至少有一个点可以选择
@@ -476,8 +475,25 @@ ofVec2f Coalition::localSearch_small(const Coalition & enemy, int i)
 	return: 一个二维坐标，作为 local search 的结果
 */
 ofVec2f Coalition::localSearch_big(const Coalition & enemy)
-{// 使用 set
-	return ofVec2f();
+{
+	vector<Tank> tanks = this->getCoalition();
+	vector<ofVec2f> newArrayIndex;
+	ofVec2f tempArrayIndex;
+	for (int i = 0; i < tanks.size(); ++i)
+	{
+		for (int j = 0; j < 8; ++j)
+		{
+			tempArrayIndex.x = tanks[i].getArrayIndex().x + MOVE_X[j];
+			tempArrayIndex.y = tanks[i].getArrayIndex().y + MOVE_X[j];
+			if (Tank::ckeckInBF(tempArrayIndex) && contain(*this, tempArrayIndex) == false
+				&& contain(enemy, tempArrayIndex) == false)
+			{
+				newArrayIndex.push_back(tempArrayIndex);
+			}
+		}
+	}
+	int choose = (int)ofRandom(0, newArrayIndex.size());
+	return newArrayIndex[choose];
 }
 
 /*
