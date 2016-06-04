@@ -1,7 +1,7 @@
 #include "Coalition.h"
 
 int Coalition::logNumber = 0;
-double Coalition::target = 6.0;
+double Coalition::target = 7.0;
 
 Coalition::Coalition()
 {
