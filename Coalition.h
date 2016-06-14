@@ -3,6 +3,7 @@
 #include "Tank.h"
 #include "Global.h"
 
+
 class Coalition
 {
 public:
@@ -40,12 +41,15 @@ public:
 	const int    getStagnate0()const;
 	const bool   getIsStagnate()const;
 
+	void resetAtStagnate0(const Coalition &m_enemy, int updateCounter);
+	bool isZero(double d);
+
 	void draw();
 	bool contain(const vector<ofVec2f> &vecArrayIndex, const ofVec2f &arrayIndex);
 	bool contain(const Coalition &c, const ofVec2f &arrayIndex);
 
 	string toString(string evaluateKind);
-	static void update_BF(const vector<ofVec2f> &vecArrayIndex);\
+	static void update_BF(const vector<ofVec2f> &vecArrayIndex);
 
 	ofVec2f localSearch_small(const Coalition &enemy, int i);  // backupC 是调用者
 	ofVec2f localSearch_big(const Coalition &enemy);           // backupC 是调用者

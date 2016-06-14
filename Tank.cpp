@@ -81,7 +81,8 @@ bool Tank::operator==(const Tank & t) const
 	return m_arrayIndex == t.m_arrayIndex;
 }
 
-inline int Tank::xCoordi2ArrayIndx(double xCoordi)
+// 加了 inline 为什么 debug 成功但是 release 失败？
+int Tank::xCoordi2ArrayIndx(double xCoordi)
 {
 	if (xCoordi > -EPSILON)
 		return int(xCoordi + 0.1) / 10 + WIDTH / 2; // bug：这里的除以10这个数字，需要随mesh的“放大倍数”而改动
@@ -89,7 +90,7 @@ inline int Tank::xCoordi2ArrayIndx(double xCoordi)
 		return int(xCoordi - 0.1) / 10 + WIDTH / 2;
 }
 
-inline int Tank::yCoordi2ArrayIndx(double yCoordi)
+int Tank::yCoordi2ArrayIndx(double yCoordi)
 {
 	if (yCoordi > -EPSILON)
 		return int(yCoordi + 0.1) / 10 + HEIGHT / 2;
@@ -97,12 +98,12 @@ inline int Tank::yCoordi2ArrayIndx(double yCoordi)
 		return int(yCoordi - 0.1) / 10 + HEIGHT / 2;
 }
 
-inline double Tank::xArrayIndx2Coordi(int x)
+double Tank::xArrayIndx2Coordi(int x)
 {
 	return (x - WIDTH / 2) * 10.0;
 }
 
-inline double Tank::yArrayIndx2Coordi(int y)
+double Tank::yArrayIndx2Coordi(int y)
 {
 	return (y - HEIGHT / 2) * 10.0;
 }

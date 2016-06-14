@@ -1,7 +1,7 @@
 #include "Coalition.h"
 
 int Coalition::logNumber = 0;
-double Coalition::target = 7.0;
+double Coalition::target = 17.0;
 
 Coalition::Coalition()
 {
@@ -46,7 +46,7 @@ void Coalition::initialize(int individualSize)
 	m_simpleEvaluate = m_fitness = m_weight = m_stagnate0 = 0;
 	m_isStagnate = true;
 
-	string logName("../log/coalition_");
+	string logName("../../log/32^2,pop=48,ind=20/coalition_");  // caolition_0 是 enemy
 	logName.append(ofToString(Coalition::logNumber));  // 初始化该 Coalition 自己的日志
 	logName.append(".txt");
 	m_logPlace.open(logName);
@@ -62,7 +62,7 @@ void Coalition::setup_8(double abilityDistance, bool isEnemy, const Coalition &e
 	ofVec2f startPoint;                                              
 	if (isEnemy)						// enemy 随机选择一个初始二维坐标
 	{
-		startPoint = ofVec2f((int)ofRandom(0, 16), (int)ofRandom(0, 16));
+		startPoint = ofVec2f((int)ofRandom(0, WIDTH), (int)ofRandom(0, HEIGHT));
 	}
 	else                                // 我军选地点的时候，不能和 enemy 重合
 	{
@@ -310,6 +310,33 @@ const bool Coalition::getIsStagnate() const
 	return m_isStagnate;
 }
 
+void Coalition::resetAtStagnate0(const Coalition & m_enemy, int updateCounter)
+{
+	if (getIsStagnate() == true && isZero(getSimpleEvaluate() - 0.0))  // 首先判断是否可能停滞，如果已经不可能了（E > 1），这不进入 if statement
+	{
+		setStagnate0(getStagnate0() + 1);        // 记录一个联盟在 Evaluation = 0 停滞的代数
+		if (getStagnate0() > 200)                // 连续 200 代都处于 Evaluation = 0 的滞胀
+		{
+			setup_CR(getAbilityDistance(), getIsEnemy(), m_enemy);         // 重新初始化
+			setStagnate0(0);                                               // 重新开始滞胀计数
+			setSimpleEvaluate(simpleEvalute(m_enemy, *this));              // 重新评估
+			cout << "reset one coalition at " << updateCounter << " " << getSimpleEvaluate() << endl;
+		}
+	}
+	if (getIsStagnate() == true && getSimpleEvaluate() > 0.5)
+	{
+		setIsStangate(false);                    // 评估值已经 > 0 了，不可能再在 E = 0 这个坑里面停滞了
+	}
+}
+
+bool Coalition::isZero(double d)
+{
+	if (d<EPSILON && d>-EPSILON)
+		return true;
+
+	return false;
+}
+
 void Coalition::pushBackTank(const Tank &t)
 {
 	m_coalition.push_back(t);
@@ -486,7 +513,7 @@ ofVec2f Coalition::localSearch_big(const Coalition & enemy)
 			tempArrayIndex.x = tanks[i].getArrayIndex().x + MOVE_X[j];
 			tempArrayIndex.y = tanks[i].getArrayIndex().y + MOVE_Y[j];
 			if (Tank::ckeckInBF(tempArrayIndex) && contain(*this, tempArrayIndex) == false
-				&& contain(enemy, tempArrayIndex) == false)
+				&& contain(enemy, tempArrayIndex) == false /*&& contain(newArrayIndex, tempArrayIndex) == false*/)
 			{
 				newArrayIndex.push_back(tempArrayIndex);
 			}

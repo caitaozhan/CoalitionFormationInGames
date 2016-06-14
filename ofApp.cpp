@@ -2,7 +2,7 @@
 #include "Global.h"
 
 const int ofApp::MAX_EXPERIMENT = 30;
-const int ofApp::MAX_UPDATE = 500;
+const int ofApp::MAX_UPDATE = 800;
 
 //--------------------------------------------------------------
 void ofApp::setup(){
@@ -37,13 +37,14 @@ void ofApp::setup(){
 	BF_UL = ofVec2f(0, HEIGHT - 1);
 	BF_LR = ofVec2f(WIDTH - 1, 0);
 
-	LOG_PM.open("../../log/log_simpleEvaluate.txt");
-	LOG_ANALYSE.open("../../log/log_analyze.txt");
+	LOG_PM.open("../../log/32^2,pop=48,ind=20/log_simpleEvaluate.txt");
+	LOG_ANALYSE.open("../../log/32^2,pop=48,ind=20/log_analyze.txt");
 
 	m_enemy.initialize(INDIVIDUAL_SIZE);                   // 修正BUG：之前 m_enemy 调用重载的默认构造函数，导致vector大小=0
 	//m_enemy.setup_8(ABILITY_DISTANCE, true, Coalition()); 
+	//m_enemy.writeLog();
 	//m_enemy.setup_CR(ABILITY_DISTANCE, true, Coalition());
-	m_enemy.setup_file(ABILITY_DISTANCE, true, "../sample/1_case_10.txt");
+	m_enemy.setup_file(ABILITY_DISTANCE, true, "../sample/2_case_20.txt");
 
 	m_population.resize(POPULATION_SIZE);                  // 初始化 m_population
 	
@@ -105,6 +106,7 @@ void ofApp::update(){
 		updateWeight();              //  新的种群位置     --> 更新种群的权值
 		updatePMatrix();             //  新的种群权值     --> 更新全局的概率矩阵
 		updateBestCoalition();       //  更新最好的Coalition
+		writeLogMatrix(m_updateCounter);
 	}
 }
 
@@ -118,13 +120,16 @@ void ofApp::draw(){
 
 	m_mesh.drawWireframe();
 	m_enemy.draw();
-	for (int i = 0; i < m_population.size(); ++i)
+	m_bestCoalition.draw();
+	for (int i = 0; i < m_population.size() / 2; ++i)
 	{
-		//m_population[i].draw();
-		m_bestCoalition.draw();
-		ofDrawBitmapString(m_population[i].toString("simpleEvaluate"), -180, -10 * i + 120);
-		
+		ofDrawBitmapString(m_population[i].toString("simpleEvaluate"), -250, -10 * i + 150);
 	}
+	for (int i = m_population.size() / 2, j = 0; i < m_population.size(); ++i, ++j)
+	{
+		ofDrawBitmapString(m_population[i].toString("simpleEvaluate"), -200, -10 * j + 150);
+	}
+
 	m_easyCam.end();
 }
 
@@ -166,6 +171,7 @@ void ofApp::keyPressed(int key){
 	else if (key == 'e')
 	{
 		m_enemy.setup_8(ABILITY_DISTANCE, true, m_enemy);
+		m_enemy.writeLog();
 	}
 	else if (key == 'u')
 	{
@@ -245,23 +251,7 @@ void ofApp::updateWeight()
 	for (Coalition &c : m_population)                  // 更新每一个联盟的评估值
 	{
 		c.setSimpleEvaluate(Coalition::simpleEvalute(m_enemy, c));
-
-		// todo: 这里可以重构一个方法
-		if (c.getIsStagnate() == true && isZero(c.getSimpleEvaluate() - 0.0))  // 首先判断是否可能停滞，如果已经不可能了（E > 1），这不进入 if statement
-		{
-			c.setStagnate0(c.getStagnate0() + 1);      // 记录一个联盟在 Evaluation = 0 停滞的代数
-			if (c.getStagnate0() > 150)                // 连续 150 代都处于 Evaluation = 0 的滞胀
-			{
-				c.setup_CR(c.getAbilityDistance(), c.getIsEnemy(), m_enemy);   // 重新初始化
-				c.setIsStangate(0);                                            // 这里修复一个小BUG
-				c.setSimpleEvaluate(Coalition::simpleEvalute(m_enemy, c));
-				cout << "reset one coalition at " << m_updateCounter << " " << c.getSimpleEvaluate() << endl;
-			}
-		}
-		if (c.getIsStagnate() == true && c.getSimpleEvaluate() > 0.5)
-		{
-			c.setIsStangate(false);                   // 评估值已经 > 0 了，不可能再在 E = 0 这个坑里面停滞了
-		}
+		c.resetAtStagnate0(m_enemy, m_updateCounter);
 	}
 	
 	int maxE = -INDIVIDUAL_SIZE;
@@ -421,7 +411,7 @@ void ofApp::updatePopluation()
 				}
 			}
 		}
-		c.writeLog();
+		//c.writeLog();
 	}
 }
 
