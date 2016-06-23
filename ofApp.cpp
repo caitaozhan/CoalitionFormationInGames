@@ -269,7 +269,8 @@ void ofApp::updateWeight()
 	for (Coalition &c : m_population)                  // 估值 --> 适应值 --> 权值
 	{
 		c.setFitness(c.calculateFitness(c.getSimpleEvaluate(), maxE, minE));
-		c.setWeight(c.calculateWeight(c.getFitness()));
+		//c.setWeight(c.calculateWeight(c.getFitness()));
+		c.setWeight(c.getFitness());      // 不使用sigmoild函数，直接上适应值，用以拉开差距
 	}
 }
 

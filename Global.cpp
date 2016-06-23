@@ -14,7 +14,7 @@ int POPULATION_SIZE = 32;
 int INDIVIDUAL_SIZE = 32;
 double ABILITY_DISTANCE = 2.9;
 
-double PL = 1;    // Probability Learning
+double PL = 0.9;    // Probability Learning
 double LS = 0.8;  // Local Search
 vector<vector<double>> PROBABILITY_MATRIX;
 double SMALL_NUMBER = 0.1;
