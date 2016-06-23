@@ -27,7 +27,7 @@ void Tank::setup(const ofVec2f &arrayIndex, double abilityDistance, bool isEnemy
 void Tank::draw(const ofColor &color)
 {
 	ofSetColor(color);
-	ofDrawSphere(m_position, 3);
+	ofDrawSphere(m_position, 1.5);
 }
 
 void Tank::setTankPosition(double x, double y, double z)
@@ -85,27 +85,27 @@ bool Tank::operator==(const Tank & t) const
 int Tank::xCoordi2ArrayIndx(double xCoordi)
 {
 	if (xCoordi > -EPSILON)
-		return int(xCoordi + 0.1) / 10 + WIDTH / 2; // bug：这里的除以10这个数字，需要随mesh的“放大倍数”而改动
+		return int(xCoordi + 0.1) / PIXEL_PER_INDEX + WIDTH / 2; // bug：这里的除以10这个数字，需要随mesh的“放大倍数”而改动
 	else
-		return int(xCoordi - 0.1) / 10 + WIDTH / 2;
+		return int(xCoordi - 0.1) / PIXEL_PER_INDEX + WIDTH / 2;
 }
 
 int Tank::yCoordi2ArrayIndx(double yCoordi)
 {
 	if (yCoordi > -EPSILON)
-		return int(yCoordi + 0.1) / 10 + HEIGHT / 2;
+		return int(yCoordi + 0.1) / PIXEL_PER_INDEX + HEIGHT / 2;
 	else
-		return int(yCoordi - 0.1) / 10 + HEIGHT / 2;
+		return int(yCoordi - 0.1) / PIXEL_PER_INDEX + HEIGHT / 2;
 }
 
 double Tank::xArrayIndx2Coordi(int x)
 {
-	return (x - WIDTH / 2) * 10.0;
+	return (x - (double)WIDTH / 2) * PIXEL_PER_INDEX;
 }
 
 double Tank::yArrayIndx2Coordi(int y)
 {
-	return (y - HEIGHT / 2) * 10.0;
+	return (y - (double)HEIGHT / 2) * PIXEL_PER_INDEX;
 }
 
 bool Tank::checkInBoundary(const ofVec2f &arrayIndex)

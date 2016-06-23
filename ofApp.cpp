@@ -1,8 +1,8 @@
 #include "ofApp.h"
 #include "Global.h"
 
-const int ofApp::MAX_EXPERIMENT = 30;
-const int ofApp::MAX_UPDATE = 800;
+const int ofApp::MAX_EXPERIMENT = 10;
+const int ofApp::MAX_UPDATE = 1000;
 
 //--------------------------------------------------------------
 void ofApp::setup(){
@@ -37,14 +37,14 @@ void ofApp::setup(){
 	BF_UL = ofVec2f(0, HEIGHT - 1);
 	BF_LR = ofVec2f(WIDTH - 1, 0);
 
-	LOG_PM.open("../../log/32^2,pop=48,ind=20/log_simpleEvaluate.txt");
-	LOG_ANALYSE.open("../../log/32^2,pop=48,ind=20/log_analyze.txt");
+	LOG_PM.open("../../log/32^2,pop=32,ind=32_param/log_simpleEvaluate.txt");
+	LOG_ANALYSE.open("../../log/32^2,pop=32,ind=32_param/log_analyze.txt");
 
 	m_enemy.initialize(INDIVIDUAL_SIZE);                   // 修正BUG：之前 m_enemy 调用重载的默认构造函数，导致vector大小=0
 	//m_enemy.setup_8(ABILITY_DISTANCE, true, Coalition()); 
 	//m_enemy.writeLog();
 	//m_enemy.setup_CR(ABILITY_DISTANCE, true, Coalition());
-	m_enemy.setup_file(ABILITY_DISTANCE, true, "../sample/2_case_20.txt");
+	m_enemy.setup_file(ABILITY_DISTANCE, true, "../sample/4_case_20.txt");
 
 	m_population.resize(POPULATION_SIZE);                  // 初始化 m_population
 	
@@ -112,25 +112,27 @@ void ofApp::update(){
 
 //--------------------------------------------------------------
 void ofApp::draw(){
-
+	
+	
 	m_easyCam.begin();
 
 	string msg = "fps: " + ofToString(ofGetFrameRate(), 2);
 	ofDrawBitmapString(msg, ofPoint(100, 100));
-
+	
 	m_mesh.drawWireframe();
 	m_enemy.draw();
 	m_bestCoalition.draw();
 	for (int i = 0; i < m_population.size() / 2; ++i)
 	{
-		ofDrawBitmapString(m_population[i].toString("simpleEvaluate"), -250, -10 * i + 150);
+		ofDrawBitmapString(m_population[i].toString("simpleEvaluate"), -120, -10 * i + 100);
 	}
 	for (int i = m_population.size() / 2, j = 0; i < m_population.size(); ++i, ++j)
 	{
-		ofDrawBitmapString(m_population[i].toString("simpleEvaluate"), -200, -10 * j + 150);
+		ofDrawBitmapString(m_population[i].toString("simpleEvaluate"), -100, -10 * j + 100);
 	}
-
+	
 	m_easyCam.end();
+	
 }
 
 const Coalition & ofApp::getBestCoalition() const
