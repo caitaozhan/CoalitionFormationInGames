@@ -1,0 +1,16 @@
+.vs
+
+bin/
+Debug/
+obj/
+Release/
+
+addons.make
+Coalition.sln
+Coalition.VC.db
+Coalition.VC.VC.opendb
+Coalition.vcxproj
+Coalition.vcxproj.filters
+Coalition.vcxproj.user
+icon.rc
+version_*
