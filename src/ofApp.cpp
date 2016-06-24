@@ -1,8 +1,8 @@
 #include "ofApp.h"
 #include "Global.h"
 
-const int ofApp::MAX_EXPERIMENT = 10;
-const int ofApp::MAX_UPDATE = 1000;
+const int ofApp::MAX_EXPERIMENT = 1;
+const int ofApp::MAX_UPDATE = 10;
 
 //--------------------------------------------------------------
 void ofApp::setup(){
@@ -37,8 +37,8 @@ void ofApp::setup(){
 	BF_UL = ofVec2f(0, HEIGHT - 1);
 	BF_LR = ofVec2f(WIDTH - 1, 0);
 
-	LOG_PM.open("../../log/32^2,pop=32,ind=32_param/log_simpleEvaluate.txt");
-	LOG_ANALYSE.open("../../log/32^2,pop=32,ind=32_param/log_analyze.txt");
+	LOG_PM.open("../log/32^2,pop=32,ind=32_param/log_simpleEvaluate.txt");
+	LOG_ANALYSE.open("../log/32^2,pop=32,ind=32_param/log_analyze.txt");
 
 	m_enemy.initialize(INDIVIDUAL_SIZE);                   // 修正BUG：之前 m_enemy 调用重载的默认构造函数，导致vector大小=0
 	//m_enemy.setup_8(ABILITY_DISTANCE, true, Coalition()); 
@@ -97,6 +97,10 @@ void ofApp::update(){
 		if (m_experimentTimes == ofApp::MAX_EXPERIMENT)  // 准备做 MAX_EXPERIMENT 次实验
 		{
 			cout << "end of experiment!" << endl;
+			LOG_ANALYSE.close();                  // 先关闭，再由另外一个类打开
+			AnalyzeLog analyzeLog;                // 曾经 AnalyzeLog 是一个独立的project
+			analyzeLog.analyze();                 // 新建了一个filter(筛选器),合并到此项目了
+												  
 			m_update = 0;
 		}
 

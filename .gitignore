@@ -4,6 +4,8 @@ bin/
 Debug/
 obj/
 Release/
+log/
+PPT/
 
 addons.make
 Coalition.sln
@@ -13,4 +15,3 @@ Coalition.vcxproj
 Coalition.vcxproj.filters
 Coalition.vcxproj.user
 icon.rc
-version_*

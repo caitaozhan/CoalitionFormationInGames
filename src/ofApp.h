@@ -2,6 +2,7 @@
 
 #include "ofMain.h"
 #include "Coalition.h"
+#include "../analyze/AnalyzeLog.h"
 
 class ofApp : public ofBaseApp
 {
