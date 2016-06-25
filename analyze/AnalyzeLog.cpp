@@ -9,12 +9,12 @@ Best @246  6
 
 AnalyzeLog::AnalyzeLog()
 {
-	m_patternNotFound = "target not found.*";   // 没有找到
-	m_patternBest = "@([\\d]+)";				// 整数
-	m_patternAvg = ": ([0-9]+\\.[0-9]+)";		// 先匹配实数，如果没有这匹配整数（这里有贪心的顺序问题）
+	m_patternNotFound = "target not found.*";     // 没有找到
+	m_patternBest = "@([\\d]+)";				  // 整数
+	m_patternAvg = ": ([0-9]+\\.[0-9]+|[0-9]+)";  // 先匹配实数，如果没有这匹配整数（这里有贪心的顺序问题）
 
 	string ifileName("../log/32^2,pop=32,ind=32_param/log_analyze.txt");
-	string ofileName("../log/32^2,pop=32,ind=32_param/10_0.9_0.8.txt");
+	string ofileName("../log/32^2,pop=32,ind=32_param/6-25_0.9_0.8-.txt");
 
 	m_ifile.open(ifileName);
 	m_ofile.open(ofileName);

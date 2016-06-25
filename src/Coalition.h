@@ -53,6 +53,7 @@ public:
 
 	ofVec2f localSearch_small(const Coalition &enemy, int i);  // backupC 是调用者
 	ofVec2f localSearch_big(const Coalition &enemy);           // backupC 是调用者
+	ofVec2f localSearch_big_PM(const Coalition &enemy);        // backupC 是调用者,加入概率矩阵
 
 	static ofVec2f getPlaceFromPMatrix();
 	

@@ -421,7 +421,10 @@ double Coalition::calculateFitness(double evaluate, double maxEvaluate, double m
 
 double Coalition::calculateWeight(double fitness)
 {
-	return 1.0 / (1 + pow(E, -fitness));
+	return fitness;   // 直接上适应值，用以拉开差距
+
+
+	//return 1.0 / (1 + pow(E, -fitness));  // TODO 这里可以换一个增大差距的函数
 }
 
 /*
@@ -520,6 +523,36 @@ ofVec2f Coalition::localSearch_big(const Coalition & enemy)
 		}
 	}
 	int choose = (int)ofRandom(0, newArrayIndex.size());
+	return newArrayIndex[choose];
+}
+
+ofVec2f Coalition::localSearch_big_PM(const Coalition & enemy)
+{
+	vector<Tank> tanks = this->getCoalition();
+	vector<ofVec2f> newArrayIndex;
+	vector<double>  newProbability;
+	ofVec2f tempArrayIndex;
+	for (int i = 0; i < tanks.size(); ++i)
+	{
+		for (int j = 0; j < 8; ++j)
+		{
+			tempArrayIndex.x = tanks[i].getArrayIndex().x + MOVE_X[j];
+			tempArrayIndex.y = tanks[i].getArrayIndex().y + MOVE_Y[j];
+			if (Tank::ckeckInBF(tempArrayIndex) && contain(*this, tempArrayIndex) == false
+				&& contain(enemy, tempArrayIndex) == false /*&& contain(newArrayIndex, tempArrayIndex) == false*/)
+			{
+				newArrayIndex.push_back(tempArrayIndex);                                       // 这两个vector大小一样
+				newProbability.push_back(PROBABILITY_MATRIX[tempArrayIndex.y][tempArrayIndex.x]); // 保存PM的概率
+			}
+		}
+	}
+	size_t size = newProbability.size();
+	for (int i = 1; i < size; i++)
+	{
+		newProbability[i] += newProbability[i - 1];
+	}
+	double random = ofRandom(0, newProbability[size - 1]);
+	int choose = lower_bound(newProbability.begin(), newProbability.end(), random) - newProbability.begin();
 	return newArrayIndex[choose];
 }
 

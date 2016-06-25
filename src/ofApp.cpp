@@ -1,8 +1,8 @@
 #include "ofApp.h"
 #include "Global.h"
 
-const int ofApp::MAX_EXPERIMENT = 1;
-const int ofApp::MAX_UPDATE = 10;
+const int ofApp::MAX_EXPERIMENT = 15;
+const int ofApp::MAX_UPDATE = 500;
 
 //--------------------------------------------------------------
 void ofApp::setup(){
@@ -97,7 +97,7 @@ void ofApp::update(){
 		if (m_experimentTimes == ofApp::MAX_EXPERIMENT)  // 准备做 MAX_EXPERIMENT 次实验
 		{
 			cout << "end of experiment!" << endl;
-			LOG_ANALYSE.close();                  // 先关闭，再由另外一个类打开
+			LOG_ANALYSE.close();                  // 先关闭，再由另外一个类打开“临界文件”
 			AnalyzeLog analyzeLog;                // 曾经 AnalyzeLog 是一个独立的project
 			analyzeLog.analyze();                 // 新建了一个filter(筛选器),合并到此项目了
 												  
@@ -273,8 +273,7 @@ void ofApp::updateWeight()
 	for (Coalition &c : m_population)                  // 估值 --> 适应值 --> 权值
 	{
 		c.setFitness(c.calculateFitness(c.getSimpleEvaluate(), maxE, minE));
-		//c.setWeight(c.calculateWeight(c.getFitness()));
-		c.setWeight(c.getFitness());      // 不使用sigmoild函数，直接上适应值，用以拉开差距
+		c.setWeight(c.calculateWeight(c.getFitness()));
 	}
 }
 
@@ -374,7 +373,7 @@ void ofApp::updatePopluation()
 			if (ofRandom(0, 1) < PL)      // todo: 这里还有一个&&
 			{
 				if (ofRandom(0, 1) < LS)
-				{
+				{// 不做变化，直接复制过去
 					constructC.pushBackTank(backupC.getCoalition(i));
 				}
 				else
