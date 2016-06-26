@@ -1,5 +1,5 @@
 #include "ofApp.h"
-#include "Global.h"
+#include "../Coalition/Global.h"
 
 const int ofApp::MAX_EXPERIMENT = 15;
 const int ofApp::MAX_UPDATE = 500;
@@ -380,7 +380,7 @@ void ofApp::updatePopluation()
 				{// local search
 					localSearch = true;
 					ofVec2f arrayIndex;
-					arrayIndex = backupC.localSearch_big(m_enemy);
+					arrayIndex = backupC.localSearch_big_PM(m_enemy);
 					Tank newTank;
 					newTank.setup(arrayIndex, ABILITY_DISTANCE, false);
 					constructC.pushBackTank(newTank);

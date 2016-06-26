@@ -1,8 +1,8 @@
 #pragma once
 
 #include "ofMain.h"
-#include "Coalition.h"
-#include "../analyze/AnalyzeLog.h"
+#include "../Coalition/Coalition.h"
+#include "../Analyze/AnalyzeLog.h"
 
 class ofApp : public ofBaseApp
 {
