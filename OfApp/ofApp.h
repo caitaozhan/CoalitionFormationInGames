@@ -39,7 +39,7 @@ public:
 
 private:
 	vector<Coalition> m_population;   // 论文中的 archive
-	Coalition m_bestCoalition;
+	//Coalition m_bestCoalition;
 	Coalition m_enemy;
 	ofMesh    m_mesh;
 	ofEasyCam m_easyCam;

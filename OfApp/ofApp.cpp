@@ -421,6 +421,7 @@ void ofApp::updatePopluation()
 	}
 }
 
+// TODO: 
 void ofApp::updateBestCoalition()
 {
 	for (const Coalition & c : m_population)

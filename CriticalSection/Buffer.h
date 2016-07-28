@@ -6,6 +6,8 @@
 #include "../Coalition/Coalition.h"
 using namespace std;
 
+extern const int bufferSize;
+
 // a vector of bestCoalitoins is the critical section
 // producer adds bestCoalitions, while consumer reduces bestCoalitions
 extern vector<Coalition> bestCoalitions;
