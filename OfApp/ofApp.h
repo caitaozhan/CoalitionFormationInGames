@@ -3,6 +3,7 @@
 #include "ofMain.h"
 #include "../Coalition/Coalition.h"
 #include "../Analyze/AnalyzeLog.h"
+#include "../CriticalSection/Buffer.h"
 
 class ofApp : public ofBaseApp
 {
@@ -38,9 +39,9 @@ public:
 	static const int MAX_EXPERIMENT;
 
 private:
-	vector<Coalition> m_population;   // 论文中的 archive
+	//vector<Coalition> m_population;   // 论文中的 archive
 	//Coalition m_bestCoalition;
-	Coalition m_enemy;
+	//Coalition m_enemy;
 	ofMesh    m_mesh;
 	ofEasyCam m_easyCam;
 

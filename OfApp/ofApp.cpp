@@ -1,5 +1,4 @@
 #include "ofApp.h"
-#include "../Coalition/Global.h"
 
 const int ofApp::MAX_EXPERIMENT = 15;
 const int ofApp::MAX_UPDATE = 500;
@@ -421,7 +420,7 @@ void ofApp::updatePopluation()
 	}
 }
 
-// TODO: 
+// TODO: 这个应该放在
 void ofApp::updateBestCoalition()
 {
 	for (const Coalition & c : m_population)
