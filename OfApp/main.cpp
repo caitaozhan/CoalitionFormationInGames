@@ -13,7 +13,10 @@ void consumerDraw()
 
 void producerCalculate()
 {
-	producerCalculating(Population(10));
+	while (true)
+	{
+		producerCalculating(Population(10));
+	}
 }
 
 //========================================================================

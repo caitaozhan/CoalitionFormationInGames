@@ -39,22 +39,22 @@ void ofApp::setup(){
 	LOG_PM.open("../log/32^2,pop=32,ind=32_param/log_simpleEvaluate.txt");
 	LOG_ANALYSE.open("../log/32^2,pop=32,ind=32_param/log_analyze.txt");
 
-	m_enemy.initialize(INDIVIDUAL_SIZE);                   // 修正BUG：之前 m_enemy 调用重载的默认构造函数，导致vector大小=0
+	//m_enemy.initialize(INDIVIDUAL_SIZE);                   // 修正BUG：之前 m_enemy 调用重载的默认构造函数，导致vector大小=0
 	//m_enemy.setup_8(ABILITY_DISTANCE, true, Coalition()); 
 	//m_enemy.writeLog();
 	//m_enemy.setup_CR(ABILITY_DISTANCE, true, Coalition());
-	m_enemy.setup_file(ABILITY_DISTANCE, true, "../sample/4_case_20.txt");
+	//m_enemy.setup_file(ABILITY_DISTANCE, true, "../sample/4_case_20.txt");
 
-	m_population.resize(POPULATION_SIZE);                  // 初始化 m_population
-	
-	for (int i = 0; i < m_population.size(); ++i)
-	{
-		Coalition::logNumber++;
-		m_population[i].initialize(INDIVIDUAL_SIZE);       // 修正BUG：之前 m_population[i] 调用重载的默认构造函数，导致vector大小=0
-		m_population[i].setup_CR(ABILITY_DISTANCE, false, m_enemy);
-	}
+	//m_population.resize(POPULATION_SIZE);                  // 初始化 m_population
+	//
+	//for (int i = 0; i < m_population.size(); ++i)
+	//{
+	//	Coalition::logNumber++;
+	//	m_population[i].initialize(INDIVIDUAL_SIZE);       // 修正BUG：之前 m_population[i] 调用重载的默认构造函数，导致vector大小=0
+	//	m_population[i].setup_CR(ABILITY_DISTANCE, false, m_enemy);
+	//}
 
-	m_bestCoalition = getBestCoalition();                  // 从初始化的种群中获得最好的种群
+	//m_bestCoalition = getBestCoalition();                  // 从初始化的种群中获得最好的种群
 
 	PROBABILITY_MATRIX.resize(HEIGHT);                     // 初始化 概率矩阵
 	vector<double> tmpVector(WIDTH, 0.0);
@@ -116,71 +116,83 @@ void ofApp::update(){
 //--------------------------------------------------------------
 void ofApp::draw(){
 	
-	
+	{// critical section
+		unique_lock<mutex> lock(BUFFER.mtx);
+		// block(wait) when BUFFER.bC.size() == 0
+		BUFFER.cvConsumer.wait(lock, [] {return BUFFER.bestCoalitions.size() != 0; });
+
+		m_coalitionToDraw = BUFFER.bestCoalitions.front();
+		m_enemyToDraw = BUFFER.enemy;
+		BUFFER.bestCoalitions.pop();
+
+		// notiry(wake up) when  BUFFER.bC.size() + newBC.size() <= BUFFER.bufferSize
+		BUFFER.cvProducer.notify_one();
+	}
+
 	m_easyCam.begin();
 
 	string msg = "fps: " + ofToString(ofGetFrameRate(), 2);
 	ofDrawBitmapString(msg, ofPoint(100, 100));
 	
 	m_mesh.drawWireframe();
-	m_enemy.draw();
-	m_bestCoalition.draw();
-	for (int i = 0; i < m_population.size() / 2; ++i)
-	{
-		ofDrawBitmapString(m_population[i].toString("simpleEvaluate"), -120, -10 * i + 100);
-	}
-	for (int i = m_population.size() / 2, j = 0; i < m_population.size(); ++i, ++j)
-	{
-		ofDrawBitmapString(m_population[i].toString("simpleEvaluate"), -100, -10 * j + 100);
-	}
 	
+	m_enemyToDraw.draw();
+	m_coalitionToDraw.draw();
+	ofDrawBitmapString(m_coalitionToDraw.toString("simpleEvaluate"), -100, 100);
+	
+	// TODO: 显示所有的population.evaluation
+
 	m_easyCam.end();
 	
 }
 
-const Coalition & ofApp::getBestCoalition() const
-{
-	int bestIndex = 0;
-	int bestValue = -m_population[0].getSize();  // 越大越好，初始值设为最小
-	for (int i = 0; i < m_population.size(); i++)
-	{
-		if (m_population.at(i).getSimpleEvaluate() > bestValue)
-		{
-			bestIndex = i;
-			bestValue = m_population.at(i).getSimpleEvaluate();
-		}
-	}
-	return m_population.at(bestIndex);
-}
+//const Coalition & ofApp::getBestCoalition() const
+//{
+//	int bestIndex = 0;
+//	int bestValue = -m_population[0].getSize();  // 越大越好，初始值设为最小
+//	for (int i = 0; i < m_population.size(); i++)
+//	{
+//		if (m_population.at(i).getSimpleEvaluate() > bestValue)
+//		{
+//			bestIndex = i;
+//			bestValue = m_population.at(i).getSimpleEvaluate();
+//		}
+//	}
+//	return m_population.at(bestIndex);
+//}
 
-void ofApp::resetMe()
-{
-	for (int i = 0; i < m_population.size(); ++i)
-	{
-		m_population[i].setup_CR(ABILITY_DISTANCE, false, m_enemy);  // 更新联盟里所有 tank 的位置
-		m_population[i].setIsStangate(true);                         // 修复一个BUG
-		m_population[i].setStagnate0(0);
-	}
-	updateWeight();   // 新的位置 --> 新的 weight
-	updatePMatrix();
-	m_bestCoalition = getBestCoalition();
-}
+//void ofApp::resetMe()
+//{
+//	for (int i = 0; i < m_population.size(); ++i)
+//	{
+//		m_population[i].setup_CR(ABILITY_DISTANCE, false, m_enemy);  // 更新联盟里所有 tank 的位置
+//		m_population[i].setIsStangate(true);                         // 修复一个BUG
+//		m_population[i].setStagnate0(0);
+//	}
+//	updateWeight();   // 新的位置 --> 新的 weight
+//	updatePMatrix();
+//	m_bestCoalition = getBestCoalition();
+//}
 
 //--------------------------------------------------------------
 void ofApp::keyPressed(int key){
 
 	if (key == 'm')   // coalition Setup
 	{
-		resetMe();
+		BUFFER_R.resetMe ^= 1;
+		//resetMe();
 	}
 	else if (key == 'e')
 	{
-		m_enemy.setup_8(ABILITY_DISTANCE, true, m_enemy);
-		m_enemy.writeLog();
+		BUFFER_R.resetMe ^= 1;
+		//m_enemy.setup_8(ABILITY_DISTANCE, true, m_enemy);
+		//m_enemy.writeLog();
 	}
 	else if (key == 'u')
 	{
-		if (m_update == false)
+		BUFFER_R.update ^= 1;
+
+		/*if (m_update == false)
 		{
 			m_update = true;
 			ofApp::m_experimentTimes = 0;
@@ -191,7 +203,7 @@ void ofApp::keyPressed(int key){
 		{ 
 			m_update = false;
 			cout << "update = " << m_update << endl;
-		}
+		}*/
 		/*
 		updatePopluation();   //  新的全局概率矩阵 --> 更新种群位置
 		updateWeight();       //  新的种群位置     --> 更新种群的权值

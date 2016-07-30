@@ -12,15 +12,16 @@ public:
 	void initialize();
 
 	void update();                              // update the population
-	//vector<
 	bool getStop();                             // get m_stop
-	int  getSize();
-	vector<Coalition> && getBestCoalitions();
+	int  getSize();                             // get the size of m_populations
+	void updateBestCoalitions();                // update m_bestCoalitions
+	void getBestCoalitions(vector<Coalition> & bC);
 
+	bool isZero(double d);                      // TODO: put it in utility module
 
 private:
 	vector<Coalition> m_population;			    // a group of coalitions
-	vector<Coalition> m_bestCoalitions;		    // best in the population, there could be more than one
+	vector<int> m_bestCoalitionIndex;		    // the index of best coalitions in the population, there could be more than one
 	Coalition m_enemy;                          // enemy
 	bool m_stop;							    // whether stop updating the population
 };

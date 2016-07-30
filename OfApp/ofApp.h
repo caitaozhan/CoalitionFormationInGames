@@ -1,9 +1,14 @@
 #pragma once
 
 #include "ofMain.h"
+#include <mutex>
+#include <thread>
 #include "../Coalition/Coalition.h"
 #include "../Analyze/AnalyzeLog.h"
 #include "../CriticalSection/Buffer.h"
+using namespace std;
+
+extern Buffer BUFFER;
 
 class ofApp : public ofBaseApp
 {
@@ -42,6 +47,9 @@ private:
 	//vector<Coalition> m_population;   // 论文中的 archive
 	//Coalition m_bestCoalition;
 	//Coalition m_enemy;
+	Coalition m_coalitionToDraw;
+	Coalition m_enemyToDraw;
+
 	ofMesh    m_mesh;
 	ofEasyCam m_easyCam;
 
