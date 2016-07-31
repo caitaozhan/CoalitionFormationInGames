@@ -46,7 +46,7 @@ void producerCalculating(Population && population)
 		{// critical section
 			unique_lock<mutex> lock(BUFFER.mtx);
 			// block when BUFFER.bC.size() + newBC.size() > BUFFER.bufferSize
-			BUFFER.cvProducer.wait(lock, [&] {BUFFER.bestCoalitions.size() + newBestCoalitions.size() <= BUFFER.bufferSize; });
+			BUFFER.cvProducer.wait(lock, [&] {return BUFFER.bestCoalitions.size() + newBestCoalitions.size() <= BUFFER.bufferSize; });
 			
 			BUFFER.add(move(newBestCoalitions));
 

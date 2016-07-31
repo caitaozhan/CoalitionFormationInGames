@@ -53,7 +53,7 @@ private:
 	int HEIGHT;
 	int WIDTH;
 
-
+	double EPSILON;
 
 	ofMesh    m_mesh;
 	ofEasyCam m_easyCam;

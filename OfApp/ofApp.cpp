@@ -1,14 +1,11 @@
 #include "ofApp.h"
 
-//const int ofApp::MAX_EXPERIMENT = 15;
-//const int ofApp::MAX_UPDATE = 500;
-
-
 //--------------------------------------------------------------
 void ofApp::setup(){
 	
 	HEIGHT = Global::HEIGHT;
 	WIDTH = Global::WIDTH;
+	EPSILON = Global::EPSILON;
 
 	ofTranslate(ofGetWidth() / 2, ofGetHeight() / 2);
 
