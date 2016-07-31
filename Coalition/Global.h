@@ -1,26 +1,22 @@
 #pragma once
 #include "ofMain.h"
 
-const double E = 2.718281828;
+class Global
+{
+public:
 
-extern const int HEIGHT;
-extern const int WIDTH;
-extern const int PIXEL_PER_INDEX;
-extern const double EPSILON;
-extern const int MOVE_X[8];
-extern const int MOVE_Y[8];
+	static const int HEIGHT;
+	static const int WIDTH;
+	static const int PIXEL_PER_INDEX;
+	static const double EPSILON;
+	static const int MOVE_X[8];
+	static const int MOVE_Y[8];
 
-extern ofVec2f BF_UL;   
-extern ofVec2f BF_LR;
+	static ofVec2f BF_UL;             // battlefield 的左上角, upper left
+	static ofVec2f BF_LR;			  // battlefield 的右下角, lower right
 
-extern int POPULATION_SIZE;
-extern int INDIVIDUAL_SIZE;
-extern double ABILITY_DISTANCE;
+	static vector<vector<double>> PROBABILITY_MATRIX;
 
-extern double PL;
-extern double LS;
-extern vector<vector<double>> PROBABILITY_MATRIX;
-extern double SMALL_NUMBER;
+	static mutex mtx;
+};
 
-extern ofstream LOG_PM;
-extern ofstream LOG_ANALYSE;

@@ -4,7 +4,7 @@
 #include <mutex>
 #include <thread>
 #include "../Coalition/Coalition.h"
-#include "../Analyze/AnalyzeLog.h"
+#include "../Coalition/Global.h"
 #include "../CriticalSection/Buffer.h"
 using namespace std;
 
@@ -32,16 +32,16 @@ public:
 	void dragEvent(ofDragInfo dragInfo);
 	void gotMessage(ofMessage msg);
 
-	void updatePopluation();          // 更新种群
-	void updateBestCoalition();       // 更新最好的联盟
-	void updateWeight();              // 计算估值 --> 适应值 --> 权值
-	void updatePMatrix();             // 统计工作，更新概率矩阵
+	//void updatePopluation();          // 更新种群
+	//void updateBestCoalition();       // 更新最好的联盟
+	//void updateWeight();              // 计算估值 --> 适应值 --> 权值
+	//void updatePMatrix();             // 统计工作，更新概率矩阵
 	bool isZero(double d);
-	void writeLogMatrix(int updateCounter);      // 打印矩阵到log
+	//void writeLogMatrix(int updateCounter);      // 打印矩阵到log
 	int  writeLogAnalyse(int updateCounter);     // 打印算法的分析
 
-	static const int MAX_UPDATE;
-	static const int MAX_EXPERIMENT;
+	//static const int MAX_UPDATE;
+	//static const int MAX_EXPERIMENT;
 
 private:
 	//vector<Coalition> m_population;   // 论文中的 archive
@@ -50,14 +50,19 @@ private:
 	Coalition m_coalitionToDraw;
 	Coalition m_enemyToDraw;
 
+	int HEIGHT;
+	int WIDTH;
+
+
+
 	ofMesh    m_mesh;
 	ofEasyCam m_easyCam;
 
-	bool m_update;
-	int  m_updateCounter;
+	//bool m_update;
+	//int  m_updateCounter;
 
-	bool m_appearTarget;
-	int  m_experimentTimes;
+	/*bool m_appearTarget;
+	int  m_experimentTimes;*/
 };
 
 //Universal function which sets normals for the triangle mesh

@@ -1,5 +1,8 @@
 #include "Tank.h"
 
+const int Tank::PIXEL_PER_INDEX = 5;
+double Tank::ABILITY_DISTANCE = 3;
+
 Tank::Tank()
 {
 	m_arrayIndex = ofVec2f(0, 0);
@@ -84,33 +87,33 @@ bool Tank::operator==(const Tank & t) const
 // 加了 inline 为什么 debug 成功但是 release 失败？
 int Tank::xCoordi2ArrayIndx(double xCoordi)
 {
-	if (xCoordi > -EPSILON)
-		return int(xCoordi + 0.1) / PIXEL_PER_INDEX + WIDTH / 2; // bug：这里的除以10这个数字，需要随mesh的“放大倍数”而改动
+	if (xCoordi > -Global::EPSILON)
+		return int(xCoordi + 0.1) / PIXEL_PER_INDEX + Global::WIDTH / 2; // bug：这里的除以10这个数字，需要随mesh的“放大倍数”而改动
 	else
-		return int(xCoordi - 0.1) / PIXEL_PER_INDEX + WIDTH / 2;
+		return int(xCoordi - 0.1) / PIXEL_PER_INDEX + Global::WIDTH / 2;
 }
 
 int Tank::yCoordi2ArrayIndx(double yCoordi)
 {
-	if (yCoordi > -EPSILON)
-		return int(yCoordi + 0.1) / PIXEL_PER_INDEX + HEIGHT / 2;
+	if (yCoordi > -Global::EPSILON)
+		return int(yCoordi + 0.1) / PIXEL_PER_INDEX + Global::HEIGHT / 2;
 	else
-		return int(yCoordi - 0.1) / PIXEL_PER_INDEX + HEIGHT / 2;
+		return int(yCoordi - 0.1) / PIXEL_PER_INDEX + Global::HEIGHT / 2;
 }
 
 double Tank::xArrayIndx2Coordi(int x)
 {
-	return (x - (double)WIDTH / 2) * PIXEL_PER_INDEX;
+	return (x - (double)Global::WIDTH / 2) * PIXEL_PER_INDEX;
 }
 
 double Tank::yArrayIndx2Coordi(int y)
 {
-	return (y - (double)HEIGHT / 2) * PIXEL_PER_INDEX;
+	return (y - (double)Global::HEIGHT / 2) * PIXEL_PER_INDEX;
 }
 
 bool Tank::checkInBoundary(const ofVec2f &arrayIndex)
 {
-	if (arrayIndex.x < 0 || arrayIndex.x >= WIDTH || arrayIndex.y < 0 || arrayIndex.y >= HEIGHT)
+	if (arrayIndex.x < 0 || arrayIndex.x >= Global::WIDTH || arrayIndex.y < 0 || arrayIndex.y >= Global::HEIGHT)
 	{
 		return false;
 	}
@@ -119,7 +122,7 @@ bool Tank::checkInBoundary(const ofVec2f &arrayIndex)
 
 bool Tank::ckeckInBF(const ofVec2f & arrayIndex)
 {
-	if (arrayIndex.x > BF_LR.x || arrayIndex.x < BF_UL.x || arrayIndex.y < BF_LR.y || arrayIndex.y > BF_UL.y)
+	if (arrayIndex.x > Global::BF_LR.x || arrayIndex.x < Global::BF_UL.x || arrayIndex.y < Global::BF_LR.y || arrayIndex.y > Global::BF_UL.y)
 	{// 修复一个BUG，我怎么经常在这种“很长的if”里面犯错。。
 		return false;
 	}
