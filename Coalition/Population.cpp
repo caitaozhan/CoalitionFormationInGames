@@ -10,6 +10,7 @@ Population::Population()
 	m_update = false;
 	m_appearTarget = false;
 	m_experimentTimes = 0;
+	m_updateCounter = 0;
 
 	MAX_UPDATE = 500;
 	MAX_EXPERIMENT = 15;
@@ -51,6 +52,12 @@ void Population::initialize(double pl, double ls, int populationSize, int indivi
 		m_population[i].initialize(Coalition::INDIVIDUAL_SIZE);       // 修正BUG：之前 m_population[i] 调用重载的默认构造函数，导致vector大小=0
 		m_population[i].setup_CR(Tank::ABILITY_DISTANCE, false, m_enemy);
 	}
+
+	m_enemy.initialize(Coalition::INDIVIDUAL_SIZE);                               // 修正BUG：之前 m_enemy 调用重载的默认构造函数，导致vector大小=0
+	m_enemy.setup_file(Tank::ABILITY_DISTANCE, true, "../sample/4_case_20.txt");  // 从文件从读入数据，进行初始化
+	//m_enemy.setup_8(Tank::ABILITY_DISTANCE, true, Coalition()); 
+	//m_enemy.writeLog();
+	//m_enemy.setup_CR(Tank::ABILITY_DISTANCE, true, Coalition());
 
     // 初始化 概率矩阵
 	Global::PROBABILITY_MATRIX.resize(Global::HEIGHT);                     
@@ -199,6 +206,18 @@ void Population::updatePMatrix()
 	}
 }
 
+void Population::resetEnemy(string & way)
+{
+	if (way == string("8"))
+	{
+		m_enemy.setup_8(Tank::ABILITY_DISTANCE, true, Coalition()); 
+	}
+	else if (way == string("CR"))
+	{
+		m_enemy.setup_CR(Tank::ABILITY_DISTANCE, true, Coalition());
+	}
+}
+
 void Population::writeLogMatrix(int updateCounter)
 {
 	LOG_PM << '\n' << "update counter: " << updateCounter << '\n';
@@ -283,6 +302,11 @@ void Population::getBestCoalitions(vector<Coalition>& bC)
 
 	bC = move(temp);
 	return;
+}
+
+void Population::getEnemy(Coalition & e)
+{
+	e = m_enemy;
 }
 
 bool Population::isZero(double d)

@@ -17,6 +17,7 @@ public:
 	void updateBestCoalitions();                // update m_bestCoalitions
 	void updateWeight();                        // 计算估值 --> 适应值 --> 权值
 	void updatePMatrix();                       // update probability matrix
+	void resetEnemy(string &way);
 	
 	void writeLogMatrix(int updateCounter);     // 打印矩阵到log
 	int  writeLogAnalyse(int updateCounter);    // 打印算法的分析
@@ -24,6 +25,7 @@ public:
 	bool getStop();                             // get m_stop
 	int  getSize();                             // get the size of m_populations
 	void getBestCoalitions(vector<Coalition> & bC);
+	void getEnemy(Coalition &e);
 	bool isZero(double d);                      // TODO: put it in utility module
 
 	void resetMe();

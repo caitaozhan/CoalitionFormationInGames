@@ -123,11 +123,15 @@ void ofApp::draw(){
 		BUFFER.cvConsumer.wait(lock, [] {return BUFFER.bestCoalitions.size() != 0; });
 
 		m_coalitionToDraw = BUFFER.bestCoalitions.front();
-		m_enemyToDraw = BUFFER.enemy;
 		BUFFER.bestCoalitions.pop();
 
-		// notiry(wake up) when  BUFFER.bC.size() + newBC.size() <= BUFFER.bufferSize
+		// notiry(wake up) when BUFFER.bC.size() + newBC.size() <= BUFFER.bufferSize
 		BUFFER.cvProducer.notify_one();
+	}
+
+	{
+		unique_lock<mutex> lock(BUFFER_R.mtx);
+		m_enemyToDraw = BUFFER_R.enemy;
 	}
 
 	m_easyCam.begin();
@@ -180,18 +184,23 @@ void ofApp::keyPressed(int key){
 
 	if (key == 'm')   // coalition Setup
 	{
-		BUFFER_R.resetMe ^= 1;
+		unique_lock<mutex> lock(BUFFER_R.mtx);
+		BUFFER_R.resetMe = true;
 		//resetMe();
 	}
 	else if (key == 'e')
 	{
-		BUFFER_R.resetMe ^= 1;
+		unique_lock<mutex> lock(BUFFER_R.mtx);
+		BUFFER_R.resetEnemy = true;
 		//m_enemy.setup_8(ABILITY_DISTANCE, true, m_enemy);
 		//m_enemy.writeLog();
 	}
 	else if (key == 'u')
 	{
+		unique_lock<mutex> lock(BUFFER_R.mtx);
 		BUFFER_R.update ^= 1;
+		// TODO：存在逻辑问题，当update == false，生产者线程停止生产，很快Buffer.queue为空，消费者等待。
+		// 当按键按下'u'的时候，系统无法响应，因为是消费者负责相应按钮。。。解决方案：当update == false的时候，生产者暂停几秒钟，然后自动恢复。
 
 		/*if (m_update == false)
 		{

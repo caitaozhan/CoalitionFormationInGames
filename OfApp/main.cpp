@@ -15,7 +15,7 @@ void producerCalculate()
 {
 	while (true)
 	{
-		producerCalculating(Population(10));
+		producerCalculating(Population());
 	}
 }
 

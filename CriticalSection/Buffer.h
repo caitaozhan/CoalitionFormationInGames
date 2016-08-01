@@ -27,9 +27,6 @@ public:
 
 	// add new items to queue
 	void add(vector<Coalition> && newBestCoalitions);
-	
-	// producer need it when calculating, consumer draws the enemy
-	Coalition enemy;
 
 	// mutex for bestCoalition
 	mutex mtx;
@@ -47,7 +44,10 @@ public:
 class BufferResponse
 {
 public:
-	BufferResponse(bool b);
+	BufferResponse(bool resetMe, bool resetEnemy, bool update);
+	
+	// producer need it when calculating, consumer draws the enemy
+	Coalition enemy;
 
 	bool resetMe;        // whether reset my tanks
 	bool resetEnemy;     // whether reset enemy tanks

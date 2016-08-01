@@ -2,19 +2,11 @@
 
 Buffer BUFFER(100);
 
-BufferResponse BUFFER_R(false);
+BufferResponse BUFFER_R(false, false, true);
 
 Buffer::Buffer(int size)
 {
 	bufferSize = size;
-	
-	enemy.initialize(Coalition::INDIVIDUAL_SIZE);                         // 修正BUG：之前 m_enemy 调用重载的默认构造函数，导致vector大小=0
-	//m_enemy.setup_8(ABILITY_DISTANCE, true, Coalition()); 
-	//m_enemy.writeLog();
-	//m_enemy.setup_CR(ABILITY_DISTANCE, true, Coalition());
-	
-	enemy.setup_file(Tank::ABILITY_DISTANCE, true, "../sample/4_case_20.txt");
-
 }
 
 void Buffer::add(vector<Coalition>&& newBestCoalitions)
@@ -25,21 +17,46 @@ void Buffer::add(vector<Coalition>&& newBestCoalitions)
 	}
 }
 
-BufferResponse::BufferResponse(bool b)
+BufferResponse::BufferResponse(bool resetMe, bool resetEnemy, bool update)
 {
-	resetMe = b;
-	resetEnemy = b;
-	update = b;
+	this->resetMe = resetMe;
+	this->resetEnemy = resetEnemy;
+	this->update = update;
 }
 
 
 void producerCalculating(Population && population)
 {
-	population.initialize(0.9, 0.9, 32, 32);     // 这里可以有很多参数
+	population.initialize(0.9, 0.9, 32, 32);     // 初始化参数
+	{
+		unique_lock<mutex> lock(BUFFER_R.mtx);
+		population.getEnemy(BUFFER_R.enemy);     // 初始化BUFFER_R.enemy
+	}
 	BUFFER.bufferSize = population.getSize() * 2;
 	vector<Coalition> newBestCoalitions;
 	while (population.getStop() == false)        // when termination conditions are not satisfied
 	{
+		{
+			unique_lock<mutex> lock(BUFFER_R.mtx);
+			if (BUFFER_R.resetEnemy == true)
+			{
+				population.resetEnemy(string("8"));
+				population.getEnemy(BUFFER_R.enemy);             // 更新 BUFFER.enemy
+			    // m_enemy.writeLog();
+				BUFFER_R.resetEnemy = false;
+			}
+			if (BUFFER_R.resetMe == true)
+			{
+				population.resetMe();
+				BUFFER_R.resetMe = false;
+			}
+			if (BUFFER_R.update == false)
+			{
+				this_thread::sleep_for(chrono::seconds(3));
+				BUFFER_R.update = true;
+			}
+		}
+
 		population.update();                     // this line of code should be time-costy
 		population.getBestCoalitions(newBestCoalitions);
 
