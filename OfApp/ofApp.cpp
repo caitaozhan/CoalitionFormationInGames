@@ -128,7 +128,6 @@ void ofApp::draw(){
 		// notiry(wake up) when BUFFER.bC.size() + newBC.size() <= BUFFER.bufferSize
 		BUFFER.cvProducer.notify_one();
 	}
-
 	{
 		unique_lock<mutex> lock(BUFFER_R.mtx);
 		m_enemyToDraw = BUFFER_R.enemy;

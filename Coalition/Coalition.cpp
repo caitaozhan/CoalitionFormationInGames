@@ -1,7 +1,7 @@
 #include "Coalition.h"
 
 int Coalition::logNumber = 0;
-double Coalition::target = 16.0;
+double Coalition::target = 17.0;
 int Coalition::INDIVIDUAL_SIZE = 32;
 
 Coalition::Coalition()
@@ -164,7 +164,9 @@ void Coalition::setup_file(double abilityDistance, bool isEnemy, const string &f
 	}
 	int n;
 	ifile >> n;
-	INDIVIDUAL_SIZE = n;
+	INDIVIDUAL_SIZE = n;              // TODO: 这里的size发生了问题，初始化是32，这里变成了20
+	m_coalition.resize(INDIVIDUAL_SIZE);
+	
 	vector<ofVec2f> vecArrayIndex;
 	ofVec2f temp;
 	while (ifile >> temp)

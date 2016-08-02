@@ -27,12 +27,15 @@ BufferResponse::BufferResponse(bool resetMe, bool resetEnemy, bool update)
 
 void producerCalculating(Population && population)
 {
-	population.initialize(0.9, 0.9, 32, 32);     // 初始化参数
+	population.initialize(0.9, 0.9, 32);         // 初始化参数
 	{
 		unique_lock<mutex> lock(BUFFER_R.mtx);
 		population.getEnemy(BUFFER_R.enemy);     // 初始化BUFFER_R.enemy
 	}
-	BUFFER.bufferSize = population.getSize() * 2;
+	{
+		unique_lock<mutex> lock(BUFFER.mtx);     // RAII写法
+		BUFFER.bufferSize = population.getSize() * 4;
+	}
 	vector<Coalition> newBestCoalitions;
 	while (population.getStop() == false)        // when termination conditions are not satisfied
 	{

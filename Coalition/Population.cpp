@@ -7,11 +7,11 @@ Population::Population()
 	LS = 0.9;    // Local Search
 	SMALL_NUMBER = 0.1;
 
-	m_update = false;
+	m_update = true;
 	m_appearTarget = false;
 	m_experimentTimes = 0;
 	m_updateCounter = 0;
-
+	m_stop = false;
 	MAX_UPDATE = 500;
 	MAX_EXPERIMENT = 15;
 }
@@ -25,8 +25,9 @@ Population::Population(size_t size)
 	PL = 0.9;    // Probability Learning
 	LS = 0.8;    // Local Search
 	SMALL_NUMBER = 0.1;
-
-	m_update = false;
+	
+	m_stop = false;
+	m_update = true;
 	m_appearTarget = false;
 	m_experimentTimes = 0;
 	
@@ -34,15 +35,20 @@ Population::Population(size_t size)
 	MAX_EXPERIMENT = 15;
 }
 
-void Population::initialize(double pl, double ls, int populationSize, int individualSize)
+void Population::initialize(double pl, double ls, int populationSize)
 {
 	PL = pl;
 	LS = ls;
 	m_populationSize = populationSize;
-	Coalition::INDIVIDUAL_SIZE = individualSize;
 
 	LOG_PM.open("../log/32^2,pop=32,ind=32_param/log_simpleEvaluate.txt");
 	LOG_ANALYSE.open("../log/32^2,pop=32,ind=32_param/log_analyze.txt");
+
+	m_enemy.initialize(Coalition::INDIVIDUAL_SIZE);                               // 修正BUG：之前 m_enemy 调用重载的默认构造函数，导致vector大小=0
+	m_enemy.setup_file(Tank::ABILITY_DISTANCE, true, "../sample/4_case_20.txt");  // 从文件从读入数据，进行初始化
+	//m_enemy.setup_8(Tank::ABILITY_DISTANCE, true, Coalition()); 
+	//m_enemy.writeLog();
+	//m_enemy.setup_CR(Tank::ABILITY_DISTANCE, true, Coalition());
 
 	// 初始化 m_population
 	m_population.resize(m_populationSize);                  
@@ -52,12 +58,7 @@ void Population::initialize(double pl, double ls, int populationSize, int indivi
 		m_population[i].initialize(Coalition::INDIVIDUAL_SIZE);       // 修正BUG：之前 m_population[i] 调用重载的默认构造函数，导致vector大小=0
 		m_population[i].setup_CR(Tank::ABILITY_DISTANCE, false, m_enemy);
 	}
-
-	m_enemy.initialize(Coalition::INDIVIDUAL_SIZE);                               // 修正BUG：之前 m_enemy 调用重载的默认构造函数，导致vector大小=0
-	m_enemy.setup_file(Tank::ABILITY_DISTANCE, true, "../sample/4_case_20.txt");  // 从文件从读入数据，进行初始化
-	//m_enemy.setup_8(Tank::ABILITY_DISTANCE, true, Coalition()); 
-	//m_enemy.writeLog();
-	//m_enemy.setup_CR(Tank::ABILITY_DISTANCE, true, Coalition());
+	m_bestCoalitionIndex.emplace_back(0);                             // 就是初始化加入一个元素
 
     // 初始化 概率矩阵
 	Global::PROBABILITY_MATRIX.resize(Global::HEIGHT);                     
@@ -68,7 +69,7 @@ void Population::initialize(double pl, double ls, int populationSize, int indivi
 	}
 	updateWeight();   // 初始化的种群 --> 计算其权值
 	updatePMatrix();  // 初始化的种群的权值 --> 生成一个初始化的概率矩阵
-	m_update = false;
+	//m_update = false;
 	updateBestCoalitions();                  // 从初始化的种群中获得最好的种群
 }
 
@@ -272,12 +273,13 @@ int Population::getSize()
 */
 void Population::updateBestCoalitions()
 {
+	int lastBestEvaluation = m_population[m_bestCoalitionIndex[0]].getSimpleEvaluate(); // 依据算法的逻辑，m_bestCoalitionIndex 必须至少有一个元素
 	m_bestCoalitionIndex.clear();
 	int n = getSize();
 	double bestEvaluation = -n;
 	for (int i = 0; i < n; ++i)
 	{
-		if (m_population[i].getSimpleEvaluate() > bestEvaluation)
+		if (m_population[i].getSimpleEvaluate() > bestEvaluation + 0.1)
 		{
 			m_bestCoalitionIndex.clear();
 			bestEvaluation = m_population[i].getSimpleEvaluate();
@@ -288,7 +290,11 @@ void Population::updateBestCoalitions()
 			m_bestCoalitionIndex.emplace_back(i);
 		}
 	}
-
+	int newBestEvaluation = m_population[m_bestCoalitionIndex[0]].getSimpleEvaluate();
+	if (lastBestEvaluation != newBestEvaluation)  // 最佳评估值有提高
+	{
+		cout << "Best @" << m_updateCounter << "  " << newBestEvaluation << '\n';
+	}
 }
 
 void Population::getBestCoalitions(vector<Coalition>& bC)

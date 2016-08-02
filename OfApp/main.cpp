@@ -2,7 +2,6 @@
 #include "ofMain.h"
 #include "ofApp.h"
 #include "../Coalition/Population.h"
-#include "../CriticalSection/Buffer.h"
 using namespace std;
 
 void consumerDraw()
@@ -29,5 +28,13 @@ int main( )
 	producer.join();
 	consumer.join();
 
+	/*Population pop;
+	pop.initialize(0.9, 0.9, 32);
+	while (true)
+	{
+		pop.update();
+	}*/
+
+	system("pause");
 	return 0;
 }

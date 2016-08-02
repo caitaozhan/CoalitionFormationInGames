@@ -10,7 +10,7 @@ class Population
 public:
 	Population();
 	Population(size_t size);
-	void initialize(double pl, double ls, int populationSize, int individualSize);
+	void initialize(double pl, double ls, int populationSize);
 
 	void update();                              // update the population
 	void updatePopluation();                    // 更新种群
@@ -40,7 +40,7 @@ private:
 	int m_populationSize;
 	vector<int> m_bestCoalitionIndex;		    // the index of best coalitions in the population, there could be more than one
 	Coalition m_enemy;                          // enemy
-	bool m_stop;							    // whether stop updating the population
+	bool m_stop;							    // whether population meets terminal condition
 	int  m_updateCounter;
 	
 	bool m_update;
