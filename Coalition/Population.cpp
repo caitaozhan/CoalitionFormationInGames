@@ -30,9 +30,9 @@ void Population::initialize(double pl, double ls, int populationSize)
 	LOG_ANALYSE.open(LOG_ANALYSE_INPUT);
 
 	m_enemy.initialize(Coalition::INDIVIDUAL_SIZE);                  // 修正BUG：之前 m_enemy 调用重载的默认构造函数，导致vector大小=0
-	m_enemy.setup_file(Tank::ABILITY_DISTANCE, true, ENEMY_INPUT);   // 从文件从读入数据，进行初始化
+	//m_enemy.setup_file(Tank::ABILITY_DISTANCE, true, ENEMY_INPUT);   // 从文件从读入数据，进行初始化
 	//m_enemy.setup_8(Tank::ABILITY_DISTANCE, true, Coalition()); 
-	//m_enemy.setup_CR(Tank::ABILITY_DISTANCE, true, Coalition());
+	m_enemy.setup_CR(Tank::ABILITY_DISTANCE, true, Coalition());
 
 	// 初始化 m_population
 	m_population.resize(m_populationSize);                  

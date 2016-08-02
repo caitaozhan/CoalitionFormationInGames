@@ -50,7 +50,10 @@ void ofApp::draw(){
 		BUFFER.cvConsumer.wait(lock, [] {return BUFFER.bestCoalitions.size() != 0; });
 
 		m_coalitionToDraw = BUFFER.bestCoalitions.front();
-		BUFFER.bestCoalitions.pop();
+		if (BUFFER.bestCoalitions.size() > 1)
+		{
+			BUFFER.bestCoalitions.pop();           // 只有缓冲区的元素个数 > 1 的时候，才弹出。当生产者过慢的时候，这样做可以防止消费者卡顿
+		}
 		// cout << BUFFER.bestCoalitions.size() << "\n";  早期，queue很空；后期，很多的联盟都是最优解，一次性往queue加入很多，于是queue很满
 		// notiry(wake up) when BUFFER.bC.size() + newBC.size() <= BUFFER.bufferSize
 		BUFFER.cvProducer.notify_one();

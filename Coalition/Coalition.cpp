@@ -2,7 +2,7 @@
 
 int Coalition::logNumber = 0;
 double Coalition::target = 16.0;
-int Coalition::INDIVIDUAL_SIZE = 32;
+int Coalition::INDIVIDUAL_SIZE = 64;
 
 Coalition::Coalition()
 {
