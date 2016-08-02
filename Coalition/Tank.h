@@ -18,6 +18,7 @@ public:
 	const double   getAbilityDistance()const;
 	const bool     getIsEnemy()const;
 
+	static const int PIXEL_PER_INDEX;
 
 	bool operator!=(const Tank &t)const;
 	bool operator==(const Tank &t)const;
@@ -28,6 +29,8 @@ public:
 	static double yArrayIndx2Coordi(int y);
 	static bool   checkInBoundary(const ofVec2f &arrayIndex); // 检查坦克的位置是否越界
 	static bool   ckeckInBF(const ofVec2f &arrayIndex);
+
+	static double ABILITY_DISTANCE;
 
 private:
 	ofPoint m_position;           // 几何坐标

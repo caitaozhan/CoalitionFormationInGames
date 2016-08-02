@@ -1,7 +1,8 @@
 #include "Coalition.h"
 
 int Coalition::logNumber = 0;
-double Coalition::target = 16.0;
+double Coalition::target = 17.0;
+int Coalition::INDIVIDUAL_SIZE = 32;
 
 Coalition::Coalition()
 {
@@ -62,14 +63,14 @@ void Coalition::setup_8(double abilityDistance, bool isEnemy, const Coalition &e
 	ofVec2f startPoint;                                              
 	if (isEnemy)						// enemy 随机选择一个初始二维坐标
 	{
-		startPoint = ofVec2f((int)ofRandom(0, WIDTH), (int)ofRandom(0, HEIGHT));
+		startPoint = ofVec2f((int)ofRandom(0, Global::WIDTH), (int)ofRandom(0, Global::HEIGHT));
 	}
 	else                                // 我军选地点的时候，不能和 enemy 重合
 	{
-		startPoint = ofVec2f((int)ofRandom(BF_UL.x, BF_LR.x + 1), (int)ofRandom(BF_LR.y, BF_UL.y + 1));// 随机选择一个初始二维坐标 
+		startPoint = ofVec2f((int)ofRandom(Global::BF_UL.x, Global::BF_LR.x + 1), (int)ofRandom(Global::BF_LR.y, Global::BF_UL.y + 1));// 随机选择一个初始二维坐标 
 		while (contain(enemy, startPoint) == true)
 		{
-			startPoint.set((int)ofRandom(BF_UL.x, BF_LR.x + 1), (int)ofRandom(BF_LR.y, BF_UL.y + 1));
+			startPoint.set((int)ofRandom(Global::BF_UL.x, Global::BF_LR.x + 1), (int)ofRandom(Global::BF_LR.y, Global::BF_UL.y + 1));
 		}
 	}
 	vecArrayIndex.push_back(startPoint);  // BUG: 随机找初始点的时候，也要检查是否和敌人区域重合；思维漏洞，检查日志检查了好久才找到
@@ -83,8 +84,8 @@ void Coalition::setup_8(double abilityDistance, bool isEnemy, const Coalition &e
 		for (int j = 0; j < 8; ++j)                                  // 找到八连通区域中所有没有占用的二维坐标 
 		{
 			ofVec2f tempArrayIndex;
-			tempArrayIndex.x = startPoint.x + MOVE_X[j];
-			tempArrayIndex.y = startPoint.y + MOVE_Y[j];
+			tempArrayIndex.x = startPoint.x + Global::MOVE_X[j];
+			tempArrayIndex.y = startPoint.y + Global::MOVE_Y[j];
 			if (Tank::checkInBoundary(tempArrayIndex))
 			{
 				if (isEnemy && contain(vecArrayIndex, tempArrayIndex) == false)
@@ -129,7 +130,7 @@ void Coalition::setup_CR(double abilityDistance, bool isEnemy, const Coalition &
 	
 	while (vecArrayIndex.size() < INDIVIDUAL_SIZE)
 	{
-		temp = ofVec2f((int)ofRandom(BF_UL.x, BF_LR.x + 1), (int)ofRandom(BF_LR.y, BF_UL.y + 1));
+		temp = ofVec2f((int)ofRandom(Global::BF_UL.x, Global::BF_LR.x + 1), (int)ofRandom(Global::BF_LR.y, Global::BF_UL.y + 1));
 
 		if (isEnemy && contain(vecArrayIndex, temp) == false)
 			vecArrayIndex.push_back(temp);
@@ -163,7 +164,9 @@ void Coalition::setup_file(double abilityDistance, bool isEnemy, const string &f
 	}
 	int n;
 	ifile >> n;
-	INDIVIDUAL_SIZE = n;
+	INDIVIDUAL_SIZE = n;              // TODO: 这里的size发生了问题，初始化是32，这里变成了20
+	m_coalition.resize(INDIVIDUAL_SIZE);
+	
 	vector<ofVec2f> vecArrayIndex;
 	ofVec2f temp;
 	while (ifile >> temp)
@@ -331,7 +334,7 @@ void Coalition::resetAtStagnate0(const Coalition & m_enemy, int updateCounter)
 
 bool Coalition::isZero(double d)
 {
-	if (d<EPSILON && d>-EPSILON)
+	if (d<Global::EPSILON && d>-Global::EPSILON)
 		return true;
 
 	return false;
@@ -380,7 +383,7 @@ int Coalition::simpleEvalute(const Coalition & enemy, const Coalition & me)
 		for (int j = 0; j < enemyTanks.size(); ++j)
 		{
 			enemyTank = enemyTanks[j].getArrayIndex();
-			if (ofDist(meTank.x, meTank.y, enemyTank.x, enemyTank.y) <= ABILITY_DISTANCE)
+			if (ofDist(meTank.x, meTank.y, enemyTank.x, enemyTank.y) <= Tank::ABILITY_DISTANCE)
 			{
 				++meSeeEnemy;
 				break;
@@ -395,7 +398,7 @@ int Coalition::simpleEvalute(const Coalition & enemy, const Coalition & me)
 		for (int j = 0; j < meTanks.size(); ++j)
 		{
 			meTank = meTanks[j].getArrayIndex();
-			if (ofDist(enemyTank.x, enemyTank.y, meTank.x, meTank.y) <= ABILITY_DISTANCE)
+			if (ofDist(enemyTank.x, enemyTank.y, meTank.x, meTank.y) <= Tank::ABILITY_DISTANCE)
 			{
 				++enemySeeMe;
 				break;
@@ -449,7 +452,7 @@ string Coalition::toString(string evaluateKind)
 
 void Coalition::update_BF(const vector<ofVec2f> &vecArrayIndex)
 {
-	int lowX = WIDTH, highX = 0, lowY = HEIGHT, highY = 0;
+	int lowX = Global::WIDTH, highX = 0, lowY = Global::HEIGHT, highY = 0;
 	for (int i = 0; i < vecArrayIndex.size(); ++i)           // 寻找战场范围
 	{
 		if (vecArrayIndex[i].x < lowX)
@@ -462,11 +465,11 @@ void Coalition::update_BF(const vector<ofVec2f> &vecArrayIndex)
 		else if (vecArrayIndex[i].y > highY)
 			highY = vecArrayIndex[i].y;						 // 找到最 high 的 Y
 	}
-	BF_UL.x = (lowX - ABILITY_DISTANCE >= 0) ? lowX - ABILITY_DISTANCE : 0;
-	BF_UL.y = (highY + ABILITY_DISTANCE <= HEIGHT - 1) ? highY + ABILITY_DISTANCE : HEIGHT - 1;
-	BF_LR.x = (highX + ABILITY_DISTANCE <= WIDTH - 1) ? highX + ABILITY_DISTANCE : WIDTH - 1;
-	BF_LR.y = (lowY - ABILITY_DISTANCE >= 0) ? lowY - ABILITY_DISTANCE : 0;
-	cout << "Upper Left: " << BF_UL << "     Lower Right: " << BF_LR << endl;
+	Global::BF_UL.x = (lowX - Tank::ABILITY_DISTANCE >= 0) ? lowX - Tank::ABILITY_DISTANCE : 0;
+	Global::BF_UL.y = (highY + Tank::ABILITY_DISTANCE <= Global::HEIGHT - 1) ? highY + Tank::ABILITY_DISTANCE : Global::HEIGHT - 1;
+	Global::BF_LR.x = (highX + Tank::ABILITY_DISTANCE <= Global::WIDTH - 1) ? highX + Tank::ABILITY_DISTANCE : Global::WIDTH - 1;
+	Global::BF_LR.y = (lowY - Tank::ABILITY_DISTANCE >= 0) ? lowY - Tank::ABILITY_DISTANCE : 0;
+	cout << "Upper Left: " << Global::BF_UL << "     Lower Right: " << Global::BF_LR << endl;
 }
 
 /*
@@ -485,8 +488,8 @@ ofVec2f Coalition::localSearch_small(const Coalition & enemy, int i)
 	ofVec2f tempArrayIndex;
 	for (int i = 0; i < 8; ++i)
 	{
-		tempArrayIndex.x = startpoint.x + MOVE_X[i];
-		tempArrayIndex.y = startpoint.y + MOVE_Y[i];
+		tempArrayIndex.x = startpoint.x + Global::MOVE_X[i];
+		tempArrayIndex.y = startpoint.y + Global::MOVE_Y[i];
 		if (Tank::ckeckInBF(tempArrayIndex) && contain(*this, tempArrayIndex) == false
 			&& contain(enemy, tempArrayIndex) == false)
 		{
@@ -513,8 +516,8 @@ ofVec2f Coalition::localSearch_big(const Coalition & enemy)
 	{
 		for (int j = 0; j < 8; ++j)
 		{
-			tempArrayIndex.x = tanks[i].getArrayIndex().x + MOVE_X[j];
-			tempArrayIndex.y = tanks[i].getArrayIndex().y + MOVE_Y[j];
+			tempArrayIndex.x = tanks[i].getArrayIndex().x + Global::MOVE_X[j];
+			tempArrayIndex.y = tanks[i].getArrayIndex().y + Global::MOVE_Y[j];
 			if (Tank::ckeckInBF(tempArrayIndex) && contain(*this, tempArrayIndex) == false
 				&& contain(enemy, tempArrayIndex) == false /*&& contain(newArrayIndex, tempArrayIndex) == false*/)
 			{
@@ -536,13 +539,13 @@ ofVec2f Coalition::localSearch_big_PM(const Coalition & enemy)
 	{
 		for (int j = 0; j < 8; ++j)
 		{
-			tempArrayIndex.x = tanks[i].getArrayIndex().x + MOVE_X[j];
-			tempArrayIndex.y = tanks[i].getArrayIndex().y + MOVE_Y[j];
+			tempArrayIndex.x = tanks[i].getArrayIndex().x + Global::MOVE_X[j];
+			tempArrayIndex.y = tanks[i].getArrayIndex().y + Global::MOVE_Y[j];
 			if (Tank::ckeckInBF(tempArrayIndex) && contain(*this, tempArrayIndex) == false
 				&& contain(enemy, tempArrayIndex) == false /*&& contain(newArrayIndex, tempArrayIndex) == false*/)
 			{
 				newArrayIndex.push_back(tempArrayIndex);                                       // 这两个vector大小一样
-				newProbability.push_back(PROBABILITY_MATRIX[tempArrayIndex.y][tempArrayIndex.x]); // 保存PM的概率
+				newProbability.push_back(Global::PROBABILITY_MATRIX[tempArrayIndex.y][tempArrayIndex.x]); // 保存PM的概率
 			}
 		}
 	}
@@ -566,8 +569,8 @@ ofVec2f Coalition::localSearch_big_PM(const Coalition & enemy)
 */
 ofVec2f Coalition::getPlaceFromPMatrix()
 {
-	int x1 = BF_UL.x, x2 = BF_LR.x;
-	int y1 = BF_LR.y, y2 = BF_UL.y;
+	int x1 = Global::BF_UL.x, x2 = Global::BF_LR.x;
+	int y1 = Global::BF_LR.y, y2 = Global::BF_UL.y;
 	double sumTotal = 0.0;                           // 总和
 	vector<double> sumOfRow(y2 - y1 + 1, 0.0);       // 累积到该行之和
 	for (int y = y1; y <= y2; ++y)
@@ -578,8 +581,8 @@ ofVec2f Coalition::getPlaceFromPMatrix()
 		}
 		for (int x = x1; x <= x2; ++x)
 		{
-			sumTotal += PROBABILITY_MATRIX[y][x];
-			sumOfRow[y - y1] += PROBABILITY_MATRIX[y][x];  // 修正BUG：下标错误
+			sumTotal += Global::PROBABILITY_MATRIX[y][x];
+			sumOfRow[y - y1] += Global::PROBABILITY_MATRIX[y][x];  // 修正BUG：下标错误
 		}
 	}
 	double choose = ofRandom(0, sumTotal);                              // 产生一个随机数
@@ -588,10 +591,10 @@ ofVec2f Coalition::getPlaceFromPMatrix()
 	if (row >= 1)
 		choose -= sumOfRow[row - 1];                                    // 这里思维不够缜密，出现了大BUG；现在要找 choose 在第 row 行的位置
 	vector<double> sumOfChosenRow(x2 - x1 + 1, 0);
-	sumOfChosenRow[0] = PROBABILITY_MATRIX[row + y1][x1];               // 修正BUG：下标错误
+	sumOfChosenRow[0] = Global::PROBABILITY_MATRIX[row + y1][x1];               // 修正BUG：下标错误
 	for (int i = 1; i < sumOfChosenRow.size(); ++i)
 	{
-		sumOfChosenRow[i] = sumOfChosenRow[i - 1] + PROBABILITY_MATRIX[row + y1][x1 + i];  // 修复BUG：下标错误 + 思维不缜密
+		sumOfChosenRow[i] = sumOfChosenRow[i - 1] + Global::PROBABILITY_MATRIX[row + y1][x1 + i];  // 修复BUG：下标错误 + 思维不缜密
 	}
 	int column = lower_bound(sumOfChosenRow.begin(), sumOfChosenRow.end(), choose) - sumOfChosenRow.begin();
 
