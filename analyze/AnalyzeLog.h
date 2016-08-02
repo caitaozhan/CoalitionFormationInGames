@@ -6,6 +6,8 @@
 #include <regex>
 using namespace std;
 
+// 曾经 AnalyzeLog 是一个独立的project
+// 建了filter(筛选器), 独立的project合并到一个大project里面，变成了大project里面的一个模块
 class AnalyzeLog
 {
 public:

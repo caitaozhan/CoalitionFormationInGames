@@ -9,7 +9,6 @@ class Population
 {
 public:
 	Population();
-	Population(size_t size);
 	void initialize(double pl, double ls, int populationSize);
 
 	void update();                              // update the population
@@ -29,7 +28,7 @@ public:
 	bool isZero(double d);                      // TODO: put it in utility module
 
 	void resetMe();
-
+	
 private:
 	vector<Coalition> m_population;			    // a group of coalitions
 	int m_populationSize;
@@ -52,4 +51,8 @@ private:
 	ofstream LOG_PM;           // 概率矩阵的日志
 	ofstream LOG_ANALYSE;	   // 算法分析日志
 
+	string LOG_PM_NAME;
+	string LOG_ANALYSE_INPUT;
+	string LOG_ANALYSE_OUTPUT;
+	string ENEMY_INPUT;
 };

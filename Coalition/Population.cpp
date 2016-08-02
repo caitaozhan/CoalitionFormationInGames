@@ -1,36 +1,21 @@
 #include "Population.h"
 
-
 Population::Population()
 {
 	PL = 0.9;    // Probability Learning
 	LS = 0.9;    // Local Search
-	SMALL_NUMBER = 0.1;
+	
+	ENEMY_INPUT = string("../sample/4_case_20.txt");                                 // enemy阵型的初始化编队
+	LOG_PM_NAME = string("../log/32^2,pop=32,ind=32_param/log_simpleEvaluate.txt");  // 概率矩阵日志
+	LOG_ANALYSE_INPUT = string("../log/32^2,pop=32,ind=32_param/log_analyze.txt");   // 程序运行日志，记录每一次实验的评估值
+	LOG_ANALYSE_OUTPUT = string("../log/32^2,pop=32,ind=32_param/8-2_0.9_0.9-.txt"); // 分析程序运行的运行记录
 
+	SMALL_NUMBER = 0.1;
 	m_update = true;
 	m_appearTarget = false;
 	m_experimentTimes = 0;
 	m_updateCounter = 0;
 	m_stop = false;
-	MAX_UPDATE = 500;
-	MAX_EXPERIMENT = 15;
-}
-
-Population::Population(size_t size)
-{
-	m_population.reserve(size);
-	m_bestCoalitionIndex.reserve(size);
-	m_updateCounter = 0;
-
-	PL = 0.9;    // Probability Learning
-	LS = 0.8;    // Local Search
-	SMALL_NUMBER = 0.1;
-	
-	m_stop = false;
-	m_update = true;
-	m_appearTarget = false;
-	m_experimentTimes = 0;
-	
 	MAX_UPDATE = 500;
 	MAX_EXPERIMENT = 15;
 }
@@ -41,13 +26,12 @@ void Population::initialize(double pl, double ls, int populationSize)
 	LS = ls;
 	m_populationSize = populationSize;
 
-	LOG_PM.open("../log/32^2,pop=32,ind=32_param/log_simpleEvaluate.txt");
-	LOG_ANALYSE.open("../log/32^2,pop=32,ind=32_param/log_analyze.txt");
+	LOG_PM.open(LOG_PM_NAME);
+	LOG_ANALYSE.open(LOG_ANALYSE_INPUT);
 
-	m_enemy.initialize(Coalition::INDIVIDUAL_SIZE);                               // 修正BUG：之前 m_enemy 调用重载的默认构造函数，导致vector大小=0
-	m_enemy.setup_file(Tank::ABILITY_DISTANCE, true, "../sample/4_case_20.txt");  // 从文件从读入数据，进行初始化
+	m_enemy.initialize(Coalition::INDIVIDUAL_SIZE);                  // 修正BUG：之前 m_enemy 调用重载的默认构造函数，导致vector大小=0
+	m_enemy.setup_file(Tank::ABILITY_DISTANCE, true, ENEMY_INPUT);   // 从文件从读入数据，进行初始化
 	//m_enemy.setup_8(Tank::ABILITY_DISTANCE, true, Coalition()); 
-	//m_enemy.writeLog();
 	//m_enemy.setup_CR(Tank::ABILITY_DISTANCE, true, Coalition());
 
 	// 初始化 m_population
@@ -67,10 +51,9 @@ void Population::initialize(double pl, double ls, int populationSize)
 	{
 		vec_double = tmpVector;
 	}
-	updateWeight();   // 初始化的种群 --> 计算其权值
-	updatePMatrix();  // 初始化的种群的权值 --> 生成一个初始化的概率矩阵
-	//m_update = false;
-	updateBestCoalitions();                  // 从初始化的种群中获得最好的种群
+	updateWeight();                 // 初始化的种群 --> 计算其权值
+	updatePMatrix();                // 初始化的种群的权值 --> 生成一个初始化的概率矩阵
+	updateBestCoalitions();         // 从初始化的种群中获得最好的种群
 }
 
 void Population::update()
@@ -87,10 +70,10 @@ void Population::update()
 				LOG_ANALYSE << "target not found @" << m_updateCounter << '\n';
 			}
 			m_experimentTimes++;                    // 做完了一次实验
+			m_updateCounter = 0;                    // 为下一次实验做准备
 			cout << m_experimentTimes << "次实验\n------\n";
 			writeLogAnalyse(m_updateCounter);
 			resetMe();
-			m_updateCounter = 0;                    // 为下一次实验做准备
 			m_appearTarget = false;
 		}
 
@@ -98,8 +81,8 @@ void Population::update()
 		{
 			cout << "end of experiment!" << endl;
 			LOG_ANALYSE.close();                  // 先关闭，再由另外一个类打开“临界文件”
-			AnalyzeLog analyzeLog;                // 曾经 AnalyzeLog 是一个独立的project
-			analyzeLog.analyze();                 // 新建了一个filter(筛选器),合并到此项目了
+			AnalyzeLog analyzeLog(LOG_ANALYSE_INPUT, LOG_ANALYSE_OUTPUT);
+			analyzeLog.analyze();
 
 			m_update = 0;
 		}
@@ -109,7 +92,7 @@ void Population::update()
 		updatePopluation();          //  新的全局概率矩阵 --> 更新种群位置
 		updateWeight();              //  新的种群位置     --> 更新种群的权值
 		updatePMatrix();             //  新的种群权值     --> 更新全局的概率矩阵
-		updateBestCoalitions();      //  更新最好的Coalition
+		updateBestCoalitions();      //  更新最好的Coalitions
 		writeLogMatrix(m_updateCounter);
 	}
 
@@ -291,9 +274,14 @@ void Population::updateBestCoalitions()
 		}
 	}
 	int newBestEvaluation = m_population[m_bestCoalitionIndex[0]].getSimpleEvaluate();
-	if (lastBestEvaluation != newBestEvaluation)  // 最佳评估值有提高
+	if (newBestEvaluation > lastBestEvaluation)  // 最佳评估值有提高
 	{
 		cout << "Best @" << m_updateCounter << "  " << newBestEvaluation << '\n';
+		if (m_appearTarget == false && isZero(newBestEvaluation - Coalition::target))
+		{
+			LOG_ANALYSE << "Best @" << m_updateCounter << "  " << Coalition::target << '\n';
+			m_appearTarget = true;
+		}
 	}
 }
 
