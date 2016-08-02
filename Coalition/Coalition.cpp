@@ -1,7 +1,7 @@
 #include "Coalition.h"
 
 int Coalition::logNumber = 0;
-double Coalition::target = 17.0;
+double Coalition::target = 16.0;
 int Coalition::INDIVIDUAL_SIZE = 32;
 
 Coalition::Coalition()

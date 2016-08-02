@@ -51,7 +51,7 @@ void ofApp::draw(){
 
 		m_coalitionToDraw = BUFFER.bestCoalitions.front();
 		BUFFER.bestCoalitions.pop();
-
+		// cout << BUFFER.bestCoalitions.size() << "\n";  早期，queue很空；后期，很多的联盟都是最优解，一次性往queue加入很多，于是queue很满
 		// notiry(wake up) when BUFFER.bC.size() + newBC.size() <= BUFFER.bufferSize
 		BUFFER.cvProducer.notify_one();
 	}
