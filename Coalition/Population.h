@@ -30,11 +30,6 @@ public:
 
 	void resetMe();
 
-	//used to be global variables//
-	
-	ofstream LOG_PM;           // 概率矩阵的日志
-	ofstream LOG_ANALYSE;	   // 算法分析日志
-	//        ...              //
 private:
 	vector<Coalition> m_population;			    // a group of coalitions
 	int m_populationSize;
@@ -53,4 +48,8 @@ private:
 
 	int MAX_UPDATE;
 	int MAX_EXPERIMENT;
+	
+	ofstream LOG_PM;           // 概率矩阵的日志
+	ofstream LOG_ANALYSE;	   // 算法分析日志
+
 };
