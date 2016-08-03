@@ -1,5 +1,7 @@
 #include "Population.h"
 
+uniform_real_distribution<double> Population::urd_0_1 = uniform_real_distribution<double>(0.0, 1.0);
+
 Population::Population()
 {
 	PL = 0.9;    // Probability Learning
@@ -8,7 +10,7 @@ Population::Population()
 	ENEMY_INPUT = string("../sample/4_case_20.txt");                                 // enemy阵型的初始化编队
 	LOG_PM_NAME = string("../log/32^2,pop=32,ind=32_param/log_simpleEvaluate.txt");  // 概率矩阵日志
 	LOG_ANALYSE_INPUT = string("../log/32^2,pop=32,ind=32_param/log_analyze.txt");   // 程序运行日志，记录每一次实验的评估值
-	LOG_ANALYSE_OUTPUT = string("../log/32^2,pop=32,ind=32_param/8-2_0.9_0.9.txt"); // 分析程序运行的运行记录
+	LOG_ANALYSE_OUTPUT = string("../log/32^2,pop=32,ind=32_param/8-2_0.9_0.9.txt");  // 分析程序运行的运行记录
 	MAX_UPDATE = 500;
 	MAX_EXPERIMENT = 15;
 
@@ -107,9 +109,9 @@ void Population::updatePopluation()
 		for (int i = 0; i < backupC.getSize(); ++i)
 		{
 			bool localSearch = false;
-			if (ofRandom(0, 1) < PL)      // todo: 这里还有一个&&
+			if (urd_0_1(Global::dre) < PL)      // todo: 这里还有一个&&
 			{
-				if (ofRandom(0, 1) < LS)
+				if (urd_0_1(Global::dre) < LS)
 				{// 不做变化，直接复制过去
 					constructC.pushBackTank(backupC.getCoalition(i));
 				}
@@ -148,7 +150,7 @@ void Population::updatePopluation()
 			}
 			else if (evaluateBackupC == evaluateC && localSearch == true)  // 相等，但是如果是 local search
 			{
-				if (ofRandom(0, 2) < 1.0)                                 // 给 50% 概率更新
+				if (urd_0_1(Global::dre) < 0.5)                            // 给 50% 概率更新
 				{
 					c = backupC;
 				}

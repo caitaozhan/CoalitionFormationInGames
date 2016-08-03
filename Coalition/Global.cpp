@@ -11,6 +11,6 @@ const int Global::MOVE_Y[8] = { 1, 1, 0, -1, -1, -1, 0, 1 };
 ofVec2f Global::BF_UL = ofVec2f(0, Global::HEIGHT - 1);
 ofVec2f Global::BF_LR = ofVec2f(Global::WIDTH - 1, 0);
 
-
 vector<vector<double>> Global::PROBABILITY_MATRIX = vector<vector<double>>();
 
+default_random_engine Global::dre(chrono::system_clock::now().time_since_epoch().count());
