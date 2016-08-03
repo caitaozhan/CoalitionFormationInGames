@@ -27,7 +27,7 @@ BufferResponse::BufferResponse(bool resetMe, bool resetEnemy, bool update)
 
 void producerCalculating(Population && population)
 {
-	population.initialize(0.9, 0.9, 64);         // 初始化参数
+	population.initialize(0.9, 0.9, 32);         // 初始化参数
 	{
 		unique_lock<mutex> lock(BUFFER_R.mtx);
 		population.getEnemy(BUFFER_R.enemy);     // 初始化BUFFER_R.enemy
@@ -39,25 +39,31 @@ void producerCalculating(Population && population)
 	vector<Coalition> newBestCoalitions;
 	while (population.getStop() == false)        // when termination conditions are not satisfied
 	{
-		{
+		{// critical section
 			unique_lock<mutex> lock(BUFFER_R.mtx);
-			if (BUFFER_R.resetEnemy == true)
-			{
-				population.resetEnemy(string("8"));
-				population.getEnemy(BUFFER_R.enemy);             // 更新 BUFFER.enemy
-			    // m_enemy.writeLog();
-				BUFFER_R.resetEnemy = false;
-			}
-			if (BUFFER_R.resetMe == true)
-			{
-				population.resetMe();
-				BUFFER_R.resetMe = false;
-			}
-			if (BUFFER_R.update == false)
-			{
-				this_thread::sleep_for(chrono::seconds(3));
-				BUFFER_R.update = true;
-			}
+			population.setResetEnemy(BUFFER_R.resetEnemy);   // 从 BUFFER_R 获取界面的响应信号
+			population.setResetMe(BUFFER_R.resetMe);
+			population.setUpdate(BUFFER_R.update);
+		}
+
+		if (population.getResetEnemy() == true)
+		{
+			population.resetEnemy(string("8"));
+			population.resetMe();
+			unique_lock<mutex> lock(BUFFER_R.mtx);
+			population.getEnemy(BUFFER_R.enemy);             // 更新 BUFFER.enemy   // m_enemy.writeLog();
+			BUFFER_R.resetEnemy = false;
+		}
+		if (population.getResetMe() == true)
+		{
+			population.resetMe();
+			unique_lock<mutex> lock(BUFFER_R.mtx);
+			BUFFER_R.resetMe = false;
+		}
+		if(population.getUpdate() == false)
+		{
+			this_thread::sleep_for(chrono::milliseconds(200));
+			continue;
 		}
 
 		population.update();                     // this line of code should be time-costy

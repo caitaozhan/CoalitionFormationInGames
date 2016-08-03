@@ -21,6 +21,13 @@ public:
 	void writeLogMatrix(int updateCounter);     // 打印矩阵到log
 	int  writeLogAnalyse(int updateCounter);    // 打印算法的分析
 
+	void setResetMe(const bool &resetMe);
+	void setResetEnemy(const bool &resetEnemy);
+	void setUpdate(const bool &update);
+
+	bool getResetMe();                          // get 是否重置Me
+	bool getResetEnemy();                       // get 是否重置Enemy
+	bool getUpdate();                           // get 是否继续update population
 	bool getStop();                             // get m_stop
 	int  getSize();                             // get the size of m_populations
 	void getBestCoalitions(vector<Coalition> & bC);
@@ -37,7 +44,6 @@ private:
 	bool m_stop;							    // whether population meets terminal condition
 	int  m_updateCounter;
 	
-	bool m_update;
 	bool m_appearTarget;
 	int  m_experimentTimes;
 
@@ -51,8 +57,12 @@ private:
 	ofstream LOG_PM;           // 概率矩阵的日志
 	ofstream LOG_ANALYSE;	   // 算法分析日志
 
-	string LOG_PM_NAME;
+	string LOG_PM_NAME;        // 这是个都是日志的文件名
 	string LOG_ANALYSE_INPUT;
 	string LOG_ANALYSE_OUTPUT;
 	string ENEMY_INPUT;
+
+	bool m_resetMe;            // 是否重置我方坦克阵型
+	bool m_resetEnemy;         // 是否重置地方坦克阵型
+	bool m_update;             // population是否继续更新
 };

@@ -8,7 +8,9 @@ Population::Population()
 	ENEMY_INPUT = string("../sample/4_case_20.txt");                                 // enemy阵型的初始化编队
 	LOG_PM_NAME = string("../log/32^2,pop=32,ind=32_param/log_simpleEvaluate.txt");  // 概率矩阵日志
 	LOG_ANALYSE_INPUT = string("../log/32^2,pop=32,ind=32_param/log_analyze.txt");   // 程序运行日志，记录每一次实验的评估值
-	LOG_ANALYSE_OUTPUT = string("../log/32^2,pop=32,ind=32_param/8-2_0.9_0.9-.txt"); // 分析程序运行的运行记录
+	LOG_ANALYSE_OUTPUT = string("../log/32^2,pop=32,ind=32_param/8-2_0.9_0.9.txt"); // 分析程序运行的运行记录
+	MAX_UPDATE = 500;
+	MAX_EXPERIMENT = 15;
 
 	SMALL_NUMBER = 0.1;
 	m_update = true;
@@ -16,8 +18,6 @@ Population::Population()
 	m_experimentTimes = 0;
 	m_updateCounter = 0;
 	m_stop = false;
-	MAX_UPDATE = 500;
-	MAX_EXPERIMENT = 15;
 }
 
 void Population::initialize(double pl, double ls, int populationSize)
@@ -30,9 +30,9 @@ void Population::initialize(double pl, double ls, int populationSize)
 	LOG_ANALYSE.open(LOG_ANALYSE_INPUT);
 
 	m_enemy.initialize(Coalition::INDIVIDUAL_SIZE);                  // 修正BUG：之前 m_enemy 调用重载的默认构造函数，导致vector大小=0
-	//m_enemy.setup_file(Tank::ABILITY_DISTANCE, true, ENEMY_INPUT);   // 从文件从读入数据，进行初始化
+	m_enemy.setup_file(Tank::ABILITY_DISTANCE, true, ENEMY_INPUT);   // 从文件从读入数据，进行初始化
 	//m_enemy.setup_8(Tank::ABILITY_DISTANCE, true, Coalition()); 
-	m_enemy.setup_CR(Tank::ABILITY_DISTANCE, true, Coalition());
+	//m_enemy.setup_CR(Tank::ABILITY_DISTANCE, true, Coalition());
 
 	// 初始化 m_population
 	m_population.resize(m_populationSize);                  
@@ -239,6 +239,36 @@ int Population::writeLogAnalyse(int updateCounter)
 	avg = sum / m_population.size();
 	LOG_ANALYSE << updateCounter << ": " << avg << "\n\n";
 	return avg;
+}
+
+void Population::setResetMe(const bool & resetMe)
+{
+	m_resetMe = resetMe;
+}
+
+void Population::setResetEnemy(const bool & resetEnemy)
+{
+	m_resetEnemy = resetEnemy;
+}
+
+void Population::setUpdate(const bool & update)
+{
+	m_update = update;
+}
+
+bool Population::getResetMe()
+{
+	return m_resetMe;
+}
+
+bool Population::getResetEnemy()
+{
+	return m_resetEnemy;
+}
+
+bool Population::getUpdate()
+{
+	return m_update;
 }
 
 bool Population::getStop()
