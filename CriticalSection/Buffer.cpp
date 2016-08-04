@@ -46,6 +46,11 @@ void producerCalculating(Population && population)
 			population.setUpdate(BUFFER_R.update);
 		}
 
+		if(population.getUpdate() == false)
+		{
+			this_thread::sleep_for(chrono::milliseconds(200));
+			continue;
+		}
 		if (population.getResetEnemy() == true)
 		{
 			population.resetEnemy(string("8"));
@@ -59,11 +64,6 @@ void producerCalculating(Population && population)
 			population.resetMe();
 			unique_lock<mutex> lock(BUFFER_R.mtx);
 			BUFFER_R.resetMe = false;
-		}
-		if(population.getUpdate() == false)
-		{
-			this_thread::sleep_for(chrono::milliseconds(200));
-			continue;
 		}
 
 		population.update();                     // this line of code should be time-costy

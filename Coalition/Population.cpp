@@ -45,7 +45,7 @@ void Population::initialize(double pl, double ls, int populationSize)
 		m_population[i].setup_CR(Tank::ABILITY_DISTANCE, false, m_enemy);
 	}
 	m_bestCoalitionIndex.emplace_back(0);                             // 就是初始化加入一个元素
-
+	m_bestEvaluation = -Coalition::INDIVIDUAL_SIZE;                   // 2016/8/4日，引入此成员变量，为了修复BUG，在multi-thread版本的updateBestCoalitions中出现的BUG
     // 初始化 概率矩阵
 	Global::PROBABILITY_MATRIX.resize(Global::HEIGHT);                     
 	vector<double> tmpVector(Global::WIDTH, 0.0);
@@ -73,20 +73,23 @@ void Population::update()
 			}
 			m_experimentTimes++;                    // 做完了一次实验
 			m_updateCounter = 0;                    // 为下一次实验做准备
+			m_bestEvaluation = -Coalition::INDIVIDUAL_SIZE;
 			cout << m_experimentTimes << "次实验\n------\n";
 			writeLogAnalyse(m_updateCounter);
 			resetMe();
 			m_appearTarget = false;
+			Global::dre.seed(m_experimentTimes);    // 给随机引擎设置种子，从 0 ~ MAX_EXPERIMENT-1
 		}
 
 		if (m_experimentTimes == MAX_EXPERIMENT)  // 准备做 MAX_EXPERIMENT 次实验
 		{
-			cout << "end of experiment!" << endl;
+			cout << "End of " << MAX_EXPERIMENT << " times of experiments!" << endl;
 			LOG_ANALYSE.close();                  // 先关闭，再由另外一个类打开“临界文件”
 			AnalyzeLog analyzeLog(LOG_ANALYSE_INPUT, LOG_ANALYSE_OUTPUT);
 			analyzeLog.analyze();
-
+			m_experimentTimes = 0;
 			m_update = 0;
+			cout << "\n\nLet's start over again~" << endl;
 		}
 
 		//if (++m_updateCounter % 10 == 0)  //  每隔更新10代分析平均 Evalation
@@ -197,6 +200,7 @@ void Population::resetEnemy(string & way)
 	if (way == string("8"))
 	{
 		m_enemy.setup_8(Tank::ABILITY_DISTANCE, true, Coalition()); 
+
 	}
 	else if (way == string("CR"))
 	{
@@ -288,13 +292,12 @@ int Population::getSize()
 */
 void Population::updateBestCoalitions()
 {
-	int lastBestEvaluation = m_population[m_bestCoalitionIndex[0]].getSimpleEvaluate(); // 依据算法的逻辑，m_bestCoalitionIndex 必须至少有一个元素
 	m_bestCoalitionIndex.clear();
 	int n = getSize();
 	double bestEvaluation = -n;
 	for (int i = 0; i < n; ++i)
 	{
-		if (m_population[i].getSimpleEvaluate() > bestEvaluation + 0.1)
+		if (m_population[i].getSimpleEvaluate() > bestEvaluation + Global::EPSILON)
 		{
 			m_bestCoalitionIndex.clear();
 			bestEvaluation = m_population[i].getSimpleEvaluate();
@@ -305,11 +308,12 @@ void Population::updateBestCoalitions()
 			m_bestCoalitionIndex.emplace_back(i);
 		}
 	}
-	int newBestEvaluation = m_population[m_bestCoalitionIndex[0]].getSimpleEvaluate();
-	if (newBestEvaluation > lastBestEvaluation)  // 最佳评估值有提高
+	int newBestEvaluation = m_population[m_bestCoalitionIndex[0]].getSimpleEvaluate() + Global::EPSILON;
+	if (newBestEvaluation > m_bestEvaluation)  // 最佳评估值有提高
 	{
-		cout << "Best @" << m_updateCounter << "  " << newBestEvaluation << '\n';
-		if (m_appearTarget == false && isZero(newBestEvaluation - Coalition::target))
+		m_bestEvaluation = newBestEvaluation;
+		cout << "Best @" << m_updateCounter << "  " << m_bestEvaluation << '\n';
+		if (m_appearTarget == false && isZero(m_bestEvaluation - Coalition::target))
 		{
 			LOG_ANALYSE << "Best @" << m_updateCounter << "  " << Coalition::target << '\n';
 			m_appearTarget = true;
