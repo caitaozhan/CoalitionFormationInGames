@@ -64,6 +64,8 @@ public:
 
 	static int INDIVIDUAL_SIZE;  // 每一个Coalition的大小
 
+	static uniform_real_distribution<double> urd_0_1;
+
 private:
 	vector<Tank> m_coalition;
 	ofColor  m_color;

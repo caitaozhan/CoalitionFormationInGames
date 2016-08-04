@@ -36,10 +36,13 @@ public:
 
 	void resetMe();
 	
+	static uniform_real_distribution<double> urd_0_1;
+
 private:
 	vector<Coalition> m_population;			    // a group of coalitions
 	int m_populationSize;
 	vector<int> m_bestCoalitionIndex;		    // the index of best coalitions in the population, there could be more than one
+	int m_bestEvaluation;
 	Coalition m_enemy;                          // enemy
 	bool m_stop;							    // whether population meets terminal condition
 	int  m_updateCounter;
@@ -65,4 +68,5 @@ private:
 	bool m_resetMe;            // 是否重置我方坦克阵型
 	bool m_resetEnemy;         // 是否重置地方坦克阵型
 	bool m_update;             // population是否继续更新
+
 };

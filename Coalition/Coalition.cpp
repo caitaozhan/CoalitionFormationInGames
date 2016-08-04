@@ -3,6 +3,7 @@
 int Coalition::logNumber = 0;
 double Coalition::target = 16.0;
 int Coalition::INDIVIDUAL_SIZE = 20;
+uniform_real_distribution<double> Coalition::urd_0_1 = uniform_real_distribution<double>(0.0, 1.0);
 
 Coalition::Coalition()
 {
@@ -63,11 +64,11 @@ void Coalition::setup_8(double abilityDistance, bool isEnemy, const Coalition &e
 	ofVec2f startPoint;                                              
 	if (isEnemy)						// enemy 随机选择一个初始二维坐标
 	{
-		startPoint = ofVec2f((int)ofRandom(0, Global::WIDTH), (int)ofRandom(0, Global::HEIGHT));
+		startPoint = ofVec2f(int(urd_0_1(Global::dre)*Global::WIDTH), int(urd_0_1(Global::dre)*Global::HEIGHT));
 	}
 	else                                // 我军选地点的时候，不能和 enemy 重合
 	{
-		startPoint = ofVec2f((int)ofRandom(Global::BF_UL.x, Global::BF_LR.x + 1), (int)ofRandom(Global::BF_LR.y, Global::BF_UL.y + 1));// 随机选择一个初始二维坐标 
+		startPoint = ofVec2f(int(ofRandom(Global::BF_UL.x, Global::BF_LR.x + 1)), (int)ofRandom(Global::BF_LR.y, Global::BF_UL.y + 1));// 随机选择一个初始二维坐标 
 		while (contain(enemy, startPoint) == true)
 		{
 			startPoint.set((int)ofRandom(Global::BF_UL.x, Global::BF_LR.x + 1), (int)ofRandom(Global::BF_LR.y, Global::BF_UL.y + 1));
@@ -77,7 +78,7 @@ void Coalition::setup_8(double abilityDistance, bool isEnemy, const Coalition &e
 
 	while (vecArrayIndex.size() < INDIVIDUAL_SIZE)
 	{
-		int i = (int)ofRandom(0, vecArrayIndex.size());              // 在已有的二维坐标中随机选一个
+		int i = int(urd_0_1(Global::dre)*vecArrayIndex.size());      // 在已有的二维坐标中随机选一个
 		ofVec2f startPoint = vecArrayIndex[i];
 		vector<ofVec2f> newArrayIndex;
 
@@ -102,7 +103,7 @@ void Coalition::setup_8(double abilityDistance, bool isEnemy, const Coalition &e
 		
 		if (newArrayIndex.size() != 0)
 		{
-			int choose = (int)ofRandom(0, newArrayIndex.size());
+			int choose = int(urd_0_1(Global::dre)*newArrayIndex.size());
 			vecArrayIndex.push_back(newArrayIndex[choose]);
 		}
 	}
@@ -192,7 +193,6 @@ void Coalition::setColor(bool isEnemy)
 		m_color.set(ofColor::red);
 	else
 		m_color.set(ofColor::black);
-		//m_color.set(ofRandom(0, 128), ofRandom(32, 255), ofRandom(32, 255));
 }
 
 void Coalition::setAbilityDistance(double abilityDistance)
@@ -497,7 +497,7 @@ ofVec2f Coalition::localSearch_small(const Coalition & enemy, int i)
 		}
 	}
 
-	int choose = (int)ofRandom(0, newArrayIndex.size());
+	int choose = int(urd_0_1(Global::dre)*newArrayIndex.size());
 	return newArrayIndex[choose];
 }
  
@@ -525,7 +525,7 @@ ofVec2f Coalition::localSearch_big(const Coalition & enemy)
 			}
 		}
 	}
-	int choose = (int)ofRandom(0, newArrayIndex.size());
+	int choose = int(urd_0_1(Global::dre)*newArrayIndex.size());
 	return newArrayIndex[choose];
 }
 
@@ -554,7 +554,7 @@ ofVec2f Coalition::localSearch_big_PM(const Coalition & enemy)
 	{
 		newProbability[i] += newProbability[i - 1];
 	}
-	double random = ofRandom(0, newProbability[size - 1]);
+	double random = urd_0_1(Global::dre)*newProbability[size - 1];
 	int choose = lower_bound(newProbability.begin(), newProbability.end(), random) - newProbability.begin();
 	return newArrayIndex[choose];
 }
@@ -585,7 +585,7 @@ ofVec2f Coalition::getPlaceFromPMatrix()
 			sumOfRow[y - y1] += Global::PROBABILITY_MATRIX[y][x];  // 修正BUG：下标错误
 		}
 	}
-	double choose = ofRandom(0, sumTotal);                              // 产生一个随机数
+	double choose = urd_0_1(Global::dre)*sumTotal;                              // 产生一个随机数
 	// 先找到行，后找到列
 	int row = lower_bound(sumOfRow.begin(), sumOfRow.end(), choose) - sumOfRow.begin();  // 行 --> y
 	if (row >= 1)

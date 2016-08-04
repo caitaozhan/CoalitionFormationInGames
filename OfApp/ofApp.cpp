@@ -48,8 +48,10 @@ void ofApp::draw(){
 		unique_lock<mutex> lock(BUFFER.mtx);
 		// block(wait) when BUFFER.bC.size() == 0
 		BUFFER.cvConsumer.wait(lock, [] {return BUFFER.bestCoalitions.size() != 0; });
-
-		m_coalitionToDraw = BUFFER.bestCoalitions.front();
+		if (BUFFER.bestCoalitions.size() > 0)
+		{
+			m_coalitionToDraw = BUFFER.bestCoalitions.front();
+		}
 		if (BUFFER.bestCoalitions.size() > 1)
 		{
 			BUFFER.bestCoalitions.pop();           // 只有缓冲区的元素个数 > 1 的时候，才弹出。当生产者过慢的时候，这样做可以防止消费者卡顿
