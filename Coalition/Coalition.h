@@ -55,7 +55,7 @@ public:
 	ofVec2f localSearch_big(const Coalition &enemy);           // backupC 是调用者
 	ofVec2f localSearch_big_PM(const Coalition &enemy, const vector<vector<double>> &PROBABILITY_MATRIX);  // backupC 是调用者,加入概率矩阵
 
-	static ofVec2f getPlaceFromPMatrix(const vector<vector<double>> &PROBABILITY_MATRIX);  // TODO: 把静态去掉
+	ofVec2f getPlaceFromPMatrix(const vector<vector<double>> &PROBABILITY_MATRIX);
 	
 	void writeLog();
 
@@ -64,10 +64,10 @@ public:
 
 	static int INDIVIDUAL_SIZE;  // 每一个Coalition的大小
 
-	thread_local static uniform_real_distribution<double> urd_0_1;  // TODO：把静态去掉
-	thread_local static uniform_int_distribution<int> uid_x;
-	thread_local static uniform_int_distribution<int> uid_y;
-
+	static uniform_real_distribution<double> urd_0_1; 
+	static uniform_int_distribution<int> uid_x;
+	static uniform_int_distribution<int> uid_y;
+	
 private:
 	vector<Tank> m_coalition;
 	ofColor  m_color;

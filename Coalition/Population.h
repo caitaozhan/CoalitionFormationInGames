@@ -69,5 +69,5 @@ private:
 	bool m_resetEnemy;         // 是否重置地方坦克阵型
 	bool m_update;             // population是否继续更新
 
-	uniform_real_distribution<double> urd_0_1;  //TODO:可以把这个thread_local static去掉
+	uniform_real_distribution<double> urd_0_1;
 };
