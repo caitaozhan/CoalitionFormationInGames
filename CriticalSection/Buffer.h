@@ -63,7 +63,7 @@ extern BufferResponse BUFFER_R;
 
 extern void producerCalculating(Population && population);
 
-extern const int HEIGHT;
-extern const int WIDTH;
-extern const double EPSILON;
+//extern const int HEIGHT;
+//extern const int WIDTH;
+//extern const double EPSILON;
 

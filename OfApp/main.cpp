@@ -4,36 +4,54 @@
 #include "../Coalition/Population.h"
 using namespace std;
 
-void consumerDraw()
+/*
+	@param experiments, store a vector of experiment IDs
+	Todo: 需要更改Population的更新逻辑
+*/
+void doExperiments(const vector<int> &experiments)
 {
-	ofSetupOpenGL(1024, 768, OF_WINDOW);    // <-------- setup the GL context
-	ofRunApp(new ofApp());
-}
-
-void producerCalculate()
-{
-	while (true)
+	Population population;
+	population.initialize(0.9, 0.9, 32);
+	for (int i = 0; i < experiments.size(); ++i)
 	{
-		producerCalculating(Population());
+		population.run(experiments[i]);
 	}
 }
-
 
 //========================================================================
 int main( )
 {
-	thread producer(producerCalculate);
-	thread consumer(consumerDraw);
+	int numThread = thread::hardware_concurrency();
+	numThread = (numThread == 0 ? 2 : numThread);   // hardware_concurrency() 有可能返回 0
+	//numThread = 1;
 
-	producer.join();
-	consumer.join();
-
-	/*Population pop;
-	pop.initialize(0.9, 0.9, 32);
-	while (true)
+	// 把若干次实验，分为numThread个组，这些组同时进行实验。
+	vector<vector<int>> groups(numThread);       
+	int totalExperiments = 12;
+	int num = totalExperiments / numThread;
+	int i;
+	for (i = 0; i < totalExperiments; ++i)
 	{
-		pop.update();
-	}*/
+		int k = i / num;
+		if (k == numThread)
+			break;
+		groups[k].emplace_back(i);
+	}
+	for (int j = 0; i < totalExperiments; ++i, ++j)
+	{
+		groups[j].emplace_back(i);
+	}
+	
+	// 分组完毕之后，开启多线程同时进行实验，一个线程对应一个组。
+	vector<thread> threads(numThread);
+	for (i = 0; i < numThread; ++i)
+	{
+		threads[i] = thread(doExperiments, ref(groups[i]));
+	}
+	for (auto &t : threads)
+	{
+		t.join();
+	}
 
 	system("pause");
 	return 0;

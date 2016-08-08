@@ -1,7 +1,5 @@
 #include "Population.h"
 
-uniform_real_distribution<double> Population::urd_0_1 = uniform_real_distribution<double>(0.0, 1.0);
-
 Population::Population()
 {
 	PL = 0.9;    // Probability Learning
@@ -20,6 +18,8 @@ Population::Population()
 	m_experimentTimes = 0;
 	m_updateCounter = 0;
 	m_stop = false;
+	
+	urd_0_1 = uniform_real_distribution<double>(0.0, 1.0);
 }
 
 void Population::initialize(double pl, double ls, int populationSize)
@@ -47,9 +47,9 @@ void Population::initialize(double pl, double ls, int populationSize)
 	m_bestCoalitionIndex.emplace_back(0);                             // 就是初始化加入一个元素
 	m_bestEvaluation = -Coalition::INDIVIDUAL_SIZE;                   // 2016/8/4日，引入此成员变量，为了修复BUG，在multi-thread版本的updateBestCoalitions中出现的BUG
     // 初始化 概率矩阵
-	Global::PROBABILITY_MATRIX.resize(Global::HEIGHT);                     
+	PROBABILITY_MATRIX.resize(Global::HEIGHT);                     
 	vector<double> tmpVector(Global::WIDTH, 0.0);
-	for (auto & vec_double : Global::PROBABILITY_MATRIX)
+	for (auto & vec_double : PROBABILITY_MATRIX)
 	{
 		vec_double = tmpVector;
 	}
@@ -73,11 +73,11 @@ void Population::update()
 			}
 			m_experimentTimes++;                    // 做完了一次实验
 			m_updateCounter = 0;                    // 为下一次实验做准备
+			m_appearTarget = false;
 			m_bestEvaluation = -Coalition::INDIVIDUAL_SIZE;
 			cout << m_experimentTimes << "次实验\n------\n";
 			writeLogAnalyse(m_updateCounter);
 			resetMe();
-			m_appearTarget = false;
 			Global::dre.seed(m_experimentTimes);    // 给随机引擎设置种子，从 0 ~ MAX_EXPERIMENT-1
 		}
 
@@ -92,16 +92,51 @@ void Population::update()
 			cout << "\n\nLet's start over again~" << endl;
 		}
 
-		//if (++m_updateCounter % 10 == 0)  //  每隔更新10代分析平均 Evalation
-		//writeLogAnalyse(m_updateCounter);
 		updatePopluation();          //  新的全局概率矩阵 --> 更新种群位置
 		updateWeight();              //  新的种群位置     --> 更新种群的权值
 		updatePMatrix();             //  新的种群权值     --> 更新全局的概率矩阵
 		updateBestCoalitions();      //  更新最好的Coalitions
 		writeLogMatrix(m_updateCounter);
 	}
-
 }
+
+/*
+	in Console mode, run one single experiment
+*/
+void Population::run(int ID)
+{
+	Global::dre.seed(ID);
+	
+	while (m_appearTarget == false)  // 退出本次实验-1：当找到目标的时候
+	{
+		updatePopluation();          //  新的全局概率矩阵 --> 更新种群位置
+		updateWeight();              //  新的种群位置     --> 更新种群的权值
+		updatePMatrix();             //  新的种群权值     --> 更新全局的概率矩阵
+		updateBestCoalitions();      //  更新最好的Coalitions
+		writeLogMatrix(m_updateCounter);
+		
+		m_updateCounter++;
+		if (m_updateCounter == MAX_UPDATE)  // 退出本次实验-2：当达到实现规定的MAX_UPDATE
+			break;
+	}
+
+	if (m_appearTarget == true)
+	{
+		unique_lock<mutex> lock(Global::mtx);
+		cout << "Experiment " << ID << " has found Global best(" << Coalition::target << ") after "
+			<< m_updateCounter << " generations and " << m_updateCounter*m_populationSize << " evaluations." << endl;
+	}
+	else
+	{
+		unique_lock<mutex> lock(Global::mtx);
+		cout << "Experiment " << ID << " has not found Global best " << endl;
+	}
+	resetMe();                                       // 重置我方编队
+	m_updateCounter = 0;                             // 重新计数
+	m_appearTarget = false;                          // 恢复没有找到目标
+	m_bestEvaluation = -Coalition::INDIVIDUAL_SIZE;  // 为下一次实验做准备工作
+}
+
 
 void Population::updatePopluation()
 {
@@ -122,7 +157,7 @@ void Population::updatePopluation()
 				{// local search
 					localSearch = true;
 					ofVec2f arrayIndex;
-					arrayIndex = backupC.localSearch_big_PM(m_enemy);
+					arrayIndex = backupC.localSearch_big_PM(m_enemy, PROBABILITY_MATRIX);
 					Tank newTank;
 					newTank.setup(arrayIndex, Tank::ABILITY_DISTANCE, false);
 					constructC.pushBackTank(newTank);
@@ -133,7 +168,7 @@ void Population::updatePopluation()
 				ofVec2f arrayIndex;
 				do
 				{
-					arrayIndex = Coalition::getPlaceFromPMatrix();  // 问题：可供选择的点越来越少，可能一些很好的点，就“消失”了
+					arrayIndex = Coalition::getPlaceFromPMatrix(PROBABILITY_MATRIX);  // 问题：可供选择的点越来越少，可能一些很好的点，就“消失”了
 				} while (c.contain(backupC, arrayIndex) == true || c.contain(m_enemy, arrayIndex) == true);  // 修复一个bug
 																											 // 当新选的点，如果是该联盟中已存在的点的话，继续选；如果可选择的点很少的话，循环次数较多
 				Tank newTank;
@@ -169,7 +204,7 @@ void Population::updatePopluation()
 */
 void Population::updatePMatrix()
 {
-	for (auto &vec_double : Global::PROBABILITY_MATRIX)  // 问题：vector有没有一行代码解决？
+	for (auto &vec_double : PROBABILITY_MATRIX)  // 问题：vector有没有一行代码解决？
 	{
 		for (double &p : vec_double)
 		{
@@ -181,7 +216,7 @@ void Population::updatePMatrix()
 	{
 		int x = t.getArrayIndex().x;
 		int y = t.getArrayIndex().y;
-		Global::PROBABILITY_MATRIX[x][y] = 0;
+		PROBABILITY_MATRIX[x][y] = 0;
 	}
 
 	for (const Coalition &c : m_population)
@@ -190,7 +225,7 @@ void Population::updatePMatrix()
 		{
 			int x = tank.getArrayIndex().x;
 			int y = tank.getArrayIndex().y;
-			Global::PROBABILITY_MATRIX[x][y] += c.getWeight();
+			PROBABILITY_MATRIX[x][y] += c.getWeight();
 		}
 	}
 }
@@ -215,7 +250,7 @@ void Population::writeLogMatrix(int updateCounter)
 	{
 		for (int x = 0; x < Global::WIDTH - 1; ++x)
 		{
-			if (isZero(Global::PROBABILITY_MATRIX[x][y]))
+			if (isZero(PROBABILITY_MATRIX[x][y]))
 			{
 				LOG_PM << setprecision(0);
 			}
@@ -223,7 +258,7 @@ void Population::writeLogMatrix(int updateCounter)
 			{
 				LOG_PM << setprecision(3);
 			}
-			LOG_PM << left << setw(7) << Global::PROBABILITY_MATRIX[x][y];  // 历史遗留问题，(y,x) --> (x,y)
+			LOG_PM << left << setw(7) << PROBABILITY_MATRIX[x][y];  // 历史遗留问题，(y,x) --> (x,y)
 		}
 		LOG_PM << '\n';
 	}
@@ -312,10 +347,10 @@ void Population::updateBestCoalitions()
 	if (newBestEvaluation > m_bestEvaluation)  // 最佳评估值有提高
 	{
 		m_bestEvaluation = newBestEvaluation;
-		cout << "Best @" << m_updateCounter << "  " << m_bestEvaluation << '\n';
+		//cout << "Best @" << m_updateCounter << "  " << m_bestEvaluation << '\n';        // Console版本注释掉
 		if (m_appearTarget == false && isZero(m_bestEvaluation - Coalition::target))
 		{
-			LOG_ANALYSE << "Best @" << m_updateCounter << "  " << Coalition::target << '\n';
+			//LOG_ANALYSE << "Best @" << m_updateCounter << "  " << Coalition::target << '\n';  // Console版本注释掉
 			m_appearTarget = true;
 		}
 	}

@@ -12,6 +12,7 @@ public:
 	void initialize(double pl, double ls, int populationSize);
 
 	void update();                              // update the population
+	void run(int ID);                 // run one experiment, set default_random_engine's seed with ID
 	void updatePopluation();                    // 更新种群
 	void updateBestCoalitions();                // update m_bestCoalitions
 	void updateWeight();                        // 计算估值 --> 适应值 --> 权值
@@ -36,10 +37,9 @@ public:
 
 	void resetMe();
 	
-	static uniform_real_distribution<double> urd_0_1;
-
 private:
-	vector<Coalition> m_population;			    // a group of coalitions
+	vector<vector<double>> PROBABILITY_MATRIX;  // 概率矩阵
+	vector<Coalition> m_population;			    // a group of coalitions，论文中的 archive
 	int m_populationSize;
 	vector<int> m_bestCoalitionIndex;		    // the index of best coalitions in the population, there could be more than one
 	int m_bestEvaluation;
@@ -69,4 +69,5 @@ private:
 	bool m_resetEnemy;         // 是否重置地方坦克阵型
 	bool m_update;             // population是否继续更新
 
+	uniform_real_distribution<double> urd_0_1;  //TODO:可以把这个thread_local static去掉
 };

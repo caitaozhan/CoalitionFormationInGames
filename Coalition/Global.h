@@ -17,9 +17,7 @@ public:
 	static ofVec2f BF_UL;             // battlefield 的左上角, upper left
 	static ofVec2f BF_LR;			  // battlefield 的右下角, lower right
 
-	static vector<vector<double>> PROBABILITY_MATRIX;
-
-	static default_random_engine dre;  // 默认随机引擎，需要配合“分布”去使用
+	thread_local static default_random_engine dre;  // 默认随机引擎，需要配合“分布”去使用。thread_local表示各个线程都有一个“副本”
 
 	static mutex mtx;  // TODO: 这个可能没有用
 };

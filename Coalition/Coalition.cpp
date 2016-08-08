@@ -3,7 +3,9 @@
 int Coalition::logNumber = 0;
 double Coalition::target = 16.0;
 int Coalition::INDIVIDUAL_SIZE = 20;
-uniform_real_distribution<double> Coalition::urd_0_1 = uniform_real_distribution<double>(0.0, 1.0);
+thread_local uniform_real_distribution<double> Coalition::urd_0_1 = uniform_real_distribution<double>(0.0, 1.0);
+thread_local uniform_int_distribution<int> Coalition::uid_x = uniform_int_distribution<int>(0, 1);
+thread_local uniform_int_distribution<int> Coalition::uid_y = uniform_int_distribution<int>(0, 1);
 
 Coalition::Coalition()
 {
@@ -68,10 +70,11 @@ void Coalition::setup_8(double abilityDistance, bool isEnemy, const Coalition &e
 	}
 	else                                // 我军选地点的时候，不能和 enemy 重合
 	{
-		startPoint = ofVec2f(int(ofRandom(Global::BF_UL.x, Global::BF_LR.x + 1)), (int)ofRandom(Global::BF_LR.y, Global::BF_UL.y + 1));// 随机选择一个初始二维坐标 
+		//startPoint = ofVec2f(int(ofRandom(Global::BF_UL.x, Global::BF_LR.x + 1)), (int)ofRandom(Global::BF_LR.y, Global::BF_UL.y + 1));// 随机选择一个初始二维坐标 
+		startPoint = ofVec2f(uid_x(Global::dre), uid_y(Global::dre));// 随机选择一个初始二维坐标 
 		while (contain(enemy, startPoint) == true)
 		{
-			startPoint.set((int)ofRandom(Global::BF_UL.x, Global::BF_LR.x + 1), (int)ofRandom(Global::BF_LR.y, Global::BF_UL.y + 1));
+			startPoint.set(uid_x(Global::dre), uid_y(Global::dre));
 		}
 	}
 	vecArrayIndex.push_back(startPoint);  // BUG: 随机找初始点的时候，也要检查是否和敌人区域重合；思维漏洞，检查日志检查了好久才找到
@@ -131,7 +134,7 @@ void Coalition::setup_CR(double abilityDistance, bool isEnemy, const Coalition &
 	
 	while (vecArrayIndex.size() < INDIVIDUAL_SIZE)
 	{
-		temp = ofVec2f((int)ofRandom(Global::BF_UL.x, Global::BF_LR.x + 1), (int)ofRandom(Global::BF_LR.y, Global::BF_UL.y + 1));
+		temp = ofVec2f(uid_x(Global::dre), uid_y(Global::dre));
 
 		if (isEnemy && contain(vecArrayIndex, temp) == false)
 			vecArrayIndex.push_back(temp);
@@ -469,7 +472,9 @@ void Coalition::update_BF(const vector<ofVec2f> &vecArrayIndex)
 	Global::BF_UL.y = (highY + Tank::ABILITY_DISTANCE <= Global::HEIGHT - 1) ? highY + Tank::ABILITY_DISTANCE : Global::HEIGHT - 1;
 	Global::BF_LR.x = (highX + Tank::ABILITY_DISTANCE <= Global::WIDTH - 1) ? highX + Tank::ABILITY_DISTANCE : Global::WIDTH - 1;
 	Global::BF_LR.y = (lowY - Tank::ABILITY_DISTANCE >= 0) ? lowY - Tank::ABILITY_DISTANCE : 0;
-	cout << "Upper Left: " << Global::BF_UL << "     Lower Right: " << Global::BF_LR << endl;
+	//cout << "Upper Left: " << Global::BF_UL << "     Lower Right: " << Global::BF_LR << endl;
+	Coalition::uid_x = uniform_int_distribution<int>(Global::BF_UL.x, Global::BF_LR.x);
+	Coalition::uid_y = uniform_int_distribution<int>(Global::BF_LR.y, Global::BF_UL.y);
 }
 
 /*
@@ -529,7 +534,7 @@ ofVec2f Coalition::localSearch_big(const Coalition & enemy)
 	return newArrayIndex[choose];
 }
 
-ofVec2f Coalition::localSearch_big_PM(const Coalition & enemy)
+ofVec2f Coalition::localSearch_big_PM(const Coalition & enemy, const vector<vector<double>> &PROBABILITY_MATRIX)
 {
 	vector<Tank> tanks = this->getCoalition();
 	vector<ofVec2f> newArrayIndex;
@@ -545,7 +550,7 @@ ofVec2f Coalition::localSearch_big_PM(const Coalition & enemy)
 				&& contain(enemy, tempArrayIndex) == false /*&& contain(newArrayIndex, tempArrayIndex) == false*/)
 			{
 				newArrayIndex.push_back(tempArrayIndex);                                       // 这两个vector大小一样
-				newProbability.push_back(Global::PROBABILITY_MATRIX[tempArrayIndex.y][tempArrayIndex.x]); // 保存PM的概率
+				newProbability.push_back(PROBABILITY_MATRIX[tempArrayIndex.y][tempArrayIndex.x]); // 保存PM的概率
 			}
 		}
 	}
@@ -567,7 +572,7 @@ ofVec2f Coalition::localSearch_big_PM(const Coalition & enemy)
 
 不使用轮盘赌？
 */
-ofVec2f Coalition::getPlaceFromPMatrix()
+ofVec2f Coalition::getPlaceFromPMatrix(const vector<vector<double>> &PROBABILITY_MATRIX)
 {
 	int x1 = Global::BF_UL.x, x2 = Global::BF_LR.x;
 	int y1 = Global::BF_LR.y, y2 = Global::BF_UL.y;
@@ -581,8 +586,8 @@ ofVec2f Coalition::getPlaceFromPMatrix()
 		}
 		for (int x = x1; x <= x2; ++x)
 		{
-			sumTotal += Global::PROBABILITY_MATRIX[y][x];
-			sumOfRow[y - y1] += Global::PROBABILITY_MATRIX[y][x];  // 修正BUG：下标错误
+			sumTotal += PROBABILITY_MATRIX[y][x];
+			sumOfRow[y - y1] += PROBABILITY_MATRIX[y][x];  // 修正BUG：下标错误
 		}
 	}
 	double choose = urd_0_1(Global::dre)*sumTotal;                              // 产生一个随机数
@@ -591,10 +596,10 @@ ofVec2f Coalition::getPlaceFromPMatrix()
 	if (row >= 1)
 		choose -= sumOfRow[row - 1];                                    // 这里思维不够缜密，出现了大BUG；现在要找 choose 在第 row 行的位置
 	vector<double> sumOfChosenRow(x2 - x1 + 1, 0);
-	sumOfChosenRow[0] = Global::PROBABILITY_MATRIX[row + y1][x1];               // 修正BUG：下标错误
+	sumOfChosenRow[0] = PROBABILITY_MATRIX[row + y1][x1];               // 修正BUG：下标错误
 	for (int i = 1; i < sumOfChosenRow.size(); ++i)
 	{
-		sumOfChosenRow[i] = sumOfChosenRow[i - 1] + Global::PROBABILITY_MATRIX[row + y1][x1 + i];  // 修复BUG：下标错误 + 思维不缜密
+		sumOfChosenRow[i] = sumOfChosenRow[i - 1] + PROBABILITY_MATRIX[row + y1][x1 + i];  // 修复BUG：下标错误 + 思维不缜密
 	}
 	int column = lower_bound(sumOfChosenRow.begin(), sumOfChosenRow.end(), choose) - sumOfChosenRow.begin();
 

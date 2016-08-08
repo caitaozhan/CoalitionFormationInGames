@@ -16,9 +16,6 @@ public:
 	void setup();
 	void update();
 	void draw();
-	const Coalition& getBestCoalition()const;
-
-	void resetMe();
 
 	void keyPressed(int key);
 	void keyReleased(int key);
@@ -32,21 +29,9 @@ public:
 	void dragEvent(ofDragInfo dragInfo);
 	void gotMessage(ofMessage msg);
 
-	//void updatePopluation();          // 更新种群
-	//void updateBestCoalition();       // 更新最好的联盟
-	//void updateWeight();              // 计算估值 --> 适应值 --> 权值
-	//void updatePMatrix();             // 统计工作，更新概率矩阵
 	bool isZero(double d);
-	//void writeLogMatrix(int updateCounter);      // 打印矩阵到log
-	int  writeLogAnalyse(int updateCounter);     // 打印算法的分析
-
-	//static const int MAX_UPDATE;
-	//static const int MAX_EXPERIMENT;
 
 private:
-	//vector<Coalition> m_population;   // 论文中的 archive
-	//Coalition m_bestCoalition;
-	//Coalition m_enemy;
 	Coalition m_coalitionToDraw;
 	Coalition m_enemyToDraw;
 
@@ -57,12 +42,6 @@ private:
 
 	ofMesh    m_mesh;
 	ofEasyCam m_easyCam;
-
-	//bool m_update;
-	//int  m_updateCounter;
-
-	/*bool m_appearTarget;
-	int  m_experimentTimes;*/
 };
 
 //Universal function which sets normals for the triangle mesh
