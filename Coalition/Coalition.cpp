@@ -4,6 +4,8 @@ int Coalition::logNumber = 0;
 double Coalition::target = 16.0;
 int Coalition::INDIVIDUAL_SIZE = 20;
 uniform_real_distribution<double> Coalition::urd_0_1 = uniform_real_distribution<double>(0.0, 1.0);
+uniform_int_distribution<int> Coalition::uid_x = uniform_int_distribution<int>(0, 1);
+uniform_int_distribution<int> Coalition::uid_y = uniform_int_distribution<int>(0, 1);
 
 Coalition::Coalition()
 {
@@ -68,10 +70,11 @@ void Coalition::setup_8(double abilityDistance, bool isEnemy, const Coalition &e
 	}
 	else                                // 我军选地点的时候，不能和 enemy 重合
 	{
-		startPoint = ofVec2f(int(ofRandom(Global::BF_UL.x, Global::BF_LR.x + 1)), (int)ofRandom(Global::BF_LR.y, Global::BF_UL.y + 1));// 随机选择一个初始二维坐标 
+		//startPoint = ofVec2f(int(ofRandom(Global::BF_UL.x, Global::BF_LR.x + 1)), (int)ofRandom(Global::BF_LR.y, Global::BF_UL.y + 1));// 随机选择一个初始二维坐标 
+		startPoint = ofVec2f(uid_x(Global::dre), uid_y(Global::dre));// 随机选择一个初始二维坐标 
 		while (contain(enemy, startPoint) == true)
 		{
-			startPoint.set((int)ofRandom(Global::BF_UL.x, Global::BF_LR.x + 1), (int)ofRandom(Global::BF_LR.y, Global::BF_UL.y + 1));
+			startPoint.set(uid_x(Global::dre), uid_y(Global::dre));
 		}
 	}
 	vecArrayIndex.push_back(startPoint);  // BUG: 随机找初始点的时候，也要检查是否和敌人区域重合；思维漏洞，检查日志检查了好久才找到
@@ -131,7 +134,7 @@ void Coalition::setup_CR(double abilityDistance, bool isEnemy, const Coalition &
 	
 	while (vecArrayIndex.size() < INDIVIDUAL_SIZE)
 	{
-		temp = ofVec2f((int)ofRandom(Global::BF_UL.x, Global::BF_LR.x + 1), (int)ofRandom(Global::BF_LR.y, Global::BF_UL.y + 1));
+		temp = ofVec2f(uid_x(Global::dre), uid_y(Global::dre));
 
 		if (isEnemy && contain(vecArrayIndex, temp) == false)
 			vecArrayIndex.push_back(temp);
@@ -470,7 +473,9 @@ void Coalition::update_BF(const vector<ofVec2f> &vecArrayIndex)
 	Global::BF_UL.y = (highY + Tank::ABILITY_DISTANCE <= Global::HEIGHT - 1) ? highY + Tank::ABILITY_DISTANCE : Global::HEIGHT - 1;
 	Global::BF_LR.x = (highX + Tank::ABILITY_DISTANCE <= Global::WIDTH - 1) ? highX + Tank::ABILITY_DISTANCE : Global::WIDTH - 1;
 	Global::BF_LR.y = (lowY - Tank::ABILITY_DISTANCE >= 0) ? lowY - Tank::ABILITY_DISTANCE : 0;
-	cout << "Upper Left: " << Global::BF_UL << "     Lower Right: " << Global::BF_LR << endl;
+	//cout << "Upper Left: " << Global::BF_UL << "     Lower Right: " << Global::BF_LR << endl;
+	Coalition::uid_x = uniform_int_distribution<int>(Global::BF_UL.x, Global::BF_LR.x);
+	Coalition::uid_y = uniform_int_distribution<int>(Global::BF_LR.y, Global::BF_UL.y);
 }
 
 /*
