@@ -104,8 +104,8 @@ void AnalyzeLog::analyze()
 		getline(m_ifile, line);
 	}
 	m_ofile << "times that target is found:   " << counterFound << endl;
-	m_ofile << "when found target appears at: " << sumTarget / counterFound << endl;
-	m_ofile << "average evaluation of all is: " << sumAvg / (counterFound + counterNotFound) << endl;
+	m_ofile << "searched the first target after evaluating individuals how many times: " << sumTarget / counterFound << endl;
+	m_ofile << "average evaluation value of popluation at present is: " << sumAvg / (counterFound + counterNotFound) << endl;
 }
 
 double AnalyzeLog::string2Double(const string & doubleStr)
