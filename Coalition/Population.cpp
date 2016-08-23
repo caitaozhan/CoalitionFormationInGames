@@ -42,7 +42,6 @@ void Population::initialize(double pl, double ls, int populationSize)
 	{
 		Coalition::logNumber++;
 		m_population[i].initialize(Coalition::INDIVIDUAL_SIZE);       // 修正BUG：之前 m_population[i] 调用重载的默认构造函数，导致vector大小=0
-		m_population[i].setup_CR(Tank::ABILITY_DISTANCE, false, m_enemy);
 	}
 	m_bestCoalitionIndex.emplace_back(0);                             // 就是初始化加入一个元素
 	m_bestEvaluation = -Coalition::INDIVIDUAL_SIZE;                   // 2016/8/4日，引入此成员变量，为了修复BUG，在multi-thread版本的updateBestCoalitions中出现的BUG
@@ -53,9 +52,8 @@ void Population::initialize(double pl, double ls, int populationSize)
 	{
 		vec_double = tmpVector;
 	}
-	updateWeight();                 // 初始化的种群 --> 计算其权值
-	updatePMatrix();                // 初始化的种群的权值 --> 生成一个初始化的概率矩阵
-	updateBestCoalitions();         // 从初始化的种群中获得最好的种群
+	Global::dre.seed(0);
+	resetMe();
 }
 
 void Population::update()
@@ -76,9 +74,9 @@ void Population::update()
 			m_bestEvaluation = -Coalition::INDIVIDUAL_SIZE;
 			cout << m_experimentTimes << "次实验\n------\n";
 			writeLogAnalyse(m_updateCounter);
-			resetMe();
 			m_appearTarget = false;
 			Global::dre.seed(m_experimentTimes);    // 给随机引擎设置种子，从 0 ~ MAX_EXPERIMENT-1
+			resetMe();
 		}
 
 		if (m_experimentTimes == MAX_EXPERIMENT)  // 准备做 MAX_EXPERIMENT 次实验
