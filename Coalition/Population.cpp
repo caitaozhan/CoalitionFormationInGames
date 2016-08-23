@@ -122,7 +122,7 @@ void Population::run(int ID)
 	{
 		unique_lock<mutex> lock(Global::mtx);
 		cout << "Experiment " << ID << " has found Global best(" << Coalition::target << ") after "
-			<< m_updateCounter << " generations and " << m_updateCounter*m_populationSize << " evaluations." << endl;
+			<< m_updateCounter << " generations and " << (m_updateCounter - 1)*m_populationSize << " evaluations." << endl;
 	}
 	else
 	{
