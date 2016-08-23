@@ -19,7 +19,7 @@ public:
 
 	static vector<vector<double>> PROBABILITY_MATRIX;
 
-	static default_random_engine dre;  // 默认随机引擎，需要配合“分布”去使用
+	static mt19937 dre;  // 默认随机引擎，需要配合“分布”去使用
 
 	static mutex mtx;  // TODO: 这个可能没有用
 };

@@ -75,7 +75,7 @@ void Population::update()
 			cout << m_experimentTimes << "次实验\n------\n";
 			writeLogAnalyse(m_updateCounter);
 			m_appearTarget = false;
-			Global::dre.seed(m_experimentTimes);    // 给随机引擎设置种子，从 0 ~ MAX_EXPERIMENT-1
+			Global::dre.seed(pow(m_experimentTimes, 2));    // 给随机引擎设置种子，从 0 ~ MAX_EXPERIMENT-1
 			resetMe();
 		}
 
