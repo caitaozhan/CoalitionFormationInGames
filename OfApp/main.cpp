@@ -27,7 +27,7 @@ int main( )
 
 	// 把若干次实验，分为numThread个组，这些组同时进行实验。
 	vector<vector<int>> groups(numThread);       
-	int totalExperiments = 16;
+	int totalExperiments = 50;
 	int num = totalExperiments / numThread;
 	int i;
 	for (i = 0; i < totalExperiments; ++i)
