@@ -26,8 +26,6 @@ public:
 	void  setAbilityDistance(double abilityDistance);
 	void  setIsEnemy(bool isEnemy);
 	void  setCoalition(int i, const Tank &t);
-	void  setStagnate0(int s);
-	void  setIsStangate(bool iS);
 	void  pushBackTank(const Tank &t);
 	const vector<Tank>& getCoalition()const;
 	const Tank&  getCoalition(int i)const;
@@ -38,10 +36,7 @@ public:
 	const int    getSize()const;
 	const double getAbilityDistance()const;
 	const bool   getIsEnemy()const;
-	const int    getStagnate0()const;
-	const bool   getIsStagnate()const;
 
-	void resetAtStagnate0(const Coalition &m_enemy, int updateCounter);
 	bool isZero(double d);
 
 	void draw();
@@ -76,8 +71,6 @@ private:
 	double   m_weight;
 	double   m_abilityDistance;  // 放在这里合理么？Tank 类中也有此属性
 	bool     m_isEnemy;
-	int      m_stagnate0;        // 代数：对于 SimpleEvaluation 而言，在 Evaluation = 0 时候的停滞的代数
-	bool     m_isStagnate;       // 假设开始的时候，都是可能在 Evaluation = 0 停滞的
 	ofstream m_logPlace;         // 每一个 Coalition 对象都有自己的日志文件
 
 };

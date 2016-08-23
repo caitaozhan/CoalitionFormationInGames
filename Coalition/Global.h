@@ -14,8 +14,8 @@ public:
 	static const int MOVE_X[8];
 	static const int MOVE_Y[8];
 
-	static ofVec2f BF_UL;             // battlefield 的左上角, upper left
-	static ofVec2f BF_LR;			  // battlefield 的右下角, lower right
+	thread_local static ofVec2f BF_UL;             // battlefield 的左上角, upper left
+	thread_local static ofVec2f BF_LR;			  // battlefield 的右下角, lower right
 
 	thread_local static default_random_engine dre;  // 默认随机引擎，需要配合“分布”去使用。thread_local表示各个线程都有一个“副本”
 

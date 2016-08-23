@@ -42,7 +42,7 @@ void Population::initialize(double pl, double ls, int populationSize)
 	{
 		Coalition::logNumber++;
 		m_population[i].initialize(Coalition::INDIVIDUAL_SIZE);       // 修正BUG：之前 m_population[i] 调用重载的默认构造函数，导致vector大小=0
-		m_population[i].setup_CR(Tank::ABILITY_DISTANCE, false, m_enemy);
+		//m_population[i].setup_CR(Tank::ABILITY_DISTANCE, false, m_enemy);
 	}
 	m_bestCoalitionIndex.emplace_back(0);                             // 就是初始化加入一个元素
 	m_bestEvaluation = -Coalition::INDIVIDUAL_SIZE;                   // 2016/8/4日，引入此成员变量，为了修复BUG，在multi-thread版本的updateBestCoalitions中出现的BUG
@@ -53,9 +53,9 @@ void Population::initialize(double pl, double ls, int populationSize)
 	{
 		vec_double = tmpVector;
 	}
-	updateWeight();                 // 初始化的种群 --> 计算其权值
-	updatePMatrix();                // 初始化的种群的权值 --> 生成一个初始化的概率矩阵
-	updateBestCoalitions();         // 从初始化的种群中获得最好的种群
+	//updateWeight();                 // 初始化的种群 --> 计算其权值
+	//updatePMatrix();                // 初始化的种群的权值 --> 生成一个初始化的概率矩阵
+	//updateBestCoalitions();         // 从初始化的种群中获得最好的种群
 }
 
 void Population::update()
@@ -106,7 +106,9 @@ void Population::update()
 void Population::run(int ID)
 {
 	Global::dre.seed(ID);
-	
+
+	resetMe();                                       // 重置我方编队
+
 	while (m_appearTarget == false)  // 退出本次实验-1：当找到目标的时候
 	{
 		updatePopluation();          //  新的全局概率矩阵 --> 更新种群位置
@@ -131,7 +133,6 @@ void Population::run(int ID)
 		unique_lock<mutex> lock(Global::mtx);
 		cout << "Experiment " << ID << " has not found Global best " << endl;
 	}
-	resetMe();                                       // 重置我方编队
 	m_updateCounter = 0;                             // 重新计数
 	m_appearTarget = false;                          // 恢复没有找到目标
 	m_bestEvaluation = -Coalition::INDIVIDUAL_SIZE;  // 为下一次实验做准备工作
@@ -387,8 +388,6 @@ void Population::resetMe()
 	for (int i = 0; i < m_population.size(); ++i)
 	{
 		m_population[i].setup_CR(Tank::ABILITY_DISTANCE, false, m_enemy);  // 更新联盟里所有 tank 的位置
-		m_population[i].setIsStangate(true);                         // 修复一个BUG
-		m_population[i].setStagnate0(0);
 	}
 	updateWeight();   // 新的位置 --> 新的 weight
 	updatePMatrix();
@@ -407,7 +406,6 @@ void Population::updateWeight()
 	for (Coalition &c : m_population)                  // 更新每一个联盟的评估值
 	{
 		c.setSimpleEvaluate(Coalition::simpleEvalute(m_enemy, c));
-		c.resetAtStagnate0(m_enemy, m_updateCounter);
 	}
 
 	int maxE = -Coalition::INDIVIDUAL_SIZE;

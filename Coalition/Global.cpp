@@ -8,8 +8,8 @@ const double Global::EPSILON = 1e-8;
 const int Global::MOVE_X[8] = { 0, 1, 1, 1, 0, -1, -1, -1 };  // 8 Á¬Í¨
 const int Global::MOVE_Y[8] = { 1, 1, 0, -1, -1, -1, 0, 1 };
 
-ofVec2f Global::BF_UL = ofVec2f(0, Global::HEIGHT - 1);
-ofVec2f Global::BF_LR = ofVec2f(Global::WIDTH - 1, 0);
+thread_local ofVec2f Global::BF_UL = ofVec2f(0, Global::HEIGHT - 1);
+thread_local ofVec2f Global::BF_LR = ofVec2f(Global::WIDTH - 1, 0);
 
 thread_local default_random_engine Global::dre(0);
 
