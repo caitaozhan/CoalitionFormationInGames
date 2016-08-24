@@ -25,7 +25,9 @@ public:
 	void setResetMe(const bool &resetMe);
 	void setResetEnemy(const bool &resetEnemy);
 	void setUpdate(const bool &update);
+	void setLogExperEvaluate(int ID);
 
+	const string getLogExperEvaluate()const;
 	bool getResetMe();                          // get 是否重置Me
 	bool getResetEnemy();                       // get 是否重置Enemy
 	bool getUpdate();                           // get 是否继续update population
@@ -34,8 +36,8 @@ public:
 	void getBestCoalitions(vector<Coalition> & bC);
 	void getEnemy(Coalition &e);
 	bool isZero(double d);                      // TODO: put it in utility module
-
-	void resetMe();
+	double getPopAverageEvaluate();             // 
+	void resetMe();                             // 重置我方坦克种群
 	
 private:
 	vector<vector<double>> PROBABILITY_MATRIX;  // 概率矩阵
@@ -46,7 +48,9 @@ private:
 	Coalition m_enemy;                          // enemy
 	bool m_stop;							    // whether population meets terminal condition
 	int  m_updateCounter;
-	
+	int  m_evaluateCounter;
+	int  SAMPLE_INTERVAL;                       // 采样间隔
+
 	bool m_appearTarget;
 	int  m_experimentTimes;
 
@@ -61,7 +65,7 @@ private:
 	ofstream LOG_ANALYSE;	   // 算法分析日志
 
 	string LOG_PM_NAME;        // 这是个都是日志的文件名
-	string LOG_ANALYSE_INPUT;
+	string LOG_EXPER_EVALUATE;
 	string LOG_ANALYSE_OUTPUT;
 	string ENEMY_INPUT;
 
@@ -70,4 +74,6 @@ private:
 	bool m_update;             // population是否继续更新
 
 	uniform_real_distribution<double> urd_0_1;
+	void resetExperVariables();
+
 };

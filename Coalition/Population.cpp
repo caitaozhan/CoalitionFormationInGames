@@ -7,8 +7,8 @@ Population::Population()
 	
 	ENEMY_INPUT = string("../sample/4_case_20.txt");                                 // enemy阵型的初始化编队
 	LOG_PM_NAME = string("../log/32^2,pop=32,ind=32_param/log_simpleEvaluate.txt");  // 概率矩阵日志
-	LOG_ANALYSE_INPUT = string("../log/32^2,pop=32,ind=32_param/log_analyze.txt");   // 程序运行日志，记录每一次实验的评估值
-	LOG_ANALYSE_OUTPUT = string("../log/32^2,pop=32,ind=32_param/8-2_0.9_0.9.txt");  // 分析程序运行的运行记录
+	LOG_EXPER_EVALUATE = string("../log/case-4/experiment_");                        // 程序运行日志，记录每一次实验的评估值
+	LOG_ANALYSE_OUTPUT = string("../log/case-4/result.txt");                       // 分析程序运行的运行记录
 	MAX_UPDATE = 500;
 	MAX_EXPERIMENT = 15;
 
@@ -17,6 +17,7 @@ Population::Population()
 	m_appearTarget = false;
 	m_experimentTimes = 0;
 	m_updateCounter = 0;
+	m_evaluateCounter = 0;
 	m_stop = false;
 	
 	urd_0_1 = uniform_real_distribution<double>(0.0, 1.0);
@@ -27,9 +28,10 @@ void Population::initialize(double pl, double ls, int populationSize)
 	PL = pl;
 	LS = ls;
 	m_populationSize = populationSize;
+	SAMPLE_INTERVAL = populationSize;   // 初始条件下，SAMPLE_INTERVAL 设为种群规模大小
 
 	LOG_PM.open(LOG_PM_NAME);
-	LOG_ANALYSE.open(LOG_ANALYSE_INPUT);
+	//LOG_ANALYSE.open(LOG_EXPER_EVALUATE);
 
 	m_enemy.initialize(Coalition::INDIVIDUAL_SIZE);                  // 修正BUG：之前 m_enemy 调用重载的默认构造函数，导致vector大小=0
 	m_enemy.setup_file(Tank::ABILITY_DISTANCE, true, ENEMY_INPUT);   // 从文件从读入数据，进行初始化
@@ -40,7 +42,7 @@ void Population::initialize(double pl, double ls, int populationSize)
 	m_population.resize(m_populationSize);                  
 	for (int i = 0; i < m_population.size(); ++i)
 	{
-		Coalition::logNumber++;
+		Coalition::logNumber++;  // todo: 可以删掉？
 		m_population[i].initialize(Coalition::INDIVIDUAL_SIZE);       // 修正BUG：之前 m_population[i] 调用重载的默认构造函数，导致vector大小=0
 	}
 	m_bestCoalitionIndex.emplace_back(0);                             // 就是初始化加入一个元素
@@ -54,6 +56,9 @@ void Population::initialize(double pl, double ls, int populationSize)
 	}
 }
 
+/*
+	this member function is called in "multi_thread" version
+*/
 void Population::update()
 {
 	if (m_update)
@@ -77,11 +82,11 @@ void Population::update()
 			Global::dre.seed(m_experimentTimes);    // 给随机引擎设置种子，从 0 ~ MAX_EXPERIMENT-1
 		}
 
-		if (m_experimentTimes == MAX_EXPERIMENT)  // 准备做 MAX_EXPERIMENT 次实验
+		if (m_experimentTimes == MAX_EXPERIMENT)    // 准备做 MAX_EXPERIMENT 次实验
 		{
 			cout << "End of " << MAX_EXPERIMENT << " times of experiments!" << endl;
-			LOG_ANALYSE.close();                  // 先关闭，再由另外一个类打开“临界文件”
-			AnalyzeLog analyzeLog(LOG_ANALYSE_INPUT, LOG_ANALYSE_OUTPUT);
+			LOG_ANALYSE.close();                    // 先关闭，再由另外一个类打开“临界文件”
+			AnalyzeLog analyzeLog(LOG_EXPER_EVALUATE, LOG_ANALYSE_OUTPUT);
 			analyzeLog.analyze();
 			m_experimentTimes = 0;
 			m_update = 0;
@@ -103,7 +108,7 @@ void Population::run(int ID)
 {
 	Global::dre.seed(ID);
 
-	resetMe();                                       // 重置我方编队
+	resetMe();                       // 重置我方编队
 
 	while (m_appearTarget == false)  // 退出本次实验-1：当找到目标的时候
 	{
@@ -113,27 +118,38 @@ void Population::run(int ID)
 		updateBestCoalitions();      //  更新最好的Coalitions
 		writeLogMatrix(m_updateCounter);
 		
-		m_updateCounter++;
+		if (++m_updateCounter == 10)
+			SAMPLE_INTERVAL = 100;
 		if (m_updateCounter == MAX_UPDATE)  // 退出本次实验-2：当达到实现规定的MAX_UPDATE
 			break;
 	}
 
 	if (m_appearTarget == true)
 	{
+		LOG_ANALYSE << setw(6) << left << m_evaluateCounter <<                 // 评价的次数
+			m_population[m_bestCoalitionIndex[0]].getSimpleEvaluate() << endl; // 此时整个种群的最优适应值
+
 		unique_lock<mutex> lock(Global::mtx);
-		cout << "Experiment " << ID << " has found Global best(" << Coalition::target << ") after "
-			<< m_updateCounter << " generations and " << (m_updateCounter - 1)*m_populationSize << " evaluations." << endl;
+		cout << "Experiment " << setw(2) << left << ID << " found Global best(" << Coalition::target << ") after "
+			<< m_updateCounter << " generations, " << (m_updateCounter - 1)*m_populationSize << " evaluations" << endl;	
 	}
 	else
 	{
 		unique_lock<mutex> lock(Global::mtx);
-		cout << "Experiment " << ID << " has not found Global best " << endl;
+		cout << "Experiment " << setw(2) << ID << " not found Global best " << endl;
 	}
-	m_updateCounter = 0;                             // 重新计数
-	m_appearTarget = false;                          // 恢复没有找到目标
-	m_bestEvaluation = -Coalition::INDIVIDUAL_SIZE;  // 为下一次实验做准备工作
+	resetExperVariables();
 }
 
+void Population::resetExperVariables()
+{
+	m_evaluateCounter = 0;                           // 重新计数评估次数
+	m_updateCounter = 0;                             // 重新计数代数
+	m_appearTarget = false;                          // 恢复没有找到目标
+	m_bestEvaluation = -Coalition::INDIVIDUAL_SIZE;  // 为下一次实验做准备工作
+	SAMPLE_INTERVAL = m_populationSize;              // 重置采样间隔
+	LOG_ANALYSE.close();                             // 关闭当前的日子文件
+}
 
 void Population::updatePopluation()
 {
@@ -268,13 +284,8 @@ void Population::writeLogMatrix(int updateCounter)
 */
 int Population::writeLogAnalyse(int updateCounter)
 {
-	double sum = 0.0;
-	double avg = 0.0;
-	for (const Coalition &c : m_population)
-	{
-		sum += c.getSimpleEvaluate();
-	}
-	avg = sum / m_population.size();
+	double avg = getPopAverageEvaluate();
+	
 	LOG_ANALYSE << updateCounter << ": " << avg << "\n\n";
 	return avg;
 }
@@ -292,6 +303,23 @@ void Population::setResetEnemy(const bool & resetEnemy)
 void Population::setUpdate(const bool & update)
 {
 	m_update = update;
+}
+
+/*
+	依据实验的ID号，设置本次实验的log文件名
+*/
+void Population::setLogExperEvaluate(int ID)
+{
+	string logName = LOG_EXPER_EVALUATE;
+	logName += to_string(ID) + ".txt";
+
+	LOG_ANALYSE.open(logName);             // 设置日志文件名字，然后打开日志
+}
+
+
+const string Population::getLogExperEvaluate() const
+{
+	return LOG_EXPER_EVALUATE;
 }
 
 bool Population::getResetMe()
@@ -379,6 +407,18 @@ bool Population::isZero(double d)
 	return false;
 }
 
+double Population::getPopAverageEvaluate()
+{
+	double sum = 0.0;
+	double avg = 0.0;
+	for (const Coalition &c : m_population)
+	{
+		sum += c.getSimpleEvaluate();
+	}
+	avg = sum / m_population.size();
+	return avg;
+}
+
 void Population::resetMe()
 {
 	for (int i = 0; i < m_population.size(); ++i)
@@ -393,7 +433,7 @@ void Population::resetMe()
 
 /*
 更新权值的过程：
-1. 更新 评估值
+1. 更新 评估值  (顺便输出日志)
 2. 更新 适应值
 3. 更新 权值
 */
@@ -401,7 +441,12 @@ void Population::updateWeight()
 {
 	for (Coalition &c : m_population)                  // 更新每一个联盟的评估值
 	{
-		c.setSimpleEvaluate(Coalition::simpleEvalute(m_enemy, c));
+		c.setSimpleEvaluate(Coalition::simpleEvalute(m_enemy, c));                 // 评价一次，原始目标值
+		if (++m_evaluateCounter % SAMPLE_INTERVAL == 0)
+		{
+			LOG_ANALYSE << setw(6) << left << m_evaluateCounter <<                 // 评价的次数
+				m_population[m_bestCoalitionIndex[0]].getSimpleEvaluate() << endl; // 此时整个种群的最优适应值
+		}
 	}
 
 	int maxE = -Coalition::INDIVIDUAL_SIZE;

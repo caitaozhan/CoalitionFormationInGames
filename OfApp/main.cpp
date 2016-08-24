@@ -14,6 +14,7 @@ void doExperiments(const vector<int> &experiments)
 	population.initialize(0.9, 0.9, 32);
 	for (int i = 0; i < experiments.size(); ++i)
 	{
+		population.setLogExperEvaluate(experiments[i]);  // 依据本次实验的ID号，设置log文件名
 		population.run(experiments[i]);
 	}
 }
@@ -27,7 +28,7 @@ int main( )
 
 	// 把若干次实验，分为numThread个组，这些组同时进行实验。
 	vector<vector<int>> groups(numThread);       
-	int totalExperiments = 15;
+	int totalExperiments = 30;
 	int num = totalExperiments / numThread;
 	int i;
 	for (i = 0; i < totalExperiments; ++i)
