@@ -19,7 +19,9 @@ Population::Population()
 	m_updateCounter = 0;
 	m_evaluateCounter = 0;
 	m_stop = false;
-	
+	m_isStagnate = false;
+	m_latestPopAvg = -Coalition::INDIVIDUAL_SIZE;
+
 	urd_0_1 = uniform_real_distribution<double>(0.0, 1.0);
 }
 
@@ -29,9 +31,9 @@ void Population::initialize(double pl, double ls, int populationSize)
 	LS = ls;
 	m_populationSize = populationSize;
 	SAMPLE_INTERVAL = populationSize;   // 初始条件下，SAMPLE_INTERVAL 设为种群规模大小
+	m_stagnateCriteria = 2*SAMPLE_INTERVAL/m_populationSize;  // 连续若干次评价-->对应的进化代数，种群的fitness无变化，则终止程序
 
 	LOG_PM.open(LOG_PM_NAME);
-	//LOG_ANALYSE.open(LOG_EXPER_EVALUATE);
 
 	m_enemy.initialize(Coalition::INDIVIDUAL_SIZE);                  // 修正BUG：之前 m_enemy 调用重载的默认构造函数，导致vector大小=0
 	m_enemy.setup_file(Tank::ABILITY_DISTANCE, true, ENEMY_INPUT);   // 从文件从读入数据，进行初始化
@@ -110,7 +112,7 @@ void Population::run(int ID)
 
 	resetMe();                       // 重置我方编队
 
-	while (m_appearTarget == false)  // 退出本次实验-1：当找到目标的时候
+	while (m_appearTarget == false && m_isStagnate == false)  // 试验继续运行的条件：没有找到目标，并且没有停滞状态
 	{
 		updatePopluation();          //  新的全局概率矩阵 --> 更新种群位置
 		updateWeight();              //  新的种群位置     --> 更新种群的权值
@@ -119,19 +121,27 @@ void Population::run(int ID)
 		writeLogMatrix(m_updateCounter);
 		
 		if (++m_updateCounter == 10)
+		{
 			SAMPLE_INTERVAL = 100;
-		if (m_updateCounter == MAX_UPDATE)  // 退出本次实验-2：当达到实现规定的MAX_UPDATE
-			break;
+			m_stagnateCriteria = 3 * SAMPLE_INTERVAL / m_populationSize;
+		}
+		//if (m_updateCounter == MAX_UPDATE)  // 退出本次实验-2：当达到实现规定的MAX_UPDATE
+			//break;
 	}
 
 	if (m_appearTarget == true)
-	{
-		LOG_ANALYSE << setw(6) << left << m_evaluateCounter <<                 // 评价的次数
-			m_population[m_bestCoalitionIndex[0]].getSimpleEvaluate() << endl; // 此时整个种群的最优适应值
+	{                           //当前评估次数          此时整个种群的最优适应值
+		LOG_ANALYSE << setw(6) << m_evaluateCounter << m_population[m_bestCoalitionIndex[0]].getSimpleEvaluate();
+		LOG_ANALYSE << endl;  
+
+		////当前评估次数          此时整个种群的最优适应值
+		//LOG_ANALYSE << setw(6) << m_evaluateCounter;
+		//string str = to_string(m_population[m_bestCoalitionIndex[0]].getSimpleEvaluate()) + "\n";
+		//LOG_ANALYSE << str;
 
 		unique_lock<mutex> lock(Global::mtx);
-		cout << "Experiment " << setw(2) << left << ID << " found Global best(" << Coalition::target << ") after "
-			<< m_updateCounter << " generations, " << (m_updateCounter - 1)*m_populationSize << " evaluations" << endl;	
+		cout << "Experiment " << setw(2) << ID << " found Global best(" << Coalition::target << ") after "
+			<< setw(4) << m_updateCounter << " generations, " << setw(5) << (m_updateCounter - 1)*m_populationSize << " evaluations" << endl;
 	}
 	else
 	{
@@ -146,6 +156,7 @@ void Population::resetExperVariables()
 	m_evaluateCounter = 0;                           // 重新计数评估次数
 	m_updateCounter = 0;                             // 重新计数代数
 	m_appearTarget = false;                          // 恢复没有找到目标
+	m_isStagnate = false;                            // 恢复为“不停滞”状态
 	m_bestEvaluation = -Coalition::INDIVIDUAL_SIZE;  // 为下一次实验做准备工作
 	SAMPLE_INTERVAL = m_populationSize;              // 重置采样间隔
 	LOG_ANALYSE.close();                             // 关闭当前的日子文件
@@ -441,11 +452,25 @@ void Population::updateWeight()
 {
 	for (Coalition &c : m_population)                  // 更新每一个联盟的评估值
 	{
-		c.setSimpleEvaluate(Coalition::simpleEvalute(m_enemy, c));                 // 评价一次，原始目标值
+		c.setSimpleEvaluate(Coalition::simpleEvalute(m_enemy, c));                  // 评价一次，原始目标值
+		
 		if (++m_evaluateCounter % SAMPLE_INTERVAL == 0)
 		{
-			LOG_ANALYSE << setw(6) << left << m_evaluateCounter <<                 // 评价的次数
-				m_population[m_bestCoalitionIndex[0]].getSimpleEvaluate() << endl; // 此时整个种群的最优适应值
+			double latestBestEvaluate = m_population[m_bestCoalitionIndex[0]].getSimpleEvaluate();
+			LOG_ANALYSE << setw(6) << left << m_evaluateCounter << latestBestEvaluate;  // 评价的次数，此时整个种群的最优适应值
+		}
+	}
+
+	if (m_updateCounter % m_stagnateCriteria == 0)  // m_stagnateCriteria 是 SAMPLE_INTERVAL的倍数
+	{
+		double newPopAvg = getPopAverageEvaluate();
+		if (isZero(newPopAvg - m_latestPopAvg))
+		{
+			m_isStagnate = true;
+		}
+		else
+		{
+			m_latestPopAvg = newPopAvg;
 		}
 	}
 

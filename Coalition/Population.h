@@ -58,7 +58,7 @@ private:
 	double LS;			  // Local Search
 	double SMALL_NUMBER;
 
-	int MAX_UPDATE;
+	int MAX_UPDATE;       // todo: 这个成员需要去掉
 	int MAX_EXPERIMENT;
 	
 	ofstream LOG_PM;           // 概率矩阵的日志
@@ -76,4 +76,7 @@ private:
 	uniform_real_distribution<double> urd_0_1;
 	void resetExperVariables();
 
+	bool m_isStagnate;         // 是否陷入停滞
+	int  m_stagnateCriteria;   // 停滞的标准，即多次评价过后，种群的平均fitness依然没有提升
+	int  m_latestPopAvg;       // 记录上一次的种群平均评估值
 };
