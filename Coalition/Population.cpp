@@ -1,5 +1,8 @@
 #include "Population.h"
 
+string Population::LOG_EXPER_EVALUATE = string("../log/case-4/experiment_");         // 程序运行日志，记录每一次实验的评估值
+string Population::LOG_ANALYSE_OUTPUT = string("../log/case-4/result_");             // 分析程序运行的运行记录
+
 Population::Population()
 {
 	PL = 0.9;    // Probability Learning
@@ -7,8 +10,6 @@ Population::Population()
 	
 	ENEMY_INPUT = string("../sample/4_case_20.txt");                                 // enemy阵型的初始化编队
 	LOG_PM_NAME = string("../log/32^2,pop=32,ind=32_param/log_simpleEvaluate.txt");  // 概率矩阵日志
-	LOG_EXPER_EVALUATE = string("../log/case-4/experiment_");                        // 程序运行日志，记录每一次实验的评估值
-	LOG_ANALYSE_OUTPUT = string("../log/case-4/result.txt");                       // 分析程序运行的运行记录
 	MAX_UPDATE = 500;
 	MAX_EXPERIMENT = 15;
 
@@ -88,8 +89,8 @@ void Population::update()
 		{
 			cout << "End of " << MAX_EXPERIMENT << " times of experiments!" << endl;
 			LOG_ANALYSE.close();                    // 先关闭，再由另外一个类打开“临界文件”
-			AnalyzeLog analyzeLog(LOG_EXPER_EVALUATE, LOG_ANALYSE_OUTPUT);
-			analyzeLog.analyze();
+			//AnalyzeLog analyzeLog(LOG_EXPER_EVALUATE, LOG_ANALYSE_OUTPUT);
+			//analyzeLog.analyze();
 			m_experimentTimes = 0;
 			m_update = 0;
 			cout << "\n\nLet's start over again~" << endl;
@@ -131,7 +132,7 @@ void Population::run(int ID)
 
 	if (m_appearTarget == true)
 	{                           //当前评估次数          此时整个种群的最优适应值
-		LOG_ANALYSE << setw(6) << m_evaluateCounter << m_population[m_bestCoalitionIndex[0]].getSimpleEvaluate();
+		LOG_ANALYSE << setw(6) << (m_evaluateCounter / 100 + 1) * 100 << m_population[m_bestCoalitionIndex[0]].getSimpleEvaluate();
 		LOG_ANALYSE << endl;  
 
 		////当前评估次数          此时整个种群的最优适应值
@@ -333,6 +334,11 @@ const string Population::getLogExperEvaluate() const
 	return LOG_EXPER_EVALUATE;
 }
 
+const string Population::getLogAnalyzeOutput() const
+{
+	return LOG_ANALYSE_OUTPUT;
+}
+
 bool Population::getResetMe()
 {
 	return m_resetMe;
@@ -457,7 +463,7 @@ void Population::updateWeight()
 		if (++m_evaluateCounter % SAMPLE_INTERVAL == 0)
 		{
 			double latestBestEvaluate = m_population[m_bestCoalitionIndex[0]].getSimpleEvaluate();
-			LOG_ANALYSE << setw(6) << left << m_evaluateCounter << latestBestEvaluate;  // 评价的次数，此时整个种群的最优适应值
+			LOG_ANALYSE << setw(6) << left << m_evaluateCounter << latestBestEvaluate << endl;  // 评价的次数，此时整个种群的最优适应值
 		}
 	}
 

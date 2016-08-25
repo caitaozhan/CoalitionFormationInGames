@@ -3,7 +3,11 @@
 #include <sstream>
 #include <fstream>
 #include <string>
-#include <regex>
+#include <vector>
+#include <numeric>
+#include <algorithm>
+#include <iomanip>
+#include "CounterValue.h"
 using namespace std;
 
 // 曾经 AnalyzeLog 是一个独立的project
@@ -12,7 +16,7 @@ class AnalyzeLog
 {
 public:
 	AnalyzeLog();
-	AnalyzeLog(const string &ifileName, const string &ofileName);
+	AnalyzeLog(const int totalExperiments, const string &ifileName, const string &ofileName);
 	~AnalyzeLog();
 
 	void setInputFile(const string &ifileName);
@@ -20,13 +24,14 @@ public:
 	void setPattern(const string &pattern);
 	
 	void analyze();
+	double calcuVariance(const vector<double> &v);
 	double string2Double(const string &doubleStr);
 
 private:
+	int      m_totalExperNum;  // 一批实验的ID
+	string   m_inputBase;      // 一批txt文件作为输入文本，此成员是相同的部分
+	string   m_outputBase;     // 输出txt文件的名字，的相同的部分
 	ifstream m_ifile;
 	ofstream m_ofile;
-
-	regex m_patternNotFound;
-	regex m_patternBest;
-	regex m_patternAvg;
+	vector<CounterValue> m_results;
 };

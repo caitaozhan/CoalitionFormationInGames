@@ -12,7 +12,7 @@ public:
 	void initialize(double pl, double ls, int populationSize);
 
 	void update();                              // update the population
-	void run(int ID);                 // run one experiment, set default_random_engine's seed with ID
+	void run(int ID);                           // run one experiment, set default_random_engine's seed with ID
 	void updatePopluation();                    // 更新种群
 	void updateBestCoalitions();                // update m_bestCoalitions
 	void updateWeight();                        // 计算估值 --> 适应值 --> 权值
@@ -28,6 +28,7 @@ public:
 	void setLogExperEvaluate(int ID);
 
 	const string getLogExperEvaluate()const;
+	const string getLogAnalyzeOutput()const;
 	bool getResetMe();                          // get 是否重置Me
 	bool getResetEnemy();                       // get 是否重置Enemy
 	bool getUpdate();                           // get 是否继续update population
@@ -39,6 +40,9 @@ public:
 	double getPopAverageEvaluate();             // 
 	void resetMe();                             // 重置我方坦克种群
 	
+	static string LOG_EXPER_EVALUATE;
+	static string LOG_ANALYSE_OUTPUT;
+
 private:
 	vector<vector<double>> PROBABILITY_MATRIX;  // 概率矩阵
 	vector<Coalition> m_population;			    // a group of coalitions，论文中的 archive
@@ -65,8 +69,6 @@ private:
 	ofstream LOG_ANALYSE;	   // 算法分析日志
 
 	string LOG_PM_NAME;        // 这是个都是日志的文件名
-	string LOG_EXPER_EVALUATE;
-	string LOG_ANALYSE_OUTPUT;
 	string ENEMY_INPUT;
 
 	bool m_resetMe;            // 是否重置我方坦克阵型
