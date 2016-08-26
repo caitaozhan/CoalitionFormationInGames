@@ -10,7 +10,8 @@ public:
 	static const int HEIGHT;
 	static const int WIDTH;
 	static const int PIXEL_PER_INDEX;
-	static const double EPSILON;
+	static const double EPSILON;  // 很小的数
+	static const double E;        // 自然对数
 	static const int MOVE_X[8];
 	static const int MOVE_Y[8];
 

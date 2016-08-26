@@ -7,10 +7,10 @@ Population::Population()
 	PL = 0.9;    // Probability Learning
 	LS = 0.9;    // Local Search
 	
-	ENEMY_INPUT = string("../sample/4_case_20.txt");                                 // enemy阵型的初始化编队
+	ENEMY_INPUT = string("../sample/3_case_20.txt");                                 // enemy阵型的初始化编队
 	LOG_PM_NAME = string("../log/32^2,pop=32,ind=32_param/log_simpleEvaluate.txt");  // 概率矩阵日志
 	LOG_ANALYSE_INPUT = string("../log/32^2,pop=32,ind=32_param/log_analyze.txt");   // 程序运行日志，记录每一次实验的评估值
-	LOG_ANALYSE_OUTPUT = string("../log/32^2,pop=32,ind=32_param/8-23_0.9_0.9.txt");  // 分析程序运行的运行记录
+	LOG_ANALYSE_OUTPUT = string("../log/32^2,pop=32,ind=32_param/8-26_0.9_0.9.txt");  // 分析程序运行的运行记录
 	MAX_UPDATE = 500;
 	MAX_EXPERIMENT = 15;
 
@@ -120,7 +120,7 @@ void Population::updatePopluation()
 				{// local search
 					localSearch = true;
 					ofVec2f arrayIndex;
-					arrayIndex = backupC.localSearch_big_PM(m_enemy);
+					arrayIndex = backupC.localSearch_big(m_enemy);
 					Tank newTank;
 					newTank.setup(arrayIndex, Tank::ABILITY_DISTANCE, false);
 					constructC.pushBackTank(newTank);
