@@ -382,10 +382,10 @@ double Coalition::calculateFitness(double evaluate, double maxEvaluate, double m
 
 double Coalition::calculateWeight(double fitness)
 {
-	return fitness;   // 直接上适应值，用以拉开差距
+	//return fitness;   // 直接上适应值，用以拉开差距
 
 
-	//return 1.0 / (1 + pow(E, -fitness));  // TODO 这里可以换一个增大差距的函数
+	return 1.0 / (1 + pow(Global::E, -fitness));  // TODO 这里可以换一个增大差距的函数
 }
 
 /*
