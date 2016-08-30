@@ -11,7 +11,7 @@ using namespace std;
 void doExperiments(const vector<int> &experiments)
 {
 	Population population;
-	population.initialize(0.98, 0.9, 32);
+	population.initialize(0.5, 0.9, 50);
 	for (int i = 0; i < experiments.size(); ++i)
 	{
 		population.setLogExperEvaluate(experiments[i]);  // 依据本次实验的ID号，设置log文件名
@@ -24,7 +24,7 @@ int main( )
 {
 	int numThread = thread::hardware_concurrency();
 	numThread = (numThread == 0 ? 2 : numThread);   // hardware_concurrency() 有可能返回 0
-	//numThread = 4;
+	//numThread = 1;
 
 	// 把若干次实验，分为numThread个组，这些组同时进行实验。
 	vector<vector<int>> groups(numThread);       

@@ -79,6 +79,6 @@ private:
 	void resetExperVariables();
 
 	bool m_isStagnate;         // 是否陷入停滞
-	int  m_stagnateCriteria;   // 停滞的标准，即多次评价过后，种群的平均fitness依然没有提升
+	int  m_stagnateCriteria;   // 停滞的标准，即多次代进化之后，种群的平均fitness依然没有提升
 	int  m_latestPopAvg;       // 记录上一次的种群平均评估值
 };

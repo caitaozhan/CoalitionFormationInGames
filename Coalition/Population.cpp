@@ -1,15 +1,15 @@
 #include "Population.h"
 
-string Population::LOG_EXPER_EVALUATE = string("../log/case-5/experiment_");         // 程序运行日志，记录每一次实验的评估值
-string Population::LOG_ANALYSE_OUTPUT = string("../log/case-5/result_");             // 分析程序运行的运行记录
+string Population::LOG_EXPER_EVALUATE = string("../log/case-6/experiment_");         // 程序运行日志，记录每一次实验的评估值
+string Population::LOG_ANALYSE_OUTPUT = string("../log/case-6/result_");             // 分析程序运行的运行记录
 
 Population::Population()
 {
 	PL = 0.9;    // Probability Learning
 	LS = 0.9;    // Local Search
 	
-	ENEMY_INPUT = string("../sample/5_case_50.txt");                                 // enemy阵型的初始化编队
-	LOG_PM_NAME = string("../log/case-5/log_simpleEvaluate.txt");                    // 概率矩阵日志
+	ENEMY_INPUT = string("../sample/6_case_10.txt");                                 // enemy阵型的初始化编队
+	LOG_PM_NAME = string("../log/case-6/log_simpleEvaluate.txt");                    // 概率矩阵日志
 	MAX_UPDATE = 500;
 	MAX_EXPERIMENT = 15;
 
@@ -32,7 +32,7 @@ void Population::initialize(double pl, double ls, int populationSize)
 	LS = ls;
 	m_populationSize = populationSize;
 	SAMPLE_INTERVAL = populationSize;   // 初始条件下，SAMPLE_INTERVAL 设为种群规模大小
-	m_stagnateCriteria = 2*SAMPLE_INTERVAL/m_populationSize;  // 连续若干次评价-->对应的进化代数，种群的fitness无变化，则终止程序
+	m_stagnateCriteria = 100;             // 经过若干代数的进化，种群的fitness无变化，则终止程序
 
 	LOG_PM.open(LOG_PM_NAME);
 
@@ -124,7 +124,6 @@ void Population::run(int ID)
 		if (++m_updateCounter == 10)
 		{
 			SAMPLE_INTERVAL = 100;
-			m_stagnateCriteria = 100;
 		}
 		//if (m_updateCounter == MAX_UPDATE)  // 退出本次实验-2：当达到实现规定的MAX_UPDATE
 			//break;
