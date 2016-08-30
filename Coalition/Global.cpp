@@ -1,7 +1,7 @@
 #include "Global.h"
 
-const int Global::HEIGHT = 32;
-const int Global::WIDTH = 32;
+const int Global::HEIGHT = 50;
+const int Global::WIDTH = 50;
 const int Global::PIXEL_PER_INDEX = 5;
 const double Global::EPSILON = 1e-8;
 const double Global::E = 2.718281828;

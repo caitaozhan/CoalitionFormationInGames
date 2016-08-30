@@ -1,19 +1,19 @@
 #include "Population.h"
 
-string Population::LOG_EXPER_EVALUATE = string("../log/case-2/experiment_");         // 程序运行日志，记录每一次实验的评估值
-string Population::LOG_ANALYSE_OUTPUT = string("../log/case-2/result_");             // 分析程序运行的运行记录
+string Population::LOG_EXPER_EVALUATE = string("../log/case-5/experiment_");         // 程序运行日志，记录每一次实验的评估值
+string Population::LOG_ANALYSE_OUTPUT = string("../log/case-5/result_");             // 分析程序运行的运行记录
 
 Population::Population()
 {
 	PL = 0.9;    // Probability Learning
 	LS = 0.9;    // Local Search
 	
-	ENEMY_INPUT = string("../sample/2_case_20.txt");                                 // enemy阵型的初始化编队
-	LOG_PM_NAME = string("../log/case-2/log_simpleEvaluate.txt");                    // 概率矩阵日志
+	ENEMY_INPUT = string("../sample/5_case_50.txt");                                 // enemy阵型的初始化编队
+	LOG_PM_NAME = string("../log/case-5/log_simpleEvaluate.txt");                    // 概率矩阵日志
 	MAX_UPDATE = 500;
 	MAX_EXPERIMENT = 15;
 
-	SMALL_NUMBER = 0.1;
+	SMALL_NUMBER = 0.01;
 	m_update = true;
 	m_appearTarget = false;
 	m_experimentTimes = 0;
@@ -188,7 +188,7 @@ void Population::updatePopluation()
 					arrayIndex = backupC.localSearch_big(m_enemy);
 					Tank newTank;
 					newTank.setup(arrayIndex, Tank::ABILITY_DISTANCE, false);
-					constructC.pushBackTank(newTank);
+					constructC.pushBackTank(move(newTank));
 				}
 			}
 			else

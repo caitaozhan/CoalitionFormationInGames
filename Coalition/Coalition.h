@@ -57,7 +57,7 @@ public:
 	static int logNumber;  // 每一个 Coalition 对象都有一个自己的日志文件，通过这个静态的序号区分日志的名字
 	static double target;  // 针对某一 enemy，若能进化出 evulation = target，则认为达到目标了
 
-	static int INDIVIDUAL_SIZE;  // 每一个Coalition的大小
+	static int INDIVIDUAL_SIZE;  // 我方坦克Coalition的个体大小，即有多少个坦克
 
 	static uniform_real_distribution<double> urd_0_1; 
 	static uniform_int_distribution<int> uid_x;

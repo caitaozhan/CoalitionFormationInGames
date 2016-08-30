@@ -113,7 +113,7 @@ void AnalyzeLog::analyze()
 	m_ofile.open(m_outputBase + "avg.txt");
 	for (const CounterValue &cv : avgInputData)
 	{
-		m_ofile << setw(6) << left << cv.m_counter << cv.m_value << endl;
+		m_ofile << setw(8) << left << cv.m_counter << cv.m_value << endl;
 	}
 	m_ofile.close();
 	m_ofile.open(m_outputBase + "variance.txt");
