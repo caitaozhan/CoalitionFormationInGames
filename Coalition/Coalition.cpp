@@ -1,8 +1,8 @@
 #include "Coalition.h"
 
 int Coalition::logNumber = 0;
-double Coalition::target = 16.0;
-int Coalition::INDIVIDUAL_SIZE = 20;
+double Coalition::target = 40;
+int Coalition::INDIVIDUAL_SIZE = 50;
 uniform_real_distribution<double> Coalition::urd_0_1 = uniform_real_distribution<double>(0.0, 1.0);
 uniform_int_distribution<int> Coalition::uid_x = uniform_int_distribution<int>(0, 1);
 uniform_int_distribution<int> Coalition::uid_y = uniform_int_distribution<int>(0, 1);
@@ -105,7 +105,7 @@ void Coalition::setup_8(double abilityDistance, bool isEnemy, const Coalition &e
 		}
 	}
 	
-	for (int i = 0; i < INDIVIDUAL_SIZE; ++i)
+	for (int i = 0; i < m_coalition.size(); ++i)
 	{
 		m_coalition[i].setup(vecArrayIndex[i], abilityDistance, isEnemy);
 	}
@@ -137,7 +137,7 @@ void Coalition::setup_CR(double abilityDistance, bool isEnemy, const Coalition &
 			vecArrayIndex.push_back(temp);
 	}
 
-	for (int i = 0; i < INDIVIDUAL_SIZE; ++i)
+	for (int i = 0; i < m_coalition.size(); ++i)
 	{
 		m_coalition[i].setup(vecArrayIndex[i], abilityDistance, isEnemy);
 	}
@@ -160,20 +160,19 @@ void Coalition::setup_file(double abilityDistance, bool isEnemy, const string &f
 		cerr << "fail to open " << filename << " at Coalition::setup_file";
 		return;
 	}
-	int n;
-	ifile >> n;
-	INDIVIDUAL_SIZE = n;              // TODO: 这里的size发生了问题，初始化是32，这里变成了20
-	m_coalition.resize(INDIVIDUAL_SIZE);
+	int enemyNum;
+	ifile >> enemyNum;
+	m_coalition.resize(enemyNum);         // update：敌人和我军的坦克数量可以不相等
 	
 	vector<ofVec2f> vecArrayIndex;
 	ofVec2f temp;
 	while (ifile >> temp)
 	{
-		vecArrayIndex.push_back(temp);
+		vecArrayIndex.push_back(move(temp));
 	}
 	ifile.close();
 
-	for (int i = 0; i < INDIVIDUAL_SIZE; ++i)
+	for (int i = 0; i < enemyNum; ++i)
 	{
 		m_coalition[i].setup(vecArrayIndex[i], abilityDistance, isEnemy);
 	}
@@ -209,7 +208,7 @@ void Coalition::setCoalition(int i, const Tank &t)
 
 void Coalition::draw()
 {
-	for (int i = 0; i < INDIVIDUAL_SIZE; ++i)
+	for (int i = 0; i < m_coalition.size(); ++i)
 	{
 		m_coalition.at(i).draw(m_color);
 	}

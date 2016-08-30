@@ -1,19 +1,19 @@
 #include "Population.h"
 
-string Population::LOG_EXPER_EVALUATE = string("../log/case-2/experiment_");         // 程序运行日志，记录每一次实验的评估值
-string Population::LOG_ANALYSE_OUTPUT = string("../log/case-2/result_");             // 分析程序运行的运行记录
+string Population::LOG_EXPER_EVALUATE = string("../log/case-5/experiment_");         // 程序运行日志，记录每一次实验的评估值
+string Population::LOG_ANALYSE_OUTPUT = string("../log/case-5/result_");             // 分析程序运行的运行记录
 
 Population::Population()
 {
 	PL = 0.9;    // Probability Learning
 	LS = 0.9;    // Local Search
 	
-	ENEMY_INPUT = string("../sample/2_case_20.txt");                                 // enemy阵型的初始化编队
-	LOG_PM_NAME = string("../log/case-2/log_simpleEvaluate.txt");                    // 概率矩阵日志
+	ENEMY_INPUT = string("../sample/5_case_50.txt");                                 // enemy阵型的初始化编队
+	LOG_PM_NAME = string("../log/case-5/log_simpleEvaluate.txt");                    // 概率矩阵日志
 	MAX_UPDATE = 500;
 	MAX_EXPERIMENT = 15;
 
-	SMALL_NUMBER = 0.1;
+	SMALL_NUMBER = 0.01;
 	m_update = true;
 	m_appearTarget = false;
 	m_experimentTimes = 0;
@@ -188,7 +188,7 @@ void Population::updatePopluation()
 					arrayIndex = backupC.localSearch_big(m_enemy);
 					Tank newTank;
 					newTank.setup(arrayIndex, Tank::ABILITY_DISTANCE, false);
-					constructC.pushBackTank(newTank);
+					constructC.pushBackTank(move(newTank));
 				}
 			}
 			else
@@ -244,7 +244,7 @@ void Population::updatePMatrix()
 	{
 		int x = t.getArrayIndex().x;
 		int y = t.getArrayIndex().y;
-		PROBABILITY_MATRIX[x][y] = 0;
+		PROBABILITY_MATRIX[y][x] = 0;      // 2016/8/30，捉住一只惊天大BUG！(x, y) --> PM[y][x]
 	}
 
 	for (const Coalition &c : m_population)
@@ -253,7 +253,7 @@ void Population::updatePMatrix()
 		{
 			int x = tank.getArrayIndex().x;
 			int y = tank.getArrayIndex().y;
-			PROBABILITY_MATRIX[x][y] += c.getWeight();
+			PROBABILITY_MATRIX[y][x] += c.getWeight();
 		}
 	}
 }
@@ -278,7 +278,7 @@ void Population::writeLogMatrix(int updateCounter)
 	{
 		for (int x = 0; x < Global::WIDTH - 1; ++x)
 		{
-			if (isZero(PROBABILITY_MATRIX[x][y]))
+			if (isZero(PROBABILITY_MATRIX[y][x]))
 			{
 				LOG_PM << setprecision(0);
 			}
@@ -286,7 +286,7 @@ void Population::writeLogMatrix(int updateCounter)
 			{
 				LOG_PM << setprecision(3);
 			}
-			LOG_PM << left << setw(7) << PROBABILITY_MATRIX[x][y];  // 历史遗留问题，(y,x) --> (x,y)
+			LOG_PM << left << setw(7) << PROBABILITY_MATRIX[y][x];
 		}
 		LOG_PM << '\n';
 	}
@@ -448,6 +448,7 @@ void Population::resetMe()
 	updateWeight();   // 新的位置 --> 新的 weight
 	updatePMatrix();
 	updateBestCoalitions();
+	writeLogMatrix(0);
 }
 
 
