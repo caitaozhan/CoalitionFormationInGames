@@ -244,7 +244,7 @@ void Population::updatePMatrix()
 	{
 		int x = t.getArrayIndex().x;
 		int y = t.getArrayIndex().y;
-		PROBABILITY_MATRIX[x][y] = 0;
+		PROBABILITY_MATRIX[y][x] = 0;      // 2016/8/30，捉住一只惊天大BUG！(x, y) --> PM[y][x]
 	}
 
 	for (const Coalition &c : m_population)
@@ -253,7 +253,7 @@ void Population::updatePMatrix()
 		{
 			int x = tank.getArrayIndex().x;
 			int y = tank.getArrayIndex().y;
-			PROBABILITY_MATRIX[x][y] += c.getWeight();
+			PROBABILITY_MATRIX[y][x] += c.getWeight();
 		}
 	}
 }
@@ -278,7 +278,7 @@ void Population::writeLogMatrix(int updateCounter)
 	{
 		for (int x = 0; x < Global::WIDTH - 1; ++x)
 		{
-			if (isZero(PROBABILITY_MATRIX[x][y]))
+			if (isZero(PROBABILITY_MATRIX[y][x]))
 			{
 				LOG_PM << setprecision(0);
 			}
@@ -286,7 +286,7 @@ void Population::writeLogMatrix(int updateCounter)
 			{
 				LOG_PM << setprecision(3);
 			}
-			LOG_PM << left << setw(7) << PROBABILITY_MATRIX[x][y];  // 历史遗留问题，(y,x) --> (x,y)
+			LOG_PM << left << setw(7) << PROBABILITY_MATRIX[y][x];
 		}
 		LOG_PM << '\n';
 	}
@@ -448,6 +448,7 @@ void Population::resetMe()
 	updateWeight();   // 新的位置 --> 新的 weight
 	updatePMatrix();
 	updateBestCoalitions();
+	writeLogMatrix(0);
 }
 
 
