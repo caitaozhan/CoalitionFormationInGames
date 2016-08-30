@@ -7,14 +7,14 @@ Population::Population()
 	PL = 0.9;    // Probability Learning
 	LS = 0.9;    // Local Search
 	
-	ENEMY_INPUT = string("../sample/3_case_20.txt");                                 // enemy阵型的初始化编队
-	LOG_PM_NAME = string("../log/32^2,pop=32,ind=32_param/log_simpleEvaluate.txt");  // 概率矩阵日志
-	LOG_ANALYSE_INPUT = string("../log/32^2,pop=32,ind=32_param/log_analyze.txt");   // 程序运行日志，记录每一次实验的评估值
-	LOG_ANALYSE_OUTPUT = string("../log/32^2,pop=32,ind=32_param/8-26_0.9_0.9.txt");  // 分析程序运行的运行记录
-	MAX_UPDATE = 500;
+	ENEMY_INPUT = string("../sample/6_case_20.txt");                                 // enemy阵型的初始化编队
+	LOG_PM_NAME = string("../log/50^2,pop=50,ind=50/log_simpleEvaluate.txt");  // 概率矩阵日志
+	LOG_ANALYSE_INPUT = string("../log/50^2,pop=50,ind=50/log_analyze.txt");   // 程序运行日志，记录每一次实验的评估值
+	LOG_ANALYSE_OUTPUT = string("../log/5^2,pop=50,ind=50/8-29_0.98_0.9.txt");  // 分析程序运行的运行记录
+	MAX_UPDATE = 200;
 	MAX_EXPERIMENT = 15;
 
-	SMALL_NUMBER = 0.1;
+	SMALL_NUMBER = 0.01;
 	m_update = true;
 	m_appearTarget = false;
 	m_experimentTimes = 0;
@@ -123,7 +123,7 @@ void Population::updatePopluation()
 					arrayIndex = backupC.localSearch_big(m_enemy);
 					Tank newTank;
 					newTank.setup(arrayIndex, Tank::ABILITY_DISTANCE, false);
-					constructC.pushBackTank(newTank);
+					constructC.pushBackTank(move(newTank));  // TODO:可以用 emplace_back
 				}
 			}
 			else
@@ -179,7 +179,7 @@ void Population::updatePMatrix()
 	{
 		int x = t.getArrayIndex().x;
 		int y = t.getArrayIndex().y;
-		Global::PROBABILITY_MATRIX[x][y] = 0;
+		Global::PROBABILITY_MATRIX[y][x] = 0;
 	}
 
 	for (const Coalition &c : m_population)
@@ -188,7 +188,7 @@ void Population::updatePMatrix()
 		{
 			int x = tank.getArrayIndex().x;
 			int y = tank.getArrayIndex().y;
-			Global::PROBABILITY_MATRIX[x][y] += c.getWeight();
+			Global::PROBABILITY_MATRIX[y][x] += c.getWeight();
 		}
 	}
 }
@@ -213,7 +213,7 @@ void Population::writeLogMatrix(int updateCounter)
 	{
 		for (int x = 0; x < Global::WIDTH - 1; ++x)
 		{
-			if (isZero(Global::PROBABILITY_MATRIX[x][y]))
+			if (isZero(Global::PROBABILITY_MATRIX[y][x]))
 			{
 				LOG_PM << setprecision(0);
 			}
@@ -221,11 +221,29 @@ void Population::writeLogMatrix(int updateCounter)
 			{
 				LOG_PM << setprecision(3);
 			}
-			LOG_PM << left << setw(7) << Global::PROBABILITY_MATRIX[x][y];  // 历史遗留问题，(y,x) --> (x,y)
+			LOG_PM << left << setw(7) << Global::PROBABILITY_MATRIX[y][x];  // 历史遗留问题，(y,x) --> (x,y)
 		}
 		LOG_PM << '\n';
 	}
 	LOG_PM << '\n' << "*******************" << endl;
+
+	//for (int y = Global::HEIGHT - 1; y >= 0; --y)
+	//{
+	//	for (int x = 0; x < Global::WIDTH - 1; ++x)
+	//	{
+	//		if (isZero(Global::PROBABILITY_MATRIX[x][y]))
+	//		{
+	//			LOG_PM << setprecision(0);
+	//		}
+	//		else
+	//		{
+	//			LOG_PM << setprecision(3);
+	//		}
+	//		LOG_PM << left << setw(7) << Global::PROBABILITY_MATRIX[x][y];  // 历史遗留问题，(y,x) --> (x,y)
+	//	}
+	//	LOG_PM << '\n';
+	//}
+	//LOG_PM << '\n' << "*******************" << endl;
 }
 
 /*
@@ -356,6 +374,7 @@ void Population::resetMe()
 	updateWeight();   // 新的位置 --> 新的 weight
 	updatePMatrix();
 	updateBestCoalitions();
+	writeLogMatrix(0);
 }
 
 
@@ -370,7 +389,7 @@ void Population::updateWeight()
 	for (Coalition &c : m_population)                  // 更新每一个联盟的评估值
 	{
 		c.setSimpleEvaluate(Coalition::simpleEvalute(m_enemy, c));
-		c.resetAtStagnate0(m_enemy, m_updateCounter);
+		//c.resetAtStagnate0(m_enemy, m_updateCounter);
 	}
 
 	int maxE = -Coalition::INDIVIDUAL_SIZE;
