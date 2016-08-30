@@ -11,7 +11,7 @@ Population::Population()
 	LOG_PM_NAME = string("../log/50^2,pop=50,ind=50/log_simpleEvaluate.txt");  // 概率矩阵日志
 	LOG_ANALYSE_INPUT = string("../log/50^2,pop=50,ind=50/log_analyze.txt");   // 程序运行日志，记录每一次实验的评估值
 	LOG_ANALYSE_OUTPUT = string("../log/5^2,pop=50,ind=50/8-29_0.98_0.9.txt");  // 分析程序运行的运行记录
-	MAX_UPDATE = 200;
+	MAX_UPDATE = 500;
 	MAX_EXPERIMENT = 15;
 
 	SMALL_NUMBER = 0.01;
@@ -69,13 +69,13 @@ void Population::update()
 				cout << "target not found @" << m_updateCounter << '\n';
 				LOG_ANALYSE << "target not found @" << m_updateCounter << '\n';
 			}
-			m_experimentTimes++;                    // 做完了一次实验
-			m_updateCounter = 0;                    // 为下一次实验做准备
 			m_bestEvaluation = -Coalition::INDIVIDUAL_SIZE;
 			cout << m_experimentTimes << "次实验\n------\n";
 			writeLogAnalyse(m_updateCounter);
 			m_appearTarget = false;
-			Global::dre.seed(pow(m_experimentTimes, 2));    // 给随机引擎设置种子，从 0 ~ MAX_EXPERIMENT-1
+			Global::dre.seed(m_experimentTimes);    // 给随机引擎设置种子，从 0 ~ MAX_EXPERIMENT-1
+			m_updateCounter = 0;                    // 为下一次实验做准备
+			m_experimentTimes++;                    // 做完了一次实验
 			resetMe();
 		}
 

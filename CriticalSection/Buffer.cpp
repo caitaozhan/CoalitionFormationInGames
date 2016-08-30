@@ -27,7 +27,7 @@ BufferResponse::BufferResponse(bool resetMe, bool resetEnemy, bool update)
 
 void producerCalculating(Population && population)
 {
-	population.initialize(0.9, 0.9, 100);         // 初始化参数
+	population.initialize(0.5, 0.9, 50);         // 初始化参数
 	{
 		unique_lock<mutex> lock(BUFFER_R.mtx);
 		population.getEnemy(BUFFER_R.enemy);     // 初始化BUFFER_R.enemy
