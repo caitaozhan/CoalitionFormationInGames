@@ -45,6 +45,8 @@ public:
 
 private:
 	vector<vector<double>> PROBABILITY_MATRIX;  // 概率矩阵
+	vector<double> SUM_OF_ROW;                  // 概率矩阵每行之和，PM的metadata
+	double TOTAL;                               // 概率矩阵所有元素之和，PM的metadata
 	vector<Coalition> m_population;			    // a group of coalitions，论文中的 archive
 	int m_populationSize;
 	vector<int> m_bestCoalitionIndex;		    // the index of best coalitions in the population, there could be more than one

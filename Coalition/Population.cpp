@@ -1,15 +1,15 @@
 #include "Population.h"
 
-string Population::LOG_EXPER_EVALUATE = string("../log/case-6/experiment_");         // 程序运行日志，记录每一次实验的评估值
-string Population::LOG_ANALYSE_OUTPUT = string("../log/case-6/result_");             // 分析程序运行的运行记录
+string Population::LOG_EXPER_EVALUATE = string("../log/case-5/experiment_");         // 程序运行日志，记录每一次实验的评估值
+string Population::LOG_ANALYSE_OUTPUT = string("../log/case-5/result_");             // 分析程序运行的运行记录
 
 Population::Population()
 {
 	PL = 0.9;    // Probability Learning
 	LS = 0.9;    // Local Search
 	
-	ENEMY_INPUT = string("../sample/6_case_10.txt");                                 // enemy阵型的初始化编队
-	LOG_PM_NAME = string("../log/case-6/log_simpleEvaluate.txt");                    // 概率矩阵日志
+	ENEMY_INPUT = string("../sample/5_case_50.txt");                                 // enemy阵型的初始化编队
+	LOG_PM_NAME = string("../log/case-5/log_simpleEvaluate.txt");                    // 概率矩阵日志
 	MAX_UPDATE = 500;
 	MAX_EXPERIMENT = 15;
 
@@ -119,25 +119,18 @@ void Population::run(int ID)
 		updateWeight();              //  新的种群位置     --> 更新种群的权值
 		updatePMatrix();             //  新的种群权值     --> 更新全局的概率矩阵
 		updateBestCoalitions();      //  更新最好的Coalitions
-		writeLogMatrix(m_updateCounter);
+		writeLogMatrix(++m_updateCounter);
 		
-		if (++m_updateCounter == 10)
+		if (m_updateCounter == 10)
 		{
-			SAMPLE_INTERVAL = 100;
+			SAMPLE_INTERVAL *= 2;
 		}
-		//if (m_updateCounter == MAX_UPDATE)  // 退出本次实验-2：当达到实现规定的MAX_UPDATE
-			//break;
 	}
 
 	if (m_appearTarget == true)
 	{                           //当前评估次数          此时整个种群的最优适应值
 		LOG_ANALYSE << setw(8) << (m_evaluateCounter / 100 + 1) * 100 << m_population[m_bestCoalitionIndex[0]].getSimpleEvaluate();
 		LOG_ANALYSE << endl;  
-
-		////当前评估次数          此时整个种群的最优适应值
-		//LOG_ANALYSE << setw(6) << m_evaluateCounter;
-		//string str = to_string(m_population[m_bestCoalitionIndex[0]].getSimpleEvaluate()) + "\n";
-		//LOG_ANALYSE << str;
 
 		unique_lock<mutex> lock(Global::mtx);
 		cout << "Experiment " << setw(2) << ID << " found Global best(" << Coalition::target << ") after "
@@ -195,7 +188,7 @@ void Population::updatePopluation()
 				ofVec2f arrayIndex;
 				do
 				{
-					arrayIndex = c.getPlaceFromPMatrix(PROBABILITY_MATRIX);  // 问题：可供选择的点越来越少，可能一些很好的点，就“消失”了
+					arrayIndex = c.getPlaceFromPMatrix(PROBABILITY_MATRIX, SUM_OF_ROW, TOTAL);                 // 可供选择的点越来越少
 				} while (c.contain(backupC, arrayIndex) == true || c.contain(m_enemy, arrayIndex) == true);  // 修复一个bug
 																											 // 当新选的点，如果是该联盟中已存在的点的话，继续选；如果可选择的点很少的话，循环次数较多
 				Tank newTank;
@@ -253,6 +246,24 @@ void Population::updatePMatrix()
 			int x = tank.getArrayIndex().x;
 			int y = tank.getArrayIndex().y;
 			PROBABILITY_MATRIX[y][x] += c.getWeight();
+		}
+	}
+
+	// 更新PM的metadata
+	int x1 = Global::BF_UL.x, x2 = Global::BF_LR.x;
+	int y1 = Global::BF_LR.y, y2 = Global::BF_UL.y;
+	TOTAL = 0.0;                           // 总和
+	SUM_OF_ROW = vector<double>(y2 - y1 + 1, 0.0);      // 累积到该行之和
+	for (int y = y1; y <= y2; ++y)
+	{
+		if (y - 1 >= y1)                             // 先加上前面行的和        
+		{
+			SUM_OF_ROW[y - y1] = SUM_OF_ROW[y - y1 - 1]; // 修正BUG：下标错误
+		}
+		for (int x = x1; x <= x2; ++x)
+		{
+			TOTAL += PROBABILITY_MATRIX[y][x];
+			SUM_OF_ROW[y - y1] += PROBABILITY_MATRIX[y][x];  // 修正BUG：下标错误
 		}
 	}
 }
