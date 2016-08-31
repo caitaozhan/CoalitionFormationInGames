@@ -1,0 +1,4 @@
+SUM_OF_ROW = vector<double>(y2 - y1 + 1, 0.0);
+
+
+SUM_OF_ROW.resize(y2 - y1 + 1, 0.0);
