@@ -13,5 +13,7 @@ ofVec2f Global::BF_UL = ofVec2f(0, Global::HEIGHT - 1);
 ofVec2f Global::BF_LR = ofVec2f(Global::WIDTH - 1, 0);
 
 vector<vector<double>> Global::PROBABILITY_MATRIX = vector<vector<double>>();
+vector<double> Global::SUM_OF_ROW = vector<double>();
+double Global::TOTAL = 0.0;
 
 mt19937 Global::dre(0);

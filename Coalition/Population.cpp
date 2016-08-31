@@ -7,11 +7,11 @@ Population::Population()
 	PL = 0.9;    // Probability Learning
 	LS = 0.9;    // Local Search
 	
-	ENEMY_INPUT = string("../sample/6_case_20.txt");                                 // enemy阵型的初始化编队
+	ENEMY_INPUT = string("../sample/5_case_50.txt");                                 // enemy阵型的初始化编队
 	LOG_PM_NAME = string("../log/50^2,pop=50,ind=50/log_simpleEvaluate.txt");  // 概率矩阵日志
 	LOG_ANALYSE_INPUT = string("../log/50^2,pop=50,ind=50/log_analyze.txt");   // 程序运行日志，记录每一次实验的评估值
-	LOG_ANALYSE_OUTPUT = string("../log/5^2,pop=50,ind=50/8-29_0.98_0.9.txt");  // 分析程序运行的运行记录
-	MAX_UPDATE = 500;
+	LOG_ANALYSE_OUTPUT = string("../log/5^2,pop=50,ind=50/8-31_0.9_0.9.txt");  // 分析程序运行的运行记录
+	MAX_UPDATE = 2000;
 	MAX_EXPERIMENT = 15;
 
 	SMALL_NUMBER = 0.01;
@@ -191,6 +191,24 @@ void Population::updatePMatrix()
 			Global::PROBABILITY_MATRIX[y][x] += c.getWeight();
 		}
 	}
+	
+	// 增加空间，保存概率矩阵的metadata
+	int x1 = Global::BF_UL.x, x2 = Global::BF_LR.x;
+	int y1 = Global::BF_LR.y, y2 = Global::BF_UL.y;
+	Global::TOTAL = 0.0;                                         // 总和
+	Global::SUM_OF_ROW = vector<double>(y2 - y1 + 1, 0.0);       // 累积到该行之和
+	for (int y = y1; y <= y2; ++y)
+	{
+		if (y - 1 >= y1)                                         // 先加上前面行的和        
+		{
+			Global::SUM_OF_ROW[y - y1] = Global::SUM_OF_ROW[y - y1 - 1];    // 修正BUG：下标错误
+		}
+		for (int x = x1; x <= x2; ++x)
+		{
+			Global::TOTAL += Global::PROBABILITY_MATRIX[y][x];
+			Global::SUM_OF_ROW[y - y1] += Global::PROBABILITY_MATRIX[y][x];  // 修正BUG：下标错误
+		}
+	}
 }
 
 void Population::resetEnemy(string & way)
@@ -226,24 +244,6 @@ void Population::writeLogMatrix(int updateCounter)
 		LOG_PM << '\n';
 	}
 	LOG_PM << '\n' << "*******************" << endl;
-
-	//for (int y = Global::HEIGHT - 1; y >= 0; --y)
-	//{
-	//	for (int x = 0; x < Global::WIDTH - 1; ++x)
-	//	{
-	//		if (isZero(Global::PROBABILITY_MATRIX[x][y]))
-	//		{
-	//			LOG_PM << setprecision(0);
-	//		}
-	//		else
-	//		{
-	//			LOG_PM << setprecision(3);
-	//		}
-	//		LOG_PM << left << setw(7) << Global::PROBABILITY_MATRIX[x][y];  // 历史遗留问题，(y,x) --> (x,y)
-	//	}
-	//	LOG_PM << '\n';
-	//}
-	//LOG_PM << '\n' << "*******************" << endl;
 }
 
 /*

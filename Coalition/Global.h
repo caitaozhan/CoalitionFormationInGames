@@ -18,7 +18,9 @@ public:
 	static ofVec2f BF_UL;             // battlefield 的左上角, upper left
 	static ofVec2f BF_LR;			  // battlefield 的右下角, lower right
 
-	static vector<vector<double>> PROBABILITY_MATRIX;
+	static vector<vector<double>> PROBABILITY_MATRIX;    // 概率矩阵
+	static vector<double> SUM_OF_ROW;                    // 概率矩阵每行之和
+	static double TOTAL;                                 // 概率矩阵所有元素之和
 
 	static mt19937 dre;  // 默认随机引擎，需要配合“分布”去使用
 

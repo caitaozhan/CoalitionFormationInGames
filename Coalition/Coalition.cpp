@@ -1,8 +1,8 @@
 #include "Coalition.h"
 
 int Coalition::logNumber = 0;
-double Coalition::target = 8.0;
-int Coalition::INDIVIDUAL_SIZE = 10;
+double Coalition::target = 42.0;
+int Coalition::INDIVIDUAL_SIZE = 50;
 uniform_real_distribution<double> Coalition::urd_0_1 = uniform_real_distribution<double>(0.0, 1.0);
 uniform_int_distribution<int> Coalition::uid_x = uniform_int_distribution<int>(0, 1);
 uniform_int_distribution<int> Coalition::uid_y = uniform_int_distribution<int>(0, 1);
@@ -577,25 +577,25 @@ ofVec2f Coalition::getPlaceFromPMatrix()
 {
 	int x1 = Global::BF_UL.x, x2 = Global::BF_LR.x;
 	int y1 = Global::BF_LR.y, y2 = Global::BF_UL.y;
-	double sumTotal = 0.0;                           // 总和
-	vector<double> sumOfRow(y2 - y1 + 1, 0.0);       // 累积到该行之和
-	for (int y = y1; y <= y2; ++y)
-	{
-		if (y - 1 >= y1)                             // 先加上前面行的和        
-		{
-			sumOfRow[y - y1] = sumOfRow[y - y1 - 1]; // 修正BUG：下标错误
-		}
-		for (int x = x1; x <= x2; ++x)
-		{
-			sumTotal += Global::PROBABILITY_MATRIX[y][x];
-			sumOfRow[y - y1] += Global::PROBABILITY_MATRIX[y][x];  // 修正BUG：下标错误
-		}
-	}
-	double choose = urd_0_1(Global::dre)*sumTotal;                              // 产生一个随机数
+	//double sumTotal = 0.0;                           // 总和
+	//vector<double> sumOfRow(y2 - y1 + 1, 0.0);       // 累积到该行之和
+	//for (int y = y1; y <= y2; ++y)
+	//{
+	//	if (y - 1 >= y1)                             // 先加上前面行的和        
+	//	{
+	//		sumOfRow[y - y1] = sumOfRow[y - y1 - 1]; // 修正BUG：下标错误
+	//	}
+	//	for (int x = x1; x <= x2; ++x)
+	//	{
+	//		sumTotal += Global::PROBABILITY_MATRIX[y][x];
+	//		sumOfRow[y - y1] += Global::PROBABILITY_MATRIX[y][x];  // 修正BUG：下标错误
+	//	}
+	//}
+	double choose = urd_0_1(Global::dre)*Global::TOTAL;                              // 产生一个随机数
 	// 先找到行，后找到列
-	int row = lower_bound(sumOfRow.begin(), sumOfRow.end(), choose) - sumOfRow.begin();  // 行 --> y
+	int row = lower_bound(Global::SUM_OF_ROW.begin(), Global::SUM_OF_ROW.end(), choose) - Global::SUM_OF_ROW.begin();  // 行 --> y
 	if (row >= 1)
-		choose -= sumOfRow[row - 1];                                    // 这里思维不够缜密，出现了大BUG；现在要找 choose 在第 row 行的位置
+		choose -= Global::SUM_OF_ROW[row - 1];                                    // 这里思维不够缜密，出现了大BUG；现在要找 choose 在第 row 行的位置
 	vector<double> sumOfChosenRow(x2 - x1 + 1, 0);
 	sumOfChosenRow[0] = Global::PROBABILITY_MATRIX[row + y1][x1];               // 修正BUG：下标错误
 	for (int i = 1; i < sumOfChosenRow.size(); ++i)
