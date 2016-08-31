@@ -11,7 +11,7 @@ using namespace std;
 void doExperiments(const vector<int> &experiments)
 {
 	Population population;
-	population.initialize(0.9, 0.9, 50);
+	population.initialize(0.5, 0.9, 50);
 	for (int i = 0; i < experiments.size(); ++i)
 	{
 		population.setLogExperEvaluate(experiments[i]);  // 依据本次实验的ID号，设置log文件名

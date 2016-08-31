@@ -1,15 +1,15 @@
 #include "Population.h"
 
-string Population::LOG_EXPER_EVALUATE = string("../log/case-4/experiment_");         // 程序运行日志，记录每一次实验的评估值
-string Population::LOG_ANALYSE_OUTPUT = string("../log/case-4/result_");             // 分析程序运行的运行记录
+string Population::LOG_EXPER_EVALUATE = string("../log/case-3/experiment_");         // 程序运行日志，记录每一次实验的评估值
+string Population::LOG_ANALYSE_OUTPUT = string("../log/case-3/result_");             // 分析程序运行的运行记录
 
 Population::Population()
 {
 	PL = 0.9;    // Probability Learning
 	LS = 0.9;    // Local Search
 	
-	ENEMY_INPUT = string("../sample/4_case_20.txt");                                 // enemy阵型的初始化编队
-	LOG_PM_NAME = string("../log/case-4/log_simpleEvaluate.txt");                    // 概率矩阵日志
+	ENEMY_INPUT = string("../sample/3_case_20.txt");                                 // enemy阵型的初始化编队
+	LOG_PM_NAME = string("../log/case-3/log_simpleEvaluate.txt");                    // 概率矩阵日志
 	MAX_UPDATE = 500;
 	MAX_EXPERIMENT = 15;
 
@@ -32,7 +32,7 @@ void Population::initialize(double pl, double ls, int populationSize)
 	LS = ls;
 	m_populationSize = populationSize;
 	SAMPLE_INTERVAL = populationSize;   // 初始条件下，SAMPLE_INTERVAL 设为种群规模大小
-	m_stagnateCriteria = 100;             // 经过若干代数的进化，种群的fitness无变化，则终止程序
+	m_stagnateCriteria = 200;             // 经过若干代数的进化，种群的fitness无变化，则终止程序
 
 	LOG_PM.open(LOG_PM_NAME);
 
@@ -134,7 +134,7 @@ void Population::run(int ID)
 
 		unique_lock<mutex> lock(Global::mtx);
 		cout << "Experiment " << setw(2) << ID << " found Global best(" << Coalition::target << ") after "
-			<< setw(4) << m_updateCounter << " generations, " << setw(5) << (m_updateCounter - 1)*m_populationSize << " evaluations" << endl;
+			<< setw(4) << m_updateCounter - 1 << " generations, " << setw(5) << (m_updateCounter - 1)*m_populationSize << " evaluations" << endl;
 	}
 	else
 	{
@@ -177,7 +177,7 @@ void Population::updatePopluation()
 				{// local search
 					localSearch = true;
 					ofVec2f arrayIndex;
-					arrayIndex = backupC.localSearch_big_PM(m_enemy, PROBABILITY_MATRIX);
+					arrayIndex = backupC.localSearch_big(m_enemy);
 					Tank newTank;
 					newTank.setup(arrayIndex, Tank::ABILITY_DISTANCE, false);
 					constructC.pushBackTank(move(newTank));
