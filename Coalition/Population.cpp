@@ -1,16 +1,16 @@
 #include "Population.h"
 
-string Population::LOG_EXPER_EVALUATE = string("../log/case-3/experiment_");         // 程序运行日志，记录每一次实验的评估值
-string Population::LOG_ANALYSE_OUTPUT = string("../log/case-3/result_");             // 分析程序运行的运行记录
+string Population::LOG_EXPER_EVALUATE = string("../log/case-2/experiment_");         // 程序运行日志，记录每一次实验的评估值
+string Population::LOG_ANALYSE_OUTPUT = string("../log/case-2/result_");             // 分析程序运行的运行记录
 
 Population::Population()
 {
 	PL = 0.9;    // Probability Learning
 	LS = 0.9;    // Local Search
 	
-	ENEMY_INPUT = string("../sample/3_case_20.txt");                                 // enemy阵型的初始化编队
-	LOG_PM_NAME = string("../log/case-3/log_simpleEvaluate.txt");                    // 概率矩阵日志
-	MAX_UPDATE = 500;
+	ENEMY_INPUT = string("../sample/2_case_20.txt");                                 // enemy阵型的初始化编队
+	LOG_PM_NAME = string("../log/case-2/log_simpleEvaluate.txt");                    // 概率矩阵日志
+	MAX_UPDATE = 10000;
 	MAX_EXPERIMENT = 15;
 
 	SMALL_NUMBER = 0.01;
@@ -22,7 +22,7 @@ Population::Population()
 	m_stop = false;
 	m_isStagnate = false;
 	m_latestPopAvg = -Coalition::INDIVIDUAL_SIZE;
-
+	m_updateThreshhold = 10;
 	urd_0_1 = uniform_real_distribution<double>(0.0, 1.0);
 }
 
@@ -89,8 +89,6 @@ void Population::update()
 		{
 			cout << "End of " << MAX_EXPERIMENT << " times of experiments!" << endl;
 			LOG_ANALYSE.close();                    // 先关闭，再由另外一个类打开“临界文件”
-			//AnalyzeLog analyzeLog(LOG_EXPER_EVALUATE, LOG_ANALYSE_OUTPUT);
-			//analyzeLog.analyze();
 			m_experimentTimes = 0;
 			m_update = 0;
 			cout << "\n\nLet's start over again~" << endl;
@@ -121,10 +119,13 @@ void Population::run(int ID)
 		updateBestCoalitions();      //  更新最好的Coalitions
 		writeLogMatrix(++m_updateCounter);
 		
-		if (m_updateCounter == 10)
+		if (m_updateCounter == m_updateThreshhold)
 		{
-			SAMPLE_INTERVAL *= 2;
+			SAMPLE_INTERVAL *= 2;            // 评估次数*2之后，再sample
+			m_updateThreshhold *= 10;        // updateCounter的阈值*10
 		}
+		if (m_updateCounter == MAX_UPDATE)
+			break;
 	}
 
 	if (m_appearTarget == true)
@@ -139,10 +140,7 @@ void Population::run(int ID)
 	else
 	{
 		unique_lock<mutex> lock(Global::mtx);
-		cout << "Experiment " << setw(2) << ID << " not found Global best. ";
-		if (m_isStagnate == true)
-			cout << m_updateCounter;
-		cout << endl;
+		cout << "Experiment " << setw(2) << ID << " not found Global best. " << m_updateCounter << endl;
 	}
 	resetExperVariables();
 }
@@ -153,8 +151,10 @@ void Population::resetExperVariables()
 	m_updateCounter = 0;                             // 重新计数代数
 	m_appearTarget = false;                          // 恢复没有找到目标
 	m_isStagnate = false;                            // 恢复为“不停滞”状态
-	m_bestEvaluation = -Coalition::INDIVIDUAL_SIZE;  // 为下一次实验做准备工作
-	SAMPLE_INTERVAL = m_populationSize;              // 重置采样间隔
+	m_bestEvaluation = -Coalition::INDIVIDUAL_SIZE;  // 重置最好评估值
+	m_latestPopAvg = -Coalition::INDIVIDUAL_SIZE;    // 重置上一次记录的平均评估值
+	SAMPLE_INTERVAL = m_populationSize;              // 重置采样间隔为种群里面的个体数
+	m_updateThreshhold = 10;                         // 恢复为10
 	LOG_ANALYSE.close();                             // 关闭当前的日子文件
 }
 

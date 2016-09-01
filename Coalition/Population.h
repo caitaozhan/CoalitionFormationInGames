@@ -53,7 +53,8 @@ private:
 	int m_bestEvaluation;
 	Coalition m_enemy;                          // enemy
 	bool m_stop;							    // whether population meets terminal condition
-	int  m_updateCounter;
+	int  m_updateCounter;                       // 更近代数
+	int  m_updateThreshhold;                    // 更新代数的阈值，用来控制记录日志的频率
 	int  m_evaluateCounter;
 	int  SAMPLE_INTERVAL;                       // 采样间隔
 
