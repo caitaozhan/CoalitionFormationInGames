@@ -7,11 +7,11 @@ Population::Population()
 	PL = 0.9;    // Probability Learning
 	LS = 0.9;    // Local Search
 	
-	ENEMY_INPUT = string("../sample/3_case_20.txt");                                 // enemy阵型的初始化编队
+	ENEMY_INPUT = string("../sample/1_case_10.txt");                           // enemy阵型的初始化编队
 	LOG_PM_NAME = string("../log/50^2,pop=50,ind=50/log_simpleEvaluate.txt");  // 概率矩阵日志
 	LOG_ANALYSE_INPUT = string("../log/50^2,pop=50,ind=50/log_analyze.txt");   // 程序运行日志，记录每一次实验的评估值
 	LOG_ANALYSE_OUTPUT = string("../log/5^2,pop=50,ind=50/8-31_0.9_0.9.txt");  // 分析程序运行的运行记录
-	MAX_UPDATE = 2000;
+	MAX_UPDATE = 300;
 	MAX_EXPERIMENT = 15;
 
 	SMALL_NUMBER = 0.01;
@@ -62,7 +62,7 @@ void Population::update()
 	{
 		m_updateCounter++;
 
-		if (m_appearTarget == true || m_updateCounter == MAX_UPDATE)   // 每一次实验进化 MAX_UPDATE 代
+		if (/*m_appearTarget == true || */m_updateCounter == MAX_UPDATE)   // 每一次实验进化 MAX_UPDATE 代
 		{
 			if (m_appearTarget == false)            // MAX_UPDATE 次之内没有找到 target
 			{
@@ -73,9 +73,9 @@ void Population::update()
 			cout << m_experimentTimes << "次实验\n------\n";
 			writeLogAnalyse(m_updateCounter);
 			m_appearTarget = false;
+			m_experimentTimes++;                    // 做完了一次实验
 			Global::dre.seed(m_experimentTimes);    // 给随机引擎设置种子，从 0 ~ MAX_EXPERIMENT-1
 			m_updateCounter = 0;                    // 为下一次实验做准备
-			m_experimentTimes++;                    // 做完了一次实验
 			resetMe();
 		}
 
@@ -90,13 +90,13 @@ void Population::update()
 			cout << "\n\nLet's start over again~" << endl;
 		}
 
-		//if (++m_updateCounter % 10 == 0)  //  每隔更新10代分析平均 Evalation
-		//writeLogAnalyse(m_updateCounter);
+		
 		updatePopluation();          //  新的全局概率矩阵 --> 更新种群位置
 		updateWeight();              //  新的种群位置     --> 更新种群的权值
 		updatePMatrix();             //  新的种群权值     --> 更新全局的概率矩阵
 		updateBestCoalitions();      //  更新最好的Coalitions
 		writeLogMatrix(m_updateCounter);
+		
 	}
 
 }
