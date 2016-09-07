@@ -104,26 +104,6 @@ void ofApp::keyPressed(int key){
 	{
 		unique_lock<mutex> lock(BUFFER_R.mtx);
 		BUFFER_R.update ^= 1;
-		// TODO：存在逻辑问题，当update == false，生产者线程停止生产，很快Buffer.queue为空，消费者等待。
-		// 当按键按下'u'的时候，系统无法响应，因为是消费者负责相应按钮。。。解决方案：当update == false的时候，生产者暂停几秒钟，然后自动恢复。
-
-		/*if (m_update == false)
-		{
-			m_update = true;
-			ofApp::m_experimentTimes = 0;
-			ofApp::m_updateCounter = 0;
-			cout << "update = " << m_update << endl;
-		}
-		else
-		{ 
-			m_update = false;
-			cout << "update = " << m_update << endl;
-		}*/
-		/*
-		updatePopluation();   //  新的全局概率矩阵 --> 更新种群位置
-		updateWeight();       //  新的种群位置     --> 更新种群的权值
-		updatePMatrix();      //  新的种群权值     --> 更新全局的概率矩阵
-		*/
 	}
 }
 

@@ -7,11 +7,11 @@ Population::Population()
 	PL = 0.9;    // Probability Learning
 	LS = 0.9;    // Local Search
 	
-	ENEMY_INPUT = string("../sample/7_case_50.txt");                           // enemy阵型的初始化编队
+	ENEMY_INPUT = string("../sample/8_case_50.txt");                           // enemy阵型的初始化编队
 	LOG_PM_NAME = string("../log/50^2,pop=50,ind=50/log_simpleEvaluate.txt");  // 概率矩阵日志
 	LOG_ANALYSE_INPUT = string("../log/50^2,pop=50,ind=50/log_analyze.txt");   // 程序运行日志，记录每一次实验的评估值
 	LOG_ANALYSE_OUTPUT = string("../log/5^2,pop=50,ind=50/9-1_0.9_0.9.txt");  // 分析程序运行的运行记录
-	MAX_UPDATE = 2500;
+	MAX_UPDATE = 2000;
 	MAX_EXPERIMENT = 15;
 
 	SMALL_NUMBER = 0.01;
@@ -69,13 +69,14 @@ void Population::update()
 				cout << "target not found @" << m_updateCounter << '\n';
 				LOG_ANALYSE << "target not found @" << m_updateCounter << '\n';
 			}
-			m_bestEvaluation = -Coalition::INDIVIDUAL_SIZE;
-			cout << m_experimentTimes << "次实验\n------\n";
-			writeLogAnalyse(m_updateCounter);
-			m_appearTarget = false;
-			m_experimentTimes++;                    // 做完了一次实验
-			Global::dre.seed(m_experimentTimes);    // 给随机引擎设置种子，从 0 ~ MAX_EXPERIMENT-1
-			m_updateCounter = 0;                    // 为下一次实验做准备
+			//m_bestEvaluation = -Coalition::INDIVIDUAL_SIZE;
+			//cout << m_experimentTimes << "次实验\n------\n";
+			//writeLogAnalyse(m_updateCounter);
+			//m_appearTarget = false;
+			//m_experimentTimes++;                    // 做完了一次实验
+			//Global::dre.seed(m_experimentTimes);    // 给随机引擎设置种子，从 0 ~ MAX_EXPERIMENT-1
+			//m_updateCounter = 0;                    // 为下一次实验做准备
+			resetExperVariable();
 			resetMe();
 		}
 
@@ -90,13 +91,14 @@ void Population::update()
 			cout << "\n\nLet's start over again~" << endl;
 		}
 
-		
+		//if(m_experimentTimes == 16)
+		//{
 		updatePopluation();          //  新的全局概率矩阵 --> 更新种群位置
 		updateWeight();              //  新的种群位置     --> 更新种群的权值
 		updatePMatrix();             //  新的种群权值     --> 更新全局的概率矩阵
 		updateBestCoalitions();      //  更新最好的Coalitions
 		writeLogMatrix(m_updateCounter);
-		
+		//}
 	}
 
 }
@@ -368,13 +370,23 @@ void Population::resetMe()
 	for (int i = 0; i < m_population.size(); ++i)
 	{
 		m_population[i].setup_CR(Tank::ABILITY_DISTANCE, false, m_enemy);  // 更新联盟里所有 tank 的位置
-		m_population[i].setIsStangate(true);                         // 修复一个BUG
-		m_population[i].setStagnate0(0);
+		//m_population[i].setIsStangate(true);                         // 修复一个BUG
+		//m_population[i].setStagnate0(0);
 	}
 	updateWeight();   // 新的位置 --> 新的 weight
 	updatePMatrix();
 	updateBestCoalitions();
 	writeLogMatrix(0);
+}
+
+void Population::resetExperVariable()
+{
+	m_bestEvaluation = -Coalition::INDIVIDUAL_SIZE;
+	m_appearTarget = false;
+	m_updateCounter = 0;
+	cout << m_experimentTimes << "次试验\n-------\n";
+	m_experimentTimes++;
+	Global::dre.seed(m_experimentTimes);
 }
 
 

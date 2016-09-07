@@ -35,7 +35,7 @@ public:
 	bool isZero(double d);                      // TODO: put it in utility module
 
 	void resetMe();
-	
+	void resetExperVariable();
 	static uniform_real_distribution<double> urd_0_1;
 
 private:
