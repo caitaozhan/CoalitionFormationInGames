@@ -30,8 +30,8 @@ public:
 	bool getUpdate();                           // get ÊÇ·ñ¼ÌÐøupdate population
 	bool getStop();                             // get m_stop
 	int  getSize();                             // get the size of m_populations
-	void getBestCoalitions(vector<Coalition> & bC);
-	void getEnemy(Coalition &e);
+	vector<Coalition> & getBestCoalitions(vector<Coalition> &bC);
+	Coalition & getEnemy();
 	bool isZero(double d);                      // TODO: put it in utility module
 
 	void resetMe();
@@ -45,8 +45,8 @@ private:
 	int m_bestEvaluation;
 	Coalition m_enemy;                          // enemy
 	bool m_stop;							    // whether population meets terminal condition
-	int  m_updateCounter;
 	
+	int  m_updateCounter;
 	bool m_appearTarget;
 	int  m_experimentTimes;
 

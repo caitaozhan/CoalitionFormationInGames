@@ -40,7 +40,6 @@ void Population::initialize(double pl, double ls, int populationSize)
 	m_population.resize(m_populationSize);                  
 	for (int i = 0; i < m_population.size(); ++i)
 	{
-		Coalition::logNumber++;
 		m_population[i].initialize(Coalition::INDIVIDUAL_SIZE);       // 修正BUG：之前 m_population[i] 调用重载的默认构造函数，导致vector大小=0
 	}
 	m_bestCoalitionIndex.emplace_back(0);                             // 就是初始化加入一个元素
@@ -69,13 +68,6 @@ void Population::update()
 				cout << "target not found @" << m_updateCounter << '\n';
 				LOG_ANALYSE << "target not found @" << m_updateCounter << '\n';
 			}
-			//m_bestEvaluation = -Coalition::INDIVIDUAL_SIZE;
-			//cout << m_experimentTimes << "次实验\n------\n";
-			//writeLogAnalyse(m_updateCounter);
-			//m_appearTarget = false;
-			//m_experimentTimes++;                    // 做完了一次实验
-			//Global::dre.seed(m_experimentTimes);    // 给随机引擎设置种子，从 0 ~ MAX_EXPERIMENT-1
-			//m_updateCounter = 0;                    // 为下一次实验做准备
 			resetExperVariable();
 			resetMe();
 		}
@@ -339,22 +331,20 @@ void Population::updateBestCoalitions()
 	}
 }
 
-void Population::getBestCoalitions(vector<Coalition>& bC)
+vector<Coalition> & Population::getBestCoalitions(vector<Coalition> &bC)
 {
-	vector<Coalition> temp;
-	temp.reserve(m_bestCoalitionIndex.size());
+	bC.clear();
+	bC.reserve(m_bestCoalitionIndex.size());
 	for (int & index : m_bestCoalitionIndex)
 	{
-		temp.push_back(m_population[index]);
+		bC.push_back(m_population[index]);
 	}
-
-	bC = move(temp);
-	return;
+	return bC;
 }
 
-void Population::getEnemy(Coalition & e)
+Coalition & Population::getEnemy()
 {
-	e = m_enemy;
+	return m_enemy;
 }
 
 bool Population::isZero(double d)
@@ -365,6 +355,9 @@ bool Population::isZero(double d)
 	return false;
 }
 
+/*
+	重新初始化我方坦克阵型
+*/
 void Population::resetMe()
 {
 	for (int i = 0; i < m_population.size(); ++i)
@@ -379,6 +372,9 @@ void Population::resetMe()
 	writeLogMatrix(0);
 }
 
+/*
+	重新初始化实验的参数
+*/
 void Population::resetExperVariable()
 {
 	m_bestEvaluation = -Coalition::INDIVIDUAL_SIZE;

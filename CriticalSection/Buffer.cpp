@@ -30,7 +30,7 @@ void producerCalculating(Population && population)
 	population.initialize(0.9, 0.9, 100);         // 初始化参数
 	{
 		unique_lock<mutex> lock(BUFFER_R.mtx);
-		population.getEnemy(BUFFER_R.enemy);     // 初始化BUFFER_R.enemy
+		BUFFER_R.enemy = population.getEnemy();     // 初始化BUFFER_R.enemy
 	}
 	{
 		unique_lock<mutex> lock(BUFFER.mtx);     // RAII写法
@@ -56,7 +56,9 @@ void producerCalculating(Population && population)
 			population.resetEnemy(string("8"));
 			population.resetMe();
 			unique_lock<mutex> lock(BUFFER_R.mtx);
-			population.getEnemy(BUFFER_R.enemy);             // 更新 BUFFER.enemy   // m_enemy.writeLog();
+			//BUFFER_R.enemy = population.getEnemy(BUFFER_R.enemy);             // 更新 BUFFER.enemy   // m_enemy.writeLog();
+			BUFFER_R.enemy = population.getEnemy();             // 更新 BUFFER.enemy   // m_enemy.writeLog();
+
 			BUFFER_R.resetEnemy = false;
 		}
 		if (population.getResetMe() == true)
@@ -68,7 +70,7 @@ void producerCalculating(Population && population)
 		}
 
 		population.update();                     // this line of code should be time-costy
-		population.getBestCoalitions(newBestCoalitions);
+		newBestCoalitions = population.getBestCoalitions(newBestCoalitions);
 
 		{// critical section
 			unique_lock<mutex> lock(BUFFER.mtx);

@@ -1,6 +1,5 @@
 #include "Coalition.h"
 
-int Coalition::logNumber = 0;
 double Coalition::target = 34.0;
 int Coalition::INDIVIDUAL_SIZE = 48;
 uniform_real_distribution<double> Coalition::urd_0_1 = uniform_real_distribution<double>(0.0, 1.0);
@@ -49,11 +48,6 @@ void Coalition::initialize(int individualSize)
 	m_coalition.resize(individualSize);
 	m_simpleEvaluate = m_fitness = m_weight = m_stagnate0 = 0;
 	m_isStagnate = true;
-
-	//string logName("../../log/32^2,pop=32,ind=32_param/coalition_");  // caolition_0 是 enemy
-	//logName.append(ofToString(Coalition::logNumber));  // 初始化该 Coalition 自己的日志
-	//logName.append(".txt");
-	//m_logPlace.open(logName);
 }
 
 // 这种方法，在 INDIVIDUAL_SIZE 比较小（比如 8）的时候，效率不错；但是如果 INDIVIDUAL_SIZE，比较大（比如 40）的时候，效率可能不佳
@@ -593,14 +587,3 @@ ofVec2f Coalition::getPlaceFromPMatrix()
 
 	return ofVec2f(column + x1, row + y1);  // (x, y)
 }
-
-
-void Coalition::writeLog()
-{
-	for (Tank &t : m_coalition)
-	{
-		m_logPlace << t.getArrayIndex() << '\n';
-	}
-	m_logPlace << '\n' << "-----------" << endl;
-}
-

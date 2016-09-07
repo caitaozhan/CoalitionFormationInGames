@@ -57,8 +57,6 @@ public:
 
 	static ofVec2f getPlaceFromPMatrix();
 	
-	void writeLog();
-
 	static int logNumber;  // 每一个 Coalition 对象都有一个自己的日志文件，通过这个静态的序号区分日志的名字
 	static double target;  // 针对某一 enemy，若能进化出 evulation = target，则认为达到目标了
 
@@ -78,6 +76,4 @@ private:
 	bool     m_isEnemy;
 	int      m_stagnate0;        // 代数：对于 SimpleEvaluation 而言，在 Evaluation = 0 时候的停滞的代数
 	bool     m_isStagnate;       // 假设开始的时候，都是可能在 Evaluation = 0 停滞的
-	ofstream m_logPlace;         // 每一个 Coalition 对象都有自己的日志文件
-
 };
