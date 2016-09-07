@@ -12,10 +12,9 @@ public:
 	void initialize(double selectRatio, int populationSize);
 
 	void update();
-	void updatePopulation();
-	void updateWeight();
-	void updatePMatrix();
-	void resetEnemy(string &way);
+	void select();
+	void estimateDistribution();
+	void sample();
 
 	void writeLogMatrix(int updateCounter);
 	int  writeLoganalyse(int updateCounter);
@@ -32,7 +31,8 @@ public:
 	vector<Coalition> & getBestCoalitions(vector<Coalition> &bC);
 	Coalition & getEnemy(Coalition &e);
 	bool isZero(double d);
-
+	
+	void resetEnemy(string &way);
 	void resetMe();
 	void resetExperVariable();
 	static uniform_real_distribution<double> urd_0_1;
