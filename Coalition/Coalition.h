@@ -56,7 +56,8 @@ public:
 	ofVec2f localSearch_big_PM(const Coalition &enemy);        // backupC 是调用者,加入概率矩阵
 
 	static ofVec2f getPlaceFromPMatrix();
-	
+	static bool decrease(const Coalition & c1, const Coalition & c2);
+
 	static int logNumber;  // 每一个 Coalition 对象都有一个自己的日志文件，通过这个静态的序号区分日志的名字
 	static double target;  // 针对某一 enemy，若能进化出 evulation = target，则认为达到目标了
 

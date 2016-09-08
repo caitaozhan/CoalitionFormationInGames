@@ -218,8 +218,14 @@ void PopulationEDA::resetExperVariable()
 void PopulationEDA::select()
 {
 	m_selectedPop.clear();
-	m_selectedPop.reserve(m_populationSize * SELECT_RATIO);
-	sort(m_population.begin(), m_population.end());  // TODO: 写排序规则
+	int selectNum = m_populationSize * SELECT_RATIO;
+	m_selectedPop.resize(selectNum);
+	sort_heap(m_population.begin(), m_population.end(), Coalition::decrease); // 考虑到在基本有序或者逆序的时候（可能会有很多个体fitness相等），快排的时间复杂度接近 n^2
+
+	for (int i = 0; i < selectNum; ++i)
+	{
+		m_selectedPop[i] = m_population[i];
+	}
 }
 
 /*

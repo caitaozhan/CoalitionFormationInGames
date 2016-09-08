@@ -587,3 +587,11 @@ ofVec2f Coalition::getPlaceFromPMatrix()
 
 	return ofVec2f(column + x1, row + y1);  // (x, y)
 }
+
+bool Coalition::decrease(const Coalition & c1, const Coalition & c2)
+{
+	if (c1.getSimpleEvaluate() > c2.getSimpleEvaluate())
+		return true;
+
+	return false;
+}
