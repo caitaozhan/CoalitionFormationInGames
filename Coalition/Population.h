@@ -12,10 +12,6 @@ public:
 	void initialize(double pl, double ls, int populationSize);
 
 	void update();                              // update the population
-	void updatePopluation();                    // 更新种群
-	void updateBestCoalitions();                // update m_bestCoalitions
-	void updateWeight();                        // 计算估值 --> 适应值 --> 权值
-	void updatePMatrix();                       // update probability matrix
 	
 	void writeLogMatrix(int updateCounter);     // 打印矩阵到log
 	int  writeLogAnalyse(int updateCounter);    // 打印算法的分析
@@ -29,7 +25,7 @@ public:
 	bool getUpdate();                           // get 是否继续update population
 	bool getStop();                             // get m_stop
 	int  getSize();                             // get the size of m_populations
-	vector<Coalition> & getBestCoalitions(vector<Coalition> &bC);
+	void updateBestCoalitions(vector<Coalition> &bC);
 	Coalition & getEnemy();
 	bool isZero(double d);                      // TODO: put it in utility module
 
@@ -37,6 +33,12 @@ public:
 	void resetMe();
 	void resetExperVariable();
 	static uniform_real_distribution<double> urd_0_1;
+
+private:
+	void updatePopluation();                    // 更新种群
+	void updateBestCoalitions();                // update m_bestCoalitions
+	void updateWeight();                        // 计算估值 --> 适应值 --> 权值
+	void updatePMatrix();                       // update probability matrix
 
 private:
 	vector<Coalition> m_population;			    // a group of coalitions

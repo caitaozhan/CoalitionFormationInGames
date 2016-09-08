@@ -24,7 +24,6 @@ BufferResponse::BufferResponse(bool resetMe, bool resetEnemy, bool update)
 	this->update = update;
 }
 
-
 void producerCalculating(Population && population)
 {
 	population.initialize(0.5, 0.9, 100);         // 初始化参数
@@ -56,8 +55,7 @@ void producerCalculating(Population && population)
 			population.resetEnemy(string("8"));
 			population.resetMe();
 			unique_lock<mutex> lock(BUFFER_R.mtx);
-			//BUFFER_R.enemy = population.getEnemy(BUFFER_R.enemy);             // 更新 BUFFER.enemy   // m_enemy.writeLog();
-			BUFFER_R.enemy = population.getEnemy();             // 更新 BUFFER.enemy   // m_enemy.writeLog();
+			BUFFER_R.enemy = population.getEnemy();             // 更新 BUFFER.enemy
 
 			BUFFER_R.resetEnemy = false;
 		}
@@ -70,7 +68,7 @@ void producerCalculating(Population && population)
 		}
 
 		population.update();                     // this line of code should be time-costy
-		newBestCoalitions = population.getBestCoalitions(newBestCoalitions);
+		population.updateBestCoalitions(newBestCoalitions);
 
 		{// critical section
 			unique_lock<mutex> lock(BUFFER.mtx);
@@ -84,4 +82,3 @@ void producerCalculating(Population && population)
 		}
 	}
 }
-

@@ -78,8 +78,6 @@ void ofApp::draw(){
 	m_coalitionToDraw.draw();
 	ofDrawBitmapString(m_coalitionToDraw.toString("simpleEvaluate"), -100, 100);
 	
-	// TODO: 显示所有的population.evaluation
-
 	m_easyCam.end();
 	
 }
@@ -91,14 +89,11 @@ void ofApp::keyPressed(int key){
 	{
 		unique_lock<mutex> lock(BUFFER_R.mtx);
 		BUFFER_R.resetMe = true;
-		//resetMe();
 	}
 	else if (key == 'e')
 	{
 		unique_lock<mutex> lock(BUFFER_R.mtx);
 		BUFFER_R.resetEnemy = true;
-		//m_enemy.setup_8(ABILITY_DISTANCE, true, m_enemy);
-		//m_enemy.writeLog();
 	}
 	else if (key == 'u')
 	{

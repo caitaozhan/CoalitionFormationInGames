@@ -130,7 +130,7 @@ void Population::updatePopluation()
 																											 // 当新选的点，如果是该联盟中已存在的点的话，继续选；如果可选择的点很少的话，循环次数较多
 				Tank newTank;
 				newTank.setup(arrayIndex, Tank::ABILITY_DISTANCE, false);
-				constructC.pushBackTank(newTank);
+				constructC.pushBackTank(move(newTank));
 			}
 			if (backupC.getCoalition()[i] != constructC.getCoalition()[i])
 			{
@@ -143,7 +143,7 @@ void Population::updatePopluation()
 			{
 				c = backupC;
 			}
-			else if (evaluateBackupC == evaluateC && localSearch == true)  // 相等，但是如果是 local search
+			else if (evaluateBackupC == evaluateC && localSearch == true)  // 相等，但是如果是 local search // TODO: 把localSearch这个限制去掉？
 			{
 				if (urd_0_1(Global::dre) < 0.5)                            // 给 50% 概率更新
 				{
@@ -151,7 +151,6 @@ void Population::updatePopluation()
 				}
 			}
 		}
-		//c.writeLog();
 	}
 }
 
@@ -210,7 +209,6 @@ void Population::resetEnemy(string & way)
 	if (way == string("8"))
 	{
 		m_enemy.setup_8(Tank::ABILITY_DISTANCE, true, Coalition()); 
-
 	}
 	else if (way == string("CR"))
 	{
@@ -233,7 +231,7 @@ void Population::writeLogMatrix(int updateCounter)
 			{
 				LOG_PM << setprecision(3);
 			}
-			LOG_PM << left << setw(7) << Global::PROBABILITY_MATRIX[y][x];  // 历史遗留问题，(y,x) --> (x,y)
+			LOG_PM << left << setw(7) << Global::PROBABILITY_MATRIX[y][x];  // (x,y) --> [y][x]
 		}
 		LOG_PM << '\n';
 	}
@@ -331,7 +329,12 @@ void Population::updateBestCoalitions()
 	}
 }
 
-vector<Coalition> & Population::getBestCoalitions(vector<Coalition> &bC)
+/*
+依据population的成员变量m_bestCoalitionIndex(仅保存最好个体的vector下标)，产生最好联盟个体
+直接更改传进来的引用
+@param bC, 保存最新最好联盟个体的vector
+*/
+void Population::updateBestCoalitions(vector<Coalition> &bC)
 {
 	bC.clear();
 	bC.reserve(m_bestCoalitionIndex.size());
@@ -339,7 +342,6 @@ vector<Coalition> & Population::getBestCoalitions(vector<Coalition> &bC)
 	{
 		bC.push_back(m_population[index]);
 	}
-	return bC;
 }
 
 Coalition & Population::getEnemy()
@@ -362,8 +364,8 @@ void Population::resetMe()
 {
 	for (int i = 0; i < m_population.size(); ++i)
 	{
-		m_population[i].setup_CR(Tank::ABILITY_DISTANCE, false, m_enemy);  // 更新联盟里所有 tank 的位置
-		//m_population[i].setIsStangate(true);                         // 修复一个BUG
+		m_population[i].setup_CR(Tank::ABILITY_DISTANCE, false, m_enemy);  // 重新初始化种群里面所有个体
+		//m_population[i].setIsStangate(true);                             // 修复一个BUG
 		//m_population[i].setStagnate0(0);
 	}
 	updateWeight();   // 新的位置 --> 新的 weight

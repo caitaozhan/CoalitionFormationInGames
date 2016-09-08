@@ -11,13 +11,10 @@ public:
 	PopulationEDA();
 	void initialize(double selectRatio, int populationSize);
 
-	void update();
-	void select();
-	void estimateDistribution();
-	void sample();
-
-	void writeLogMatrix(int updateCounter);
-	int  writeLoganalyse(int updateCounter);
+	void update();                                    // update the population
+	
+	void writeLogMatrix(int updateCounter);           // 打印矩阵到log
+	int  writeLoganalyse(int updateCounter);		  // 打印算法的分析
 
 	void setResetMe(const bool &resetMe);
 	void setResetEnemy(const bool &resetEnemy);
@@ -28,8 +25,8 @@ public:
 	bool getUpdate();
 	bool getStop();
 	int  getSize();
-	vector<Coalition> & getBestCoalitions(vector<Coalition> &bC);
-	Coalition & getEnemy(Coalition &e);
+	void getBestCoalitions(vector<Coalition> &bC);
+	Coalition & getEnemy();
 	bool isZero(double d);
 	
 	void resetEnemy(string &way);
@@ -38,9 +35,14 @@ public:
 	static uniform_real_distribution<double> urd_0_1;
 
 private:
+	void select();
+	void estimateDistribution();
+	void sample();
+
+private:
 	vector<Coalition> m_population;        // a group of coalitions
-	int m_populationSize;
 	vector<int> m_bestCoalitionIndex;      // the index of best coalitions in the population, there could be more than one
+	int m_populationSize;
 	int m_bestEvaluation;                  // 记录当前种群最佳评估值
 	Coalition m_enemy;
 	
