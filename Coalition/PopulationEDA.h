@@ -38,9 +38,11 @@ private:
 	void select();
 	void estimateDistribution();
 	void sample();
+	void updateBestCoalitions();
 
 private:
 	vector<Coalition> m_population;        // a group of coalitions
+	vector<Coalition> m_selectedPop;       // selected coalitions
 	vector<int> m_bestCoalitionIndex;      // the index of best coalitions in the population, there could be more than one
 	int m_populationSize;
 	int m_bestEvaluation;                  // 记录当前种群最佳评估值

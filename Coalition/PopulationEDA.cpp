@@ -52,20 +52,17 @@ void PopulationEDA::initialize(double selectRatio, int populationSize)
 */
 void PopulationEDA::update()
 {
-	if (m_update)
+	m_updateCounter++;
+
+	if (m_updateCounter == MAX_UPDATE)         // 在某一次试验中，到达最大进化次数
 	{
-		m_updateCounter++;
 
-		if (m_updateCounter == MAX_UPDATE)         // 在某一次试验中，到达最大进化次数
-		{
-
-		}
-
-		if (m_experimentTimes == MAX_EXPERIMENT)   
-		{
-
-		}
 	}
+	
+	select();
+	estimateDistribution();
+	sample();
+
 }
 
 void PopulationEDA::writeLogMatrix(int updateCounter)
@@ -146,10 +143,11 @@ int PopulationEDA::getSize()
 {
 	return m_population.size();
 }
+
 /*
-依据population的成员变量m_bestCoalitionIndex(仅保存最好个体的vector下标)，产生最好联盟个体
-直接更改传进来的引用
-@param bC, 保存最新最好联盟个体的vector
+	依据population的成员变量m_bestCoalitionIndex(仅保存最好个体的vector下标)，产生最好联盟个体
+	直接更改传进来的引用
+	@param bC, 保存最新最好联盟个体的vector
 */
 void PopulationEDA::getBestCoalitions(vector<Coalition>& bC)
 {
@@ -161,9 +159,9 @@ void PopulationEDA::getBestCoalitions(vector<Coalition>& bC)
 	}
 }
 /*
-依据population的成员变量m_bestCoalitionIndex(仅保存最好个体的vector下标)，产生最好联盟个体
-直接更改传进来的引用
-@param bC, 保存最新最好联盟个体的vector
+	依据population的成员变量m_bestCoalitionIndex(仅保存最好个体的vector下标)，产生最好联盟个体
+	直接更改传进来的引用
+	@param bC, 保存最新最好联盟个体的vector
 */
 Coalition & PopulationEDA::getEnemy()
 {
@@ -210,21 +208,22 @@ void PopulationEDA::resetExperVariable()
 	m_bestEvaluation = -Coalition::INDIVIDUAL_SIZE;
 	m_appearTarget = false;
 	m_updateCounter = 0;
-	cout << m_experimentTimes << "次试验\n-------\n";
 	m_experimentTimes++;
 	Global::dre.seed(m_experimentTimes);
 }
 
 /*
-选择若干最好的个体，以此为依据，估计概率分布
+	选择若干最好的个体，以此为依据，估计概率分布
 */
 void PopulationEDA::select()
 {
-
+	m_selectedPop.clear();
+	m_selectedPop.reserve(m_populationSize * SELECT_RATIO);
+	sort(m_population.begin(), m_population.end());  // TODO: 写排序规则
 }
 
 /*
-经行概率分布的估计
+	经行概率分布的估计
 */
 void PopulationEDA::estimateDistribution()
 {
@@ -232,10 +231,14 @@ void PopulationEDA::estimateDistribution()
 }
 
 /*
-经行采样，产生下一代种群
+	经行采样，产生下一代种群
 */
 void PopulationEDA::sample()
 {
 
+}
+
+void PopulationEDA::updateBestCoalitions()
+{
 }
 
