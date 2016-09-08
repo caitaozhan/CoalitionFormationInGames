@@ -44,14 +44,27 @@ void PopulationEDA::initialize(double selectRatio, int populationSize)
 		vec_double = tmpVector;
 	}
 	Global::dre.seed(0);
-	//resetMe();
+	resetMe();
 }
 
+/*
+	种群进化一代
+*/
 void PopulationEDA::update()
 {
 	if (m_update)
 	{
+		m_updateCounter++;
 
+		if (m_updateCounter == MAX_UPDATE)         // 在某一次试验中，到达最大进化次数
+		{
+
+		}
+
+		if (m_experimentTimes == MAX_EXPERIMENT)   
+		{
+
+		}
 	}
 }
 

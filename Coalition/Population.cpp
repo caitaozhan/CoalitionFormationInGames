@@ -10,8 +10,8 @@ Population::Population()
 	ENEMY_INPUT = string("../sample/8_case_50.txt");                           // enemy阵型的初始化编队
 	LOG_PM_NAME = string("../log/50^2,pop=50,ind=50/log_simpleEvaluate.txt");  // 概率矩阵日志
 	LOG_ANALYSE_INPUT = string("../log/50^2,pop=50,ind=50/log_analyze.txt");   // 程序运行日志，记录每一次实验的评估值
-	LOG_ANALYSE_OUTPUT = string("../log/5^2,pop=50,ind=50/9-1_0.9_0.9.txt");  // 分析程序运行的运行记录
-	MAX_UPDATE = 2000;
+	LOG_ANALYSE_OUTPUT = string("../log/50^2,pop=50,ind=50/9-1_0.9_0.9.txt");  // 分析程序运行的运行记录
+	MAX_UPDATE = 1000;
 	MAX_EXPERIMENT = 15;
 
 	SMALL_NUMBER = 0.01;
@@ -55,44 +55,51 @@ void Population::initialize(double pl, double ls, int populationSize)
 	resetMe();
 }
 
+/*
+	种群进化一代
+*/
 void Population::update()
 {
-	if (m_update)
+	m_updateCounter++;
+
+	if (/*m_appearTarget == true || */m_updateCounter == MAX_UPDATE)   // 一次实验结束：进化了 MAX_UPDATE 代
 	{
-		m_updateCounter++;
-
-		if (/*m_appearTarget == true || */m_updateCounter == MAX_UPDATE)   // 每一次实验进化 MAX_UPDATE 代
+		if (m_appearTarget == false)            // MAX_UPDATE 次之内没有找到 target
 		{
-			if (m_appearTarget == false)            // MAX_UPDATE 次之内没有找到 target
-			{
-				cout << "target not found @" << m_updateCounter << '\n';
-				LOG_ANALYSE << "target not found @" << m_updateCounter << '\n';
-			}
-			resetExperVariable();
-			resetMe();
+			cout << "target not found @" << m_updateCounter << '\n';
+			LOG_ANALYSE << "target not found @" << m_updateCounter << '\n';
 		}
-
+		
+		cout << m_experimentTimes << "次试验\n-------\n";
+		resetExperVariable();
+		
+		if (m_experimentTimes != MAX_EXPERIMENT)
+			resetMe();
+		
 		if (m_experimentTimes == MAX_EXPERIMENT)  // 准备做 MAX_EXPERIMENT 次实验
 		{
-			cout << "End of " << MAX_EXPERIMENT << " times of experiments!" << endl;
 			LOG_ANALYSE.close();                  // 先关闭，再由另外一个类打开“临界文件”
 			AnalyzeLog analyzeLog(LOG_ANALYSE_INPUT, LOG_ANALYSE_OUTPUT);
 			analyzeLog.analyze();
+			cout << "\nEnd of " << MAX_EXPERIMENT << " times of experiments!" << endl;
+			cout << "Let's start over again in 5 seconds" << endl << endl;
+			this_thread::sleep_for(chrono::milliseconds(5000));
+			resetExperVariable();
 			m_experimentTimes = 0;
-			m_update = 0;
-			cout << "\n\nLet's start over again~" << endl;
+			Global::dre.seed(0);
+			resetMe();
+			m_updateCounter++;
 		}
-
-		//if(m_experimentTimes == 16)
-		//{
-		updatePopluation();          //  新的全局概率矩阵 --> 更新种群位置
-		updateWeight();              //  新的种群位置     --> 更新种群的权值
-		updatePMatrix();             //  新的种群权值     --> 更新全局的概率矩阵
-		updateBestCoalitions();      //  更新最好的Coalitions
-		writeLogMatrix(m_updateCounter);
-		//}
 	}
 
+	//if(m_experimentTimes == 16)
+	//{
+	updatePopluation();          //  新的全局概率矩阵 --> 更新种群位置
+	updateWeight();              //  新的种群位置     --> 更新种群的权值
+	updatePMatrix();             //  新的种群权值     --> 更新全局的概率矩阵
+	updateBestCoalitions();      //  更新最好的Coalitions
+	writeLogMatrix(m_updateCounter);
+	//}
 }
 
 void Population::updatePopluation()
@@ -239,8 +246,8 @@ void Population::writeLogMatrix(int updateCounter)
 }
 
 /*
-@param:  更新的次数
-@return: 此时整个population的平均估值
+	@param:  更新的次数
+	@return: 此时整个population的平均估值
 */
 int Population::writeLogAnalyse(int updateCounter)
 {
@@ -330,9 +337,9 @@ void Population::updateBestCoalitions()
 }
 
 /*
-依据population的成员变量m_bestCoalitionIndex(仅保存最好个体的vector下标)，产生最好联盟个体
-直接更改传进来的引用
-@param bC, 保存最新最好联盟个体的vector
+	依据population的成员变量m_bestCoalitionIndex(仅保存最好个体的vector下标)，产生最好联盟个体
+	直接更改传进来的引用
+	@param bC, 保存最新最好联盟个体的vector
 */
 void Population::updateBestCoalitions(vector<Coalition> &bC)
 {
@@ -382,17 +389,16 @@ void Population::resetExperVariable()
 	m_bestEvaluation = -Coalition::INDIVIDUAL_SIZE;
 	m_appearTarget = false;
 	m_updateCounter = 0;
-	cout << m_experimentTimes << "次试验\n-------\n";
 	m_experimentTimes++;
 	Global::dre.seed(m_experimentTimes);
 }
 
 
 /*
-更新权值的过程：
-1. 更新 评估值
-2. 更新 适应值
-3. 更新 权值
+	更新权值的过程：
+	1. 更新 评估值
+	2. 更新 适应值
+	3. 更新 权值
 */
 void Population::updateWeight()
 {
