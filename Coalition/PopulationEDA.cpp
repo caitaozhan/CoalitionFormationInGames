@@ -1,5 +1,7 @@
 #include "PopulationEDA.h"
 
+uniform_real_distribution<double> PopulationEDA::urd_0_1 = uniform_real_distribution<double>(0.0, 1.0);
+
 PopulationEDA::PopulationEDA()
 {
 	ENEMY_INPUT = string("../sample/8_case_50.txt");                           // enemy阵型的初始化编队
@@ -9,7 +11,7 @@ PopulationEDA::PopulationEDA()
 	MAX_UPDATE = 2000;
 	MAX_EXPERIMENT = 15;
 
-	SMALL_NUMBER = 0.01;
+	//SMALL_NUMBER = 0.01;
 	m_update = true;
 	m_appearTarget = false;
 	m_experimentTimes = 0;
@@ -20,6 +22,8 @@ PopulationEDA::PopulationEDA()
 void PopulationEDA::initialize(double selectRatio, int populationSize)
 {
 	SELECT_RATIO = selectRatio;
+	m_selectNum = m_populationSize * SELECT_RATIO;
+	uid_selectPop = uniform_int_distribution<int>(0, m_selectNum - 1);
 	m_populationSize = populationSize;
 	
 	LOG_PM.open(LOG_PM_NAME);
@@ -27,6 +31,15 @@ void PopulationEDA::initialize(double selectRatio, int populationSize)
 
 	m_enemy.initialize(Coalition::INDIVIDUAL_SIZE);
 	m_enemy.setup_file(Tank::ABILITY_DISTANCE, true, ENEMY_INPUT);
+
+	// 初始化“变异系数”，概率矩阵中，每个位置都
+	m_bRatio = 0.0002;
+	m_n = Coalition::INDIVIDUAL_SIZE / 15;
+	if (m_n < 2)
+		m_n = 2;
+	int avalablePlaceInPMatrix;  // 概率矩阵中avalable的位置，等于战场的大小 - 敌人的数量
+	avalablePlaceInPMatrix = (Global::BF_LR.x - Global::BF_UL.x)*(Global::BF_UL.y - Global::BF_LR.y) - Coalition::INDIVIDUAL_SIZE;
+	m_e = (m_populationSize*Coalition::INDIVIDUAL_SIZE) / (avalablePlaceInPMatrix) * m_bRatio;
 
 	// 初始化 m_population
 	m_population.resize(m_populationSize);
@@ -45,24 +58,6 @@ void PopulationEDA::initialize(double selectRatio, int populationSize)
 	}
 	Global::dre.seed(0);
 	resetMe();
-}
-
-/*
-	种群进化一代
-*/
-void PopulationEDA::update()
-{
-	m_updateCounter++;
-
-	if (m_updateCounter == MAX_UPDATE)         // 在某一次试验中，到达最大进化次数
-	{
-
-	}
-	
-	select();
-	estimateDistribution();
-	sample();
-
 }
 
 void PopulationEDA::writeLogMatrix(int updateCounter)
@@ -158,6 +153,7 @@ void PopulationEDA::getBestCoalitions(vector<Coalition>& bC)
 		bC.push_back(m_population[index]);
 	}
 }
+
 /*
 	依据population的成员变量m_bestCoalitionIndex(仅保存最好个体的vector下标)，产生最好联盟个体
 	直接更改传进来的引用
@@ -215,14 +211,13 @@ void PopulationEDA::resetExperVariable()
 /*
 	选择若干最好的个体，以此为依据，估计概率分布
 */
-void PopulationEDA::select()
+void PopulationEDA::selectIndividuals()
 {
 	m_selectedPop.clear();                                                    // 先清空
-	int selectNum = m_populationSize * SELECT_RATIO;
-	m_selectedPop.resize(selectNum);
+	m_selectedPop.resize(m_selectNum);
 	sort_heap(m_population.begin(), m_population.end(), Coalition::decrease); // 考虑到在基本有序或者逆序的时候（可能会有很多个体fitness相等），快排的时间复杂度接近 n^2
 
-	for (int i = 0; i < selectNum; ++i)
+	for (int i = 0; i < m_selectNum; ++i)
 	{
 		m_selectedPop[i] = m_population[i];
 	}
@@ -237,7 +232,7 @@ void PopulationEDA::estimateDistribution()
 	{
 		for (double & p : vec_double)
 		{
-			p = SMALL_NUMBER;
+			p = m_e;
 		}
 	}
 
@@ -260,10 +255,13 @@ void PopulationEDA::estimateDistribution()
 }
 
 /*
-	进行采样，产生下一代种群
+	进行采样，产生下一代种群中的一个个体
+	sample方法参考了with template方法
 */
-void PopulationEDA::sample()
+void PopulationEDA::sampleOneSolution()
 {
+	int pos = uid_selectPop(Global::dre);  // 随机选择one个体做template，在这个template的基础上进化
+	vector<int> randomIndex = generateRandomIndex();
 
 }
 
@@ -271,3 +269,43 @@ void PopulationEDA::updateBestCoalitions()
 {
 }
 
+vector<int> PopulationEDA::generateRandomIndex()
+{
+	vector<int> temp(m_selectNum);
+	vector<int> randomIndex(m_selectNum);
+	
+	for (int i = 0; i < temp.size(); ++i)
+		temp[i] = i;
+
+	for (int i = 0; i < randomIndex.size(); ++i)
+	{
+		uniform_int_distribution<int> uid(0, m_selectNum - 1 - i);
+		int pos = uid(Global::dre);
+		randomIndex[i] = temp[pos];
+		temp[pos] = temp[m_selectNum - 1 - i];
+	}
+
+	return randomIndex;
+}
+
+/*
+	种群进化一代
+*/
+void PopulationEDA::update()
+{
+	m_updateCounter++;
+
+	if (m_updateCounter == MAX_UPDATE)         // 在某一次试验中，到达最大进化次数
+	{
+
+	}
+
+	selectIndividuals();
+	estimateDistribution();
+
+	for (int i = 0; i < m_populationSize; ++i)
+	{
+		sampleOneSolution();
+	}
+
+}

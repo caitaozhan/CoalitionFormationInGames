@@ -35,10 +35,11 @@ public:
 	static uniform_real_distribution<double> urd_0_1;
 
 private:
-	void select();
+	void selectIndividuals();
 	void estimateDistribution();
-	void sample();
+	void sampleOneSolution();
 	void updateBestCoalitions();
+	vector<int> generateRandomIndex();
 
 private:
 	vector<Coalition> m_population;        // a group of coalitions
@@ -48,15 +49,18 @@ private:
 	int m_populationSize;
 	int m_bestEvaluation;                  // 记录当前种群最佳评估值
 	Coalition m_enemy;
-	
+
+	double SELECT_RATIO;       // 从上一代种群里面，选择百分之多少，用来模拟概率分布 
+	double m_selectNum;        // 等于 m_populationSize * SELECT_RATIO
+	//double SMALL_NUMBER;
+	double m_bRatio;
+	double m_e;                // 可以理解为变异概率
+	double m_n;                // template采样法里面的切分段数
+
 	int  m_updateCounter;
 	bool m_stop;
 	bool m_appearTarget;
 	int  m_experimentTimes;
-
-	double SELECT_RATIO;       // 从上一代种群里面，选择百分之多少，用来模拟概率分布 
-	double SMALL_NUMBER;
-
 	int MAX_UPDATE;
 	int MAX_EXPERIMENT;
 	
@@ -71,4 +75,6 @@ private:
 	bool m_resetMe;            // 是否重置我方坦克阵型
 	bool m_resetEnemy;		   // 是否重置地方坦克阵型
 	bool m_update;			   // population是否继续更新
+
+	uniform_int_distribution<int> uid_selectPop;
 };
