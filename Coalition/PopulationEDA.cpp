@@ -37,9 +37,9 @@ void PopulationEDA::initialize(double selectRatio, int populationSize)
 	m_bestCoalitionIndex.emplace_back(0);                             // 就是初始化加入一个元素
 	m_bestEvaluation = -Coalition::INDIVIDUAL_SIZE;                   // 2016/8/4日，引入此成员变量，为了修复BUG，在multi-thread版本的updateBestCoalitions中出现的BUG
 	// 初始化 概率矩阵
-	Global::PROBABILITY_MATRIX.resize(Global::HEIGHT);
+	m_probabilityMatrix.resize(Global::HEIGHT);
 	vector<double> tmpVector(Global::WIDTH, 0.0);
-	for (auto & vec_double : Global::PROBABILITY_MATRIX)
+	for (auto & vec_double : m_probabilityMatrix)
 	{
 		vec_double = tmpVector;
 	}
@@ -217,7 +217,7 @@ void PopulationEDA::resetExperVariable()
 */
 void PopulationEDA::select()
 {
-	m_selectedPop.clear();
+	m_selectedPop.clear();                                                    // 先清空
 	int selectNum = m_populationSize * SELECT_RATIO;
 	m_selectedPop.resize(selectNum);
 	sort_heap(m_population.begin(), m_population.end(), Coalition::decrease); // 考虑到在基本有序或者逆序的时候（可能会有很多个体fitness相等），快排的时间复杂度接近 n^2
@@ -229,15 +229,38 @@ void PopulationEDA::select()
 }
 
 /*
-	经行概率分布的估计
+	进行概率分布的估计
 */
 void PopulationEDA::estimateDistribution()
 {
-	
+	for (auto & vec_double : m_probabilityMatrix)
+	{
+		for (double & p : vec_double)
+		{
+			p = SMALL_NUMBER;
+		}
+	}
+
+	for (const Tank & t : m_enemy.getCoalition())
+	{
+		int x = t.getArrayIndex().x;
+		int y = t.getArrayIndex().y;
+		m_probabilityMatrix[y][x] = 0;
+	}
+
+	for (const Coalition & c : m_selectedPop)   // 从选择的部分种群个体里面估计出概率分布
+	{
+		for (const Tank & t : c.getCoalition())
+		{
+			int x = t.getArrayIndex().x;
+			int y = t.getArrayIndex().y;
+			m_probabilityMatrix[y][x] += 1;
+		}
+	}
 }
 
 /*
-	经行采样，产生下一代种群
+	进行采样，产生下一代种群
 */
 void PopulationEDA::sample()
 {

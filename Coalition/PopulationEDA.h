@@ -43,7 +43,8 @@ private:
 private:
 	vector<Coalition> m_population;        // a group of coalitions
 	vector<Coalition> m_selectedPop;       // selected coalitions
-	vector<int> m_bestCoalitionIndex;      // the index of best coalitions in the population, there could be more than one
+	vector<int>       m_bestCoalitionIndex;      // the index of best coalitions in the population, there could be more than one
+	vector<vector<double>> m_probabilityMatrix;  // 保存概率的分布
 	int m_populationSize;
 	int m_bestEvaluation;                  // 记录当前种群最佳评估值
 	Coalition m_enemy;
