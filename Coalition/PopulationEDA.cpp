@@ -40,6 +40,7 @@ void PopulationEDA::initialize(double selectRatio, int populationSize)
 	int avalablePlaceInPMatrix;  // 概率矩阵中avalable的位置，等于战场的大小 - 敌人的数量
 	avalablePlaceInPMatrix = (Global::BF_LR.x - Global::BF_UL.x)*(Global::BF_UL.y - Global::BF_LR.y) - Coalition::INDIVIDUAL_SIZE;
 	m_e = (m_populationSize*Coalition::INDIVIDUAL_SIZE) / (avalablePlaceInPMatrix) * m_bRatio;
+	m_dimension = Coalition::INDIVIDUAL_SIZE;
 
 	// 初始化 m_population
 	m_population.resize(m_populationSize);
@@ -262,6 +263,18 @@ void PopulationEDA::sampleOneSolution()
 {
 	int pos = uid_selectPop(Global::dre);  // 随机选择one个体做template，在这个template的基础上进化
 	vector<int> randomIndex = generateRandomIndex();
+	vector<int> allCutIndex(m_dimension);
+	set<int> cuttedIndex;
+	for (int i = 0; i < m_dimension; ++i)
+		allCutIndex[i] = i;
+	for (int i = 0; i < m_n; ++i)
+	{
+		uniform_int_distribution<int> uid(0, m_dimension - 1 - i);
+		int index = uid(Global::dre);
+		cuttedIndex.insert(index);
+		allCutIndex[index] = allCutIndex[m_dimension - 1 - i];
+	}
+	int sampleLength = m_dimension - (*(--cuttedIndex.end()) - *cuttedIndex.begin());
 
 }
 
@@ -271,18 +284,18 @@ void PopulationEDA::updateBestCoalitions()
 
 vector<int> PopulationEDA::generateRandomIndex()
 {
-	vector<int> temp(m_selectNum);
-	vector<int> randomIndex(m_selectNum);
+	vector<int> temp(m_dimension);
+	vector<int> randomIndex(m_dimension);
 	
 	for (int i = 0; i < temp.size(); ++i)
 		temp[i] = i;
 
 	for (int i = 0; i < randomIndex.size(); ++i)
 	{
-		uniform_int_distribution<int> uid(0, m_selectNum - 1 - i);
+		uniform_int_distribution<int> uid(0, m_dimension - 1 - i);
 		int pos = uid(Global::dre);
 		randomIndex[i] = temp[pos];
-		temp[pos] = temp[m_selectNum - 1 - i];
+		temp[pos] = temp[m_dimension - 1 - i];
 	}
 
 	return randomIndex;

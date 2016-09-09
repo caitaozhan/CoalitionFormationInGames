@@ -49,6 +49,7 @@ private:
 	int m_populationSize;
 	int m_bestEvaluation;                  // 记录当前种群最佳评估值
 	Coalition m_enemy;
+	int m_dimension;                       // 问题的维度，在这里等于一个individual里面坦克的数量
 
 	double SELECT_RATIO;       // 从上一代种群里面，选择百分之多少，用来模拟概率分布 
 	double m_selectNum;        // 等于 m_populationSize * SELECT_RATIO
