@@ -261,8 +261,7 @@ void PopulationEDA::estimateDistribution()
 */
 void PopulationEDA::sampleOneSolution()
 {
-	vector<Coalition> newIndividual;        // individual即是solution
-	newIndividual.reserve(m_dimension);
+	Coalition newIndividual;                // individual即是一个联盟，一个solution
 	int pos = uid_selectPop(Global::dre);   // 随机选择one个体做template，在这个template的基础上进化
 	vector<int> randomIndex = generateRandomIndex();
 	vector<int> allCutIndex(m_dimension);
@@ -282,11 +281,18 @@ void PopulationEDA::sampleOneSolution()
 	int p = 0;
 	while(p < m_dimension - lengthWT)
 	{
-		newIndividual.push_back(m_selectedPop[randomIndex[p++]]);
+		newIndividual.pushBackTank(m_selectedPop[pos].getCoalition(randomIndex[p++]));
 	}
 	while(p < m_dimension)
 	{
-
+		ofVec2f arrayIndex;
+		do
+		{
+			arrayIndex = newIndividual.getPlaceFromPMatrix(m_probabilityMatrix, m_sumOfRow, m_PMtotal);  // 问题：可供选择的点越来越少，可能一些很好的点，就“消失”了
+		} while (newIndividual.contain(newIndividual, arrayIndex) == true || newIndividual.contain(m_enemy, arrayIndex) == true);  // 修复一个bug
+		Tank newTank;
+		newTank.setup(arrayIndex, Tank::ABILITY_DISTANCE, false);
+		newIndividual.pushBackTank(move(newTank));
 	}
 }
 

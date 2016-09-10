@@ -8,6 +8,7 @@ class Coalition
 {
 public:
 	Coalition();                                       // 重载默认构造函数
+	//TODO: 增加一个构造函数， 用来reserve
 	Coalition(const Coalition &c);                     // 重载拷贝构造函数
 	Coalition& operator=(const Coalition& c);          // 重载赋值函数
 	// 问题：是否要重载，比如析构函数
