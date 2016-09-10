@@ -2,6 +2,7 @@
 #include "ofMain.h"
 #include "ofApp.h"
 #include "../Coalition/Population.h"
+#include "../Coalition/PopulationEDA.h"
 using namespace std;
 
 void consumerDraw()
@@ -14,7 +15,8 @@ void producerCalculate()
 {
 	while (true)
 	{
-		producerCalculating(Population());
+		//producerCalculating(Population());
+		producerCalculating(PopulationEDA());
 	}
 }
 

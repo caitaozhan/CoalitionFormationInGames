@@ -22,9 +22,9 @@ PopulationEDA::PopulationEDA()
 void PopulationEDA::initialize(double selectRatio, int populationSize)
 {
 	SELECT_RATIO = selectRatio;
+	m_populationSize = populationSize;
 	m_selectNum = m_populationSize * SELECT_RATIO;
 	uid_selectPop = uniform_int_distribution<int>(0, m_selectNum - 1);
-	m_populationSize = populationSize;
 	
 	LOG_PM.open(LOG_PM_NAME);
 	LOG_ANALYSE.open(LOG_ANALYSE_INPUT);
@@ -145,7 +145,7 @@ int PopulationEDA::getSize()
 	直接更改传进来的引用
 	@param bC, 保存最新最好联盟个体的vector
 */
-void PopulationEDA::getBestCoalitions(vector<Coalition>& bC)
+void PopulationEDA::updateBestCoalitions(vector<Coalition>& bC)
 {
 	bC.clear();
 	bC.reserve(m_bestCoalitionIndex.size());
@@ -333,7 +333,12 @@ void PopulationEDA::updateBestCoalitions()
 			m_bestCoalitionIndex.emplace_back(i);
 		}
 	}
-	int newBestEvaluation = m_population[m_bestCoalitionIndex[0]].getSimpleEvaluate() + Global::EPSILON;
+	int newBestEvaluation;
+	if (m_population[m_bestCoalitionIndex[0]].getSimpleEvaluate() < 0)  // TODO: a bug, 高精度损失（对于负数）
+		newBestEvaluation = m_population[m_bestCoalitionIndex[0]].getSimpleEvaluate() - Global::EPSILON;
+	else
+		newBestEvaluation = m_population[m_bestCoalitionIndex[0]].getSimpleEvaluate() + Global::EPSILON;
+
 	if (newBestEvaluation > m_bestEvaluation)  // 最佳评估值有提高
 	{
 		m_bestEvaluation = newBestEvaluation;

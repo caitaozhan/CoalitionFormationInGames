@@ -25,7 +25,7 @@ public:
 	bool getUpdate();
 	bool getStop();
 	int  getSize();
-	void getBestCoalitions(vector<Coalition> &bC);
+	void updateBestCoalitions(vector<Coalition> &bC);
 	Coalition & getEnemy();
 	bool isZero(double d);
 	

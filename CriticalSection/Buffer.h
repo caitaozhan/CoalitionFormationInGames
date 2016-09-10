@@ -6,6 +6,7 @@
 #include <mutex>
 #include <condition_variable>
 #include "../Coalition/Population.h"
+#include "../Coalition/PopulationEDA.h"
 #include "../Coalition/Global.h"
 using namespace std;
 
@@ -62,6 +63,8 @@ extern Buffer BUFFER;
 extern BufferResponse BUFFER_R;
 
 extern void producerCalculating(Population && population);
+
+extern void producerCalculating(PopulationEDA && population);
 
 extern const int HEIGHT;
 extern const int WIDTH;
