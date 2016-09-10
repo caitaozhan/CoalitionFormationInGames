@@ -68,7 +68,7 @@ void PopulationEDA::writeLogMatrix(int updateCounter)
 	{
 		for (int x = 0; x < Global::WIDTH - 1; ++x)
 		{
-			if (isZero(Global::PROBABILITY_MATRIX[y][x]))
+			if (isZero(m_probabilityMatrix[y][x]))
 			{
 				LOG_PM << setprecision(0);
 			}
@@ -76,7 +76,7 @@ void PopulationEDA::writeLogMatrix(int updateCounter)
 			{
 				LOG_PM << setprecision(3);
 			}
-			LOG_PM << left << setw(7) << Global::PROBABILITY_MATRIX[y][x];  // (x,y) --> [y][x]
+			LOG_PM << left << setw(7) << m_probabilityMatrix[y][x];  // (x,y) --> [y][x]
 		}
 		LOG_PM << '\n';
 	}

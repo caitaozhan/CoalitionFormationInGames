@@ -529,7 +529,7 @@ ofVec2f Coalition::localSearch_big(const Coalition & enemy)
 	return newArrayIndex[choose];
 }
 
-ofVec2f Coalition::localSearch_big_PM(const Coalition & enemy)
+ofVec2f Coalition::localSearch_big_PM(const Coalition & enemy, const vector<vector<double>> &PROBABILITY_MATRIX)
 {
 	vector<Tank> tanks = this->getCoalition();
 	vector<ofVec2f> newArrayIndex;
@@ -545,7 +545,7 @@ ofVec2f Coalition::localSearch_big_PM(const Coalition & enemy)
 				&& contain(enemy, tempArrayIndex) == false /*&& contain(newArrayIndex, tempArrayIndex) == false*/)
 			{
 				newArrayIndex.push_back(tempArrayIndex);                                       // 这两个vector大小一样
-				newProbability.push_back(Global::PROBABILITY_MATRIX[tempArrayIndex.y][tempArrayIndex.x]); // 保存PM的概率
+				newProbability.push_back(PROBABILITY_MATRIX[tempArrayIndex.y][tempArrayIndex.x]); // 保存PM的概率
 			}
 		}
 	}
@@ -567,21 +567,21 @@ ofVec2f Coalition::localSearch_big_PM(const Coalition & enemy)
 
 不使用轮盘赌？
 */
-ofVec2f Coalition::getPlaceFromPMatrix()
+ofVec2f Coalition::getPlaceFromPMatrix(const vector<vector<double>> &PROBABILITY_MATRIX, const vector<double> &SUM_OF_ROW, const double &TOTAL)
 {
 	int x1 = Global::BF_UL.x, x2 = Global::BF_LR.x;
 	int y1 = Global::BF_LR.y, y2 = Global::BF_UL.y;
 
-	double choose = urd_0_1(Global::dre)*Global::TOTAL;                              // 产生一个随机数
+	double choose = urd_0_1(Global::dre)*TOTAL;                              // 产生一个随机数
 	// 先找到行，后找到列
-	int row = lower_bound(Global::SUM_OF_ROW.begin(), Global::SUM_OF_ROW.end(), choose) - Global::SUM_OF_ROW.begin();  // 行 --> y
+	int row = lower_bound(SUM_OF_ROW.begin(), SUM_OF_ROW.end(), choose) - SUM_OF_ROW.begin();  // 行 --> y
 	if (row >= 1)
-		choose -= Global::SUM_OF_ROW[row - 1];                                    // 这里思维不够缜密，出现了大BUG；现在要找 choose 在第 row 行的位置
+		choose -= SUM_OF_ROW[row - 1];                                    // 这里思维不够缜密，出现了大BUG；现在要找 choose 在第 row 行的位置
 	vector<double> sumOfChosenRow(x2 - x1 + 1, 0);
-	sumOfChosenRow[0] = Global::PROBABILITY_MATRIX[row + y1][x1];               // 修正BUG：下标错误
+	sumOfChosenRow[0] = PROBABILITY_MATRIX[row + y1][x1];                 // 修正BUG：下标错误
 	for (int i = 1; i < sumOfChosenRow.size(); ++i)
 	{
-		sumOfChosenRow[i] = sumOfChosenRow[i - 1] + Global::PROBABILITY_MATRIX[row + y1][x1 + i];  // 修复BUG：下标错误 + 思维不缜密
+		sumOfChosenRow[i] = sumOfChosenRow[i - 1] + PROBABILITY_MATRIX[row + y1][x1 + i];  // 修复BUG：下标错误 + 思维不缜密
 	}
 	int column = lower_bound(sumOfChosenRow.begin(), sumOfChosenRow.end(), choose) - sumOfChosenRow.begin();
 

@@ -42,14 +42,16 @@ private:
 	vector<int> generateRandomIndex();
 
 private:
-	vector<Coalition> m_population;        // a group of coalitions
-	vector<Coalition> m_selectedPop;       // selected coalitions
-	vector<int>       m_bestCoalitionIndex;      // the index of best coalitions in the population, there could be more than one
-	vector<vector<double>> m_probabilityMatrix;  // 保存概率的分布
+	vector<vector<double>> m_probabilityMatrix; // 保存概率的分布
+	vector<double> m_sumOfRow;                  // 概率矩阵每行之和，PM的metadata
+	double         m_PMtotal;                   // 概率矩阵所有元素之和，PM的metadata
+	vector<Coalition> m_population;             // a group of coalitions
+	vector<Coalition> m_selectedPop;            // selected coalitions
+	vector<int>       m_bestCoalitionIndex;     // the index of best coalitions in the population, there could be more than one
 	int m_populationSize;
 	int m_bestEvaluation;                  // 记录当前种群最佳评估值
-	Coalition m_enemy;
 	int m_dimension;                       // 问题的维度，在这里等于一个individual里面坦克的数量
+	Coalition m_enemy;
 
 	double SELECT_RATIO;       // 从上一代种群里面，选择百分之多少，用来模拟概率分布 
 	double m_selectNum;        // 等于 m_populationSize * SELECT_RATIO

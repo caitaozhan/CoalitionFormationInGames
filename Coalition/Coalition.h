@@ -53,9 +53,10 @@ public:
 
 	ofVec2f localSearch_small(const Coalition &enemy, int i);  // backupC 是调用者
 	ofVec2f localSearch_big(const Coalition &enemy);           // backupC 是调用者
-	ofVec2f localSearch_big_PM(const Coalition &enemy);        // backupC 是调用者,加入概率矩阵
+	ofVec2f localSearch_big_PM(const Coalition &enemy, const vector<vector<double>> &PROBABILITY_MATRIX);        // backupC 是调用者,加入概率矩阵
 
-	static ofVec2f getPlaceFromPMatrix();
+	ofVec2f getPlaceFromPMatrix(const vector<vector<double>> &PROBABILITY_MATRIX, const vector<double> &SUM_OF_ROW, const double &TOTAL);
+	//static ofVec2f getPlaceFromPMatrix();
 	static bool decrease(const Coalition & c1, const Coalition & c2);
 
 	static int logNumber;  // 每一个 Coalition 对象都有一个自己的日志文件，通过这个静态的序号区分日志的名字
