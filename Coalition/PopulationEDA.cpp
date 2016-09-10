@@ -261,10 +261,13 @@ void PopulationEDA::estimateDistribution()
 */
 void PopulationEDA::sampleOneSolution()
 {
-	int pos = uid_selectPop(Global::dre);  // 随机选择one个体做template，在这个template的基础上进化
+	vector<Coalition> newIndividual;        // individual即是solution
+	newIndividual.reserve(m_dimension);
+	int pos = uid_selectPop(Global::dre);   // 随机选择one个体做template，在这个template的基础上进化
 	vector<int> randomIndex = generateRandomIndex();
 	vector<int> allCutIndex(m_dimension);
 	set<int> cuttedIndex;
+	
 	for (int i = 0; i < m_dimension; ++i)
 		allCutIndex[i] = i;
 	for (int i = 0; i < m_n; ++i)
@@ -274,8 +277,17 @@ void PopulationEDA::sampleOneSolution()
 		cuttedIndex.insert(index);
 		allCutIndex[index] = allCutIndex[m_dimension - 1 - i];
 	}
-	int sampleLength = m_dimension - (*(--cuttedIndex.end()) - *cuttedIndex.begin());
+	int lengthWT = m_dimension - (*(--cuttedIndex.end()) - *cuttedIndex.begin());
 
+	int p = 0;
+	while(p < m_dimension - lengthWT)
+	{
+		newIndividual.push_back(m_selectedPop[randomIndex[p++]]);
+	}
+	while(p < m_dimension)
+	{
+
+	}
 }
 
 void PopulationEDA::updateBestCoalitions()
