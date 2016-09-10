@@ -162,7 +162,6 @@ void Coalition::setup_file(double abilityDistance, bool isEnemy, const string &f
 	}
 	int enemyNum;
 	ifile >> enemyNum;
-	//INDIVIDUAL_SIZE = n;                // TODO: 这里的size发生了问题，初始化是32，这里变成了20
 	m_coalition.resize(enemyNum);         // update：敌人和我军的坦克数量可以不相等
 	
 	vector<ofVec2f> vecArrayIndex;
@@ -425,7 +424,7 @@ double Coalition::calculateWeight(double fitness)
 	//return sqrt(fitness);
 
 	//return fitness*fitness;
-	return 1.0 / (1 + pow(Global::E, -fitness));  // TODO 这里可以换一个增大差距的函数
+	return 1.0 / (1 + pow(Global::E, -fitness)); 
 }
 
 /*

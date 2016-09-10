@@ -27,7 +27,7 @@ public:
 	int  getSize();                             // get the size of m_populations
 	void updateBestCoalitions(vector<Coalition> &bC);
 	Coalition & getEnemy();
-	bool isZero(double d);                      // TODO: put it in utility module
+	bool isZero(double d);                      
 
 	void resetEnemy(string &way);
 	void resetMe();

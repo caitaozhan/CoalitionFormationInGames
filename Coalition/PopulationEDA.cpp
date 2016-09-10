@@ -7,7 +7,7 @@ PopulationEDA::PopulationEDA()
 	ENEMY_INPUT = string("../sample/8_case_50.txt");                           // enemy阵型的初始化编队
 	LOG_PM_NAME = string("../log/50^2,pop=50,ind=50/log_simpleEvaluate.txt");  // 概率矩阵日志
 	LOG_ANALYSE_INPUT = string("../log/50^2,pop=50,ind=50/log_analyze.txt");   // 程序运行日志，记录每一次实验的评估值
-	LOG_ANALYSE_OUTPUT = string("../log/5^2,pop=50,ind=50/9-1_0.9_0.9.txt");  // 分析程序运行的运行记录
+	LOG_ANALYSE_OUTPUT = string("../log/5^2,pop=50,ind=50/9-1_0.9_0.9.txt");   // 分析程序运行的运行记录
 	MAX_UPDATE = 2000;
 	MAX_EXPERIMENT = 15;
 
@@ -191,12 +191,9 @@ void PopulationEDA::resetMe()
 	{
 		m_population[i].setup_CR(Tank::ABILITY_DISTANCE, false, m_enemy);  // 重新初始化种群里面所有个体
 	}
-	//updateWeight();   // 新的位置 --> 新的 weight
-	//updatePMatrix();
-	//updateBestCoalitions();
-	//writeLogMatrix(0);
-
-	// TODO: is there any stuff in here?
+	updateEvaluations();
+	updateBestCoalitions();
+	writeLogMatrix(0);
 }
 
 void PopulationEDA::resetExperVariable()
@@ -294,10 +291,59 @@ void PopulationEDA::sampleOneSolution()
 		newTank.setup(arrayIndex, Tank::ABILITY_DISTANCE, false);
 		newIndividual.pushBackTank(move(newTank));
 	}
+	int evaluateNew = Coalition::simpleEvalute(m_enemy, newIndividual);
+	int evaluateOld = m_selectedPop[pos].getSimpleEvaluate();
+	if (evaluateNew > evaluateOld)
+	{
+		//newIndividual
+		m_selectedPop[pos] = newIndividual;
+	}
+	else if (evaluateNew == evaluateOld)
+	{
+		if (urd_0_1(Global::dre) < 0.5)
+		{
+			m_selectedPop[pos] = newIndividual;
+		}
+	}
+}
+
+void PopulationEDA::updateEvaluations()
+{
+	for (Coalition & c : m_population)
+	{
+		c.setSimpleEvaluate(Coalition::simpleEvalute(m_enemy, c));
+	}
 }
 
 void PopulationEDA::updateBestCoalitions()
 {
+	m_bestCoalitionIndex.clear();
+	int n = getSize();
+	double bestEvaluation = -n;
+	for (int i = 0; i < n; ++i)
+	{
+		if (m_population[i].getSimpleEvaluate() > bestEvaluation + Global::EPSILON)
+		{
+			m_bestCoalitionIndex.clear();
+			bestEvaluation = m_population[i].getSimpleEvaluate();
+			m_bestCoalitionIndex.emplace_back(i);
+		}
+		else if (isZero(m_population[i].getSimpleEvaluate() - bestEvaluation))
+		{
+			m_bestCoalitionIndex.emplace_back(i);
+		}
+	}
+	int newBestEvaluation = m_population[m_bestCoalitionIndex[0]].getSimpleEvaluate() + Global::EPSILON;
+	if (newBestEvaluation > m_bestEvaluation)  // 最佳评估值有提高
+	{
+		m_bestEvaluation = newBestEvaluation;
+		cout << "Best @" << m_updateCounter << "  " << m_bestEvaluation << '\n';
+		if (m_appearTarget == false && isZero(m_bestEvaluation - Coalition::target))
+		{
+			LOG_ANALYSE << "Best @" << m_updateCounter * m_populationSize << "  " << Coalition::target << '\n';
+			m_appearTarget = true;
+		}
+	}
 }
 
 vector<int> PopulationEDA::generateRandomIndex()
@@ -326,12 +372,38 @@ void PopulationEDA::update()
 {
 	m_updateCounter++;
 
-	if (m_updateCounter == MAX_UPDATE)         // 在某一次试验中，到达最大进化次数
+	if (/*m_appearTarget == true || */m_updateCounter == MAX_UPDATE)         // 在某一次试验中，到达最大进化次数
 	{
+		if (m_appearTarget == false)            // MAX_UPDATE 次之内没有找到 target
+		{
+			cout << "target not found @" << m_updateCounter << '\n';
+			LOG_ANALYSE << "target not found @" << m_updateCounter << '\n';
+		}
 
+		cout << m_experimentTimes << "次试验\n-------\n";
+		resetExperVariable();
+
+		if (m_experimentTimes != MAX_EXPERIMENT)
+			resetMe();
+
+		if (m_experimentTimes == MAX_EXPERIMENT)  // 准备做 MAX_EXPERIMENT 次实验
+		{
+			LOG_ANALYSE.close();                  // 先关闭，再由另外一个类打开“临界文件”
+			AnalyzeLog analyzeLog(LOG_ANALYSE_INPUT, LOG_ANALYSE_OUTPUT);
+			analyzeLog.analyze();
+			cout << "\nEnd of " << MAX_EXPERIMENT << " times of experiments!" << endl;
+			cout << "Let's start over again in 5 seconds" << endl << endl;
+			this_thread::sleep_for(chrono::milliseconds(5000));
+			resetExperVariable();
+			m_experimentTimes = 0;
+			Global::dre.seed(0);
+			resetMe();
+			m_updateCounter++;
+		}
 	}
 
 	selectIndividuals();
+
 	estimateDistribution();
 
 	for (int i = 0; i < m_populationSize; ++i)
@@ -339,4 +411,7 @@ void PopulationEDA::update()
 		sampleOneSolution();
 	}
 
+	updateEvaluations();
+	updateBestCoalitions();
+	writeLogMatrix(m_updateCounter++);
 }
