@@ -54,12 +54,12 @@ private:
 	int m_dimension;                       // 问题的维度，在这里等于一个individual里面坦克的数量
 	Coalition m_enemy;
 
+	int    m_selectNum;        // 等于 m_populationSize * SELECT_RATIO
 	double SELECT_RATIO;       // 从上一代种群里面，选择百分之多少，用来模拟概率分布 
-	double m_selectNum;        // 等于 m_populationSize * SELECT_RATIO
-	//double SMALL_NUMBER;
 	double m_bRatio;
 	double m_e;                // 可以理解为变异概率
-	double m_n;                // template采样法里面的切分段数
+	int    m_n;                // template采样法里面的切分段数
+	//double SMALL_NUMBER;
 
 	int  m_updateCounter;
 	bool m_stop;

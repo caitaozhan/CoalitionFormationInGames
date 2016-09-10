@@ -213,7 +213,7 @@ void PopulationEDA::selectIndividuals()
 {
 	m_selectedPop.clear();                                                    // 先清空
 	m_selectedPop.resize(m_selectNum);
-	sort_heap(m_population.begin(), m_population.end(), Coalition::decrease); // 考虑到在基本有序或者逆序的时候（可能会有很多个体fitness相等），快排的时间复杂度接近 n^2
+	sort(m_population.begin(), m_population.end(), Coalition::decrease); // 考虑到在基本有序或者逆序的时候（可能会有很多个体fitness相等），快排的时间复杂度接近 n^2
 
 	for (int i = 0; i < m_selectNum; ++i)
 	{
@@ -250,6 +250,24 @@ void PopulationEDA::estimateDistribution()
 			m_probabilityMatrix[y][x] += 1;
 		}
 	}
+
+	// 增加空间，保存概率矩阵的metadata
+	int x1 = Global::BF_UL.x, x2 = Global::BF_LR.x;
+	int y1 = Global::BF_LR.y, y2 = Global::BF_UL.y;
+	m_PMtotal = 0.0;                                         // 总和
+	m_sumOfRow = vector<double>(y2 - y1 + 1, 0.0);       // 累积到该行之和
+	for (int y = y1; y <= y2; ++y)
+	{
+		if (y - 1 >= y1)                                         // 先加上前面行的和        
+		{
+			m_sumOfRow[y - y1] = m_sumOfRow[y - y1 - 1];    // 修正BUG：下标错误
+		}
+		for (int x = x1; x <= x2; ++x)
+		{
+			m_PMtotal += m_probabilityMatrix[y][x];
+			m_sumOfRow[y - y1] += m_probabilityMatrix[y][x];  // 修正BUG：下标错误
+		}
+	}
 }
 
 /*
@@ -259,6 +277,7 @@ void PopulationEDA::estimateDistribution()
 void PopulationEDA::sampleOneSolution()
 {
 	Coalition newIndividual;                // individual即是一个联盟，一个solution
+	newIndividual.initialize(m_dimension, Tank::ABILITY_DISTANCE, false);
 	int pos = uid_selectPop(Global::dre);   // 随机选择one个体做template，在这个template的基础上进化
 	vector<int> randomIndex = generateRandomIndex();
 	vector<int> allCutIndex(m_dimension);
@@ -270,7 +289,7 @@ void PopulationEDA::sampleOneSolution()
 	{
 		uniform_int_distribution<int> uid(0, m_dimension - 1 - i);
 		int index = uid(Global::dre);
-		cuttedIndex.insert(index);
+		cuttedIndex.insert(allCutIndex[index]);
 		allCutIndex[index] = allCutIndex[m_dimension - 1 - i];
 	}
 	int lengthWT = m_dimension - (*(--cuttedIndex.end()) - *cuttedIndex.begin());
@@ -280,7 +299,7 @@ void PopulationEDA::sampleOneSolution()
 	{
 		newIndividual.pushBackTank(m_selectedPop[pos].getCoalition(randomIndex[p++]));
 	}
-	while(p < m_dimension)
+	while(p++ < m_dimension)
 	{
 		ofVec2f arrayIndex;
 		do
@@ -295,7 +314,6 @@ void PopulationEDA::sampleOneSolution()
 	int evaluateOld = m_selectedPop[pos].getSimpleEvaluate();
 	if (evaluateNew > evaluateOld)
 	{
-		//newIndividual
 		m_selectedPop[pos] = newIndividual;
 	}
 	else if (evaluateNew == evaluateOld)
@@ -334,7 +352,7 @@ void PopulationEDA::updateBestCoalitions()
 		}
 	}
 	int newBestEvaluation;
-	if (m_population[m_bestCoalitionIndex[0]].getSimpleEvaluate() < 0)  // TODO: a bug, 高精度损失（对于负数）
+	if (m_population[m_bestCoalitionIndex[0]].getSimpleEvaluate() < 0)  // TODO consolee: a bug, 高精度损失（对于负数）
 		newBestEvaluation = m_population[m_bestCoalitionIndex[0]].getSimpleEvaluate() - Global::EPSILON;
 	else
 		newBestEvaluation = m_population[m_bestCoalitionIndex[0]].getSimpleEvaluate() + Global::EPSILON;

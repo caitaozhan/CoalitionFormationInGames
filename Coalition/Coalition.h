@@ -8,11 +8,11 @@ class Coalition
 {
 public:
 	Coalition();                                       // 重载默认构造函数
-	//TODO: 增加一个构造函数， 用来reserve
 	Coalition(const Coalition &c);                     // 重载拷贝构造函数
 	Coalition& operator=(const Coalition& c);          // 重载赋值函数
 	// 问题：是否要重载，比如析构函数
 	void initialize(int individualSize);               // 初始化，参数是联盟里面的元素个数
+	void initialize(int individualSize, int abilityDistance, bool isEnemy);               // 初始化，参数是联盟里面的元素个数
 	void setup_8(double abilityDistance, bool isEnemy, const Coalition &enemy);     // 初始化一个联盟，随机的8联通区域
 	void setup_CR(double abilityDistance, bool isEnemy, const Coalition &enemy);    // 初始化一个联盟，Complete Random
 	void setup_file(double abilityDistance, bool isEnemy, const string &filename);  // 从文件中输入一个联盟
@@ -27,8 +27,6 @@ public:
 	void  setAbilityDistance(double abilityDistance);
 	void  setIsEnemy(bool isEnemy);
 	void  setCoalition(int i, const Tank &t);
-	void  setStagnate0(int s);
-	void  setIsStangate(bool iS);
 	void  pushBackTank(const Tank &t);
 	const vector<Tank>& getCoalition()const;
 	const Tank&  getCoalition(int i)const;
@@ -39,10 +37,7 @@ public:
 	const int    getSize()const;
 	const double getAbilityDistance()const;
 	const bool   getIsEnemy()const;
-	const int    getStagnate0()const;
-	const bool   getIsStagnate()const;
 
-	void resetAtStagnate0(const Coalition &m_enemy, int updateCounter);
 	bool isZero(double d);
 
 	void draw();
@@ -77,6 +72,4 @@ private:
 	double   m_weight;
 	double   m_abilityDistance;  // 放在这里合理么？Tank 类中也有此属性
 	bool     m_isEnemy;
-	int      m_stagnate0;        // 代数：对于 SimpleEvaluation 而言，在 Evaluation = 0 时候的停滞的代数
-	bool     m_isStagnate;       // 假设开始的时候，都是可能在 Evaluation = 0 停滞的
 };

@@ -9,8 +9,7 @@ uniform_int_distribution<int> Coalition::uid_y = uniform_int_distribution<int>(0
 Coalition::Coalition()
 {
 	m_coalition.resize(0);
-	m_simpleEvaluate = m_fitness = m_weight = m_stagnate0 = 0;
-	m_isStagnate = true;
+	m_simpleEvaluate = m_fitness = m_weight = 0;
 }
 
 Coalition::Coalition(const Coalition & c)
@@ -22,8 +21,6 @@ Coalition::Coalition(const Coalition & c)
 	m_weight = c.getWeight();
 	m_abilityDistance = c.getAbilityDistance();
 	m_isEnemy = c.getIsEnemy();
-	m_stagnate0 = c.getStagnate0();
-	m_isStagnate = c.getIsStagnate();
 }
 
 Coalition & Coalition::operator=(const Coalition & c)
@@ -38,16 +35,21 @@ Coalition & Coalition::operator=(const Coalition & c)
 	m_weight = c.getWeight();
 	m_abilityDistance = c.getAbilityDistance();
 	m_isEnemy = c.getIsEnemy();
-	m_stagnate0 = c.getStagnate0();
-	m_isStagnate = c.getIsStagnate();
 	return *this;
 }
 
 void Coalition::initialize(int individualSize)
 {
 	m_coalition.resize(individualSize);
-	m_simpleEvaluate = m_fitness = m_weight = m_stagnate0 = 0;
-	m_isStagnate = true;
+	m_simpleEvaluate = m_fitness = m_weight = 0;
+}
+
+void Coalition::initialize(int individualSize, int abilityDistance, bool isEnemy)
+{
+	m_coalition.resize(individualSize);
+	m_abilityDistance = abilityDistance;
+	m_isEnemy = isEnemy;
+	m_simpleEvaluate = m_fitness = m_weight = 0;
 }
 
 // 这种方法，在 INDIVIDUAL_SIZE 比较小（比如 8）的时候，效率不错；但是如果 INDIVIDUAL_SIZE，比较大（比如 40）的时候，效率可能不佳
@@ -206,16 +208,6 @@ void Coalition::setCoalition(int i, const Tank &t)
 	m_coalition[i] = t;
 }
 
-void Coalition::setStagnate0(int s)
-{
-	m_stagnate0 = s;
-}
-
-void Coalition::setIsStangate(bool iS)
-{
-	m_isStagnate = iS;
-}
-
 void Coalition::draw()
 {
 	for (int i = 0; i < m_coalition.size(); ++i)
@@ -297,35 +289,6 @@ const double Coalition::getAbilityDistance() const
 const bool Coalition::getIsEnemy() const
 {
 	return m_isEnemy;
-}
-
-const int Coalition::getStagnate0() const
-{
-	return m_stagnate0;
-}
-
-const bool Coalition::getIsStagnate() const
-{
-	return m_isStagnate;
-}
-
-void Coalition::resetAtStagnate0(const Coalition & m_enemy, int updateCounter)
-{
-	if (getIsStagnate() == true && isZero(getSimpleEvaluate() - 0.0))  // 首先判断是否可能停滞，如果已经不可能了（E > 1），这不进入 if statement
-	{
-		setStagnate0(getStagnate0() + 1);        // 记录一个联盟在 Evaluation = 0 停滞的代数
-		if (getStagnate0() > 200)                // 连续 200 代都处于 Evaluation = 0 的滞胀
-		{
-			setup_CR(getAbilityDistance(), getIsEnemy(), m_enemy);         // 重新初始化
-			setStagnate0(0);                                               // 重新开始滞胀计数
-			setSimpleEvaluate(simpleEvalute(m_enemy, *this));              // 重新评估
-			cout << "reset one coalition at " << updateCounter << " " << getSimpleEvaluate() << endl;
-		}
-	}
-	if (getIsStagnate() == true && getSimpleEvaluate() > 0.5)
-	{
-		setIsStangate(false);                    // 评估值已经 > 0 了，不可能再在 E = 0 这个坑里面停滞了
-	}
 }
 
 bool Coalition::isZero(double d)
