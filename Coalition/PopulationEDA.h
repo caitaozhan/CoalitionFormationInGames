@@ -37,7 +37,7 @@ public:
 private:
 	void selectIndividuals();
 	void estimateDistribution();
-	void sampleOneSolution();
+	void sampleOneSolution(int index);
 	void updateEvaluations();
 	void updateBestCoalitions();
 	vector<int> generateRandomIndex();

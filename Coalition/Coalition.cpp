@@ -46,7 +46,7 @@ void Coalition::initialize(int individualSize)
 
 void Coalition::initialize(int individualSize, int abilityDistance, bool isEnemy)
 {
-	m_coalition.resize(individualSize);
+	m_coalition.reserve(individualSize);
 	m_abilityDistance = abilityDistance;
 	m_isEnemy = isEnemy;
 	m_simpleEvaluate = m_fitness = m_weight = 0;

@@ -274,7 +274,7 @@ void PopulationEDA::estimateDistribution()
 	进行采样，产生下一代种群中的一个个体
 	sample方法参考了with template方法
 */
-void PopulationEDA::sampleOneSolution()
+void PopulationEDA::sampleOneSolution(int index)
 {
 	Coalition newIndividual;                // individual即是一个联盟，一个solution
 	newIndividual.initialize(m_dimension, Tank::ABILITY_DISTANCE, false);
@@ -310,18 +310,29 @@ void PopulationEDA::sampleOneSolution()
 		newTank.setup(arrayIndex, Tank::ABILITY_DISTANCE, false);
 		newIndividual.pushBackTank(move(newTank));
 	}
-	int evaluateNew = Coalition::simpleEvalute(m_enemy, newIndividual);
+	newIndividual.setSimpleEvaluate(Coalition::simpleEvalute(m_enemy, newIndividual));
+	int evaluateNew = newIndividual.getSimpleEvaluate();
 	int evaluateOld = m_selectedPop[pos].getSimpleEvaluate();
 	if (evaluateNew > evaluateOld)
 	{
 		m_selectedPop[pos] = newIndividual;
+		m_population[index] = newIndividual;
 	}
 	else if (evaluateNew == evaluateOld)
 	{
 		if (urd_0_1(Global::dre) < 0.5)
 		{
 			m_selectedPop[pos] = newIndividual;
+			m_population[index] = newIndividual;
 		}
+		else
+		{
+			m_population[index] = m_selectedPop[pos];
+		}
+	}
+	else  // evaluateNew < evaluateOld
+	{
+		m_population[index] = m_selectedPop[pos];
 	}
 }
 
@@ -431,7 +442,7 @@ void PopulationEDA::update()
 
 	for (int i = 0; i < m_populationSize; ++i)
 	{
-		sampleOneSolution();
+		sampleOneSolution(i);
 	}
 
 	updateEvaluations();
