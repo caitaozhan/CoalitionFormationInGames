@@ -4,11 +4,11 @@ uniform_real_distribution<double> PopulationEDA::urd_0_1 = uniform_real_distribu
 
 PopulationEDA::PopulationEDA()
 {
-	ENEMY_INPUT = string("../sample/1_case_10.txt");                           // enemy阵型的初始化编队
+	ENEMY_INPUT = string("../sample/4_case_20.txt");                           // enemy阵型的初始化编队
 	LOG_PM_NAME = string("../log/50^2,pop=50,ind=50/log_simpleEvaluate.txt");  // 概率矩阵日志
 	LOG_ANALYSE_INPUT = string("../log/50^2,pop=50,ind=50/log_analyze.txt");   // 程序运行日志，记录每一次实验的评估值
-	LOG_ANALYSE_OUTPUT = string("../log/5^2,pop=50,ind=50/9-1_0.9_0.9.txt");   // 分析程序运行的运行记录
-	MAX_UPDATE = 200;
+	LOG_ANALYSE_OUTPUT = string("../log/50^2,pop=50,ind=50/9-11_0.8.txt");     // 分析程序运行的运行记录
+	MAX_UPDATE = 1000;
 	MAX_EXPERIMENT = 15;
 
 	//SMALL_NUMBER = 0.01;
@@ -21,26 +21,29 @@ PopulationEDA::PopulationEDA()
 
 void PopulationEDA::initialize(double selectRatio, int populationSize)
 {
-	SELECT_RATIO = selectRatio;
-	m_populationSize = populationSize;
-	m_selectNum = m_populationSize * SELECT_RATIO;
-	uid_selectPop = uniform_int_distribution<int>(0, m_selectNum - 1);
-	
-	LOG_PM.open(LOG_PM_NAME);
-	LOG_ANALYSE.open(LOG_ANALYSE_INPUT);
-
+	// 初始化 enemy
 	m_enemy.initialize(Coalition::INDIVIDUAL_SIZE);
 	m_enemy.setup_file(Tank::ABILITY_DISTANCE, true, ENEMY_INPUT);
+	m_dimension = Coalition::INDIVIDUAL_SIZE;
 
-	// 初始化“变异系数”，概率矩阵中，每个位置都
+	// 种群大小，初始化“变异系数”，问题的维度（个体里面坦克的数量）
 	m_bRatio = 0.0002;
 	m_n = Coalition::INDIVIDUAL_SIZE / 15;
 	if (m_n < 2)
 		m_n = 2;
 	int avalablePlaceInPMatrix;  // 概率矩阵中avalable的位置，等于战场的大小 - 敌人的数量
 	avalablePlaceInPMatrix = (Global::BF_LR.x - Global::BF_UL.x)*(Global::BF_UL.y - Global::BF_LR.y) - Coalition::INDIVIDUAL_SIZE;
-	m_e = (m_populationSize*Coalition::INDIVIDUAL_SIZE) / (avalablePlaceInPMatrix) * m_bRatio;
-	m_dimension = Coalition::INDIVIDUAL_SIZE;
+	m_populationSize = 5 * sqrt(avalablePlaceInPMatrix * m_dimension);
+	//m_populationSize = populationSize;  // 不再根据经验，而是依据一个比例
+	m_e = (m_populationSize*Coalition::INDIVIDUAL_SIZE) / (avalablePlaceInPMatrix)* m_bRatio;
+
+	SELECT_RATIO = selectRatio;
+	m_selectNum = m_populationSize * SELECT_RATIO;
+	uid_selectPop = uniform_int_distribution<int>(0, m_selectNum - 1);
+	
+	// 初始化日志文件名
+	LOG_PM.open(LOG_PM_NAME);
+	LOG_ANALYSE.open(LOG_ANALYSE_INPUT);
 
 	// 初始化 m_population
 	m_population.resize(m_populationSize);
@@ -191,8 +194,11 @@ void PopulationEDA::resetMe()
 	{
 		m_population[i].setup_CR(Tank::ABILITY_DISTANCE, false, m_enemy);  // 重新初始化种群里面所有个体
 	}
+	
 	updateEvaluations();
 	updateBestCoalitions();
+	selectIndividuals();
+	estimateDistribution();
 	writeLogMatrix(0);
 }
 
@@ -406,7 +412,7 @@ void PopulationEDA::update()
 {
 	m_updateCounter++;
 
-	if (/*m_appearTarget == true || */m_updateCounter == MAX_UPDATE)         // 在某一次试验中，到达最大进化次数
+	if (m_appearTarget == true || m_updateCounter == MAX_UPDATE)         // 在某一次试验中，到达最大进化次数
 	{
 		if (m_appearTarget == false)            // MAX_UPDATE 次之内没有找到 target
 		{

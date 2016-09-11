@@ -85,7 +85,7 @@ void producerCalculating(Population && population)
 
 void producerCalculating(PopulationEDA && population)
 {
-	population.initialize(0.8, 50);         // 初始化参数
+	population.initialize(0.8, 100);         // 初始化参数
 	{
 		unique_lock<mutex> lock(BUFFER_R.mtx);
 		BUFFER_R.enemy = population.getEnemy();     // 初始化BUFFER_R.enemy

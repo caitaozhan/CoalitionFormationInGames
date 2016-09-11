@@ -78,7 +78,7 @@ void AnalyzeLog::analyze()
 {
 	smatch sMatchNotFound;
 	smatch sMatchBest;
-	smatch sMatchAvg;
+	//smatch sMatchAvg;
 	string line;
 	double sumTarget = 0.0;
 	double sumAvg  = 0.0;
@@ -97,15 +97,15 @@ void AnalyzeLog::analyze()
 			counterFound++;
 		}
 
-		getline(m_ifile, line);
+		/*getline(m_ifile, line);
 		regex_search(line, sMatchAvg, m_patternAvg);
 		sumAvg += string2Double(sMatchAvg[1]);
 
-		getline(m_ifile, line);
+		getline(m_ifile, line);*/
 	}
 	m_ofile << "times that target is found:   " << counterFound << endl;
 	m_ofile << "searched the first target after evaluating individuals how many times: " << sumTarget / counterFound << endl;
-	m_ofile << "average evaluation value of popluation at present is: " << sumAvg / (counterFound + counterNotFound) << endl;
+	//m_ofile << "average evaluation value of popluation at present is: " << sumAvg / (counterFound + counterNotFound) << endl;
 }
 
 double AnalyzeLog::string2Double(const string & doubleStr)

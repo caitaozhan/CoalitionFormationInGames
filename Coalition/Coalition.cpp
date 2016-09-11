@@ -1,7 +1,7 @@
 #include "Coalition.h"
 
-double Coalition::target = 8.0;
-int Coalition::INDIVIDUAL_SIZE = 10;
+double Coalition::target = 16.0;
+int Coalition::INDIVIDUAL_SIZE = 20;
 uniform_real_distribution<double> Coalition::urd_0_1 = uniform_real_distribution<double>(0.0, 1.0);
 uniform_int_distribution<int> Coalition::uid_x = uniform_int_distribution<int>(0, 1);
 uniform_int_distribution<int> Coalition::uid_y = uniform_int_distribution<int>(0, 1);
