@@ -398,7 +398,12 @@ void Population::updateBestCoalitions()
 			m_bestCoalitionIndex.emplace_back(i);
 		}
 	}
-	int newBestEvaluation = m_population[m_bestCoalitionIndex[0]].getSimpleEvaluate() + Global::EPSILON;
+	int newBestEvaluation;
+	if (m_population[m_bestCoalitionIndex[0]].getSimpleEvaluate() < 0) 
+		newBestEvaluation = m_population[m_bestCoalitionIndex[0]].getSimpleEvaluate() - Global::EPSILON;
+	else
+		newBestEvaluation = m_population[m_bestCoalitionIndex[0]].getSimpleEvaluate() + Global::EPSILON;
+
 	if (newBestEvaluation > m_bestEvaluation)  // 最佳评估值有提高
 	{
 		m_bestEvaluation = newBestEvaluation;
