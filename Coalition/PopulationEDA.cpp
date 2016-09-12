@@ -1,14 +1,13 @@
 #include "PopulationEDA.h"
 
-uniform_real_distribution<double> PopulationEDA::urd_0_1 = uniform_real_distribution<double>(0.0, 1.0);
+string PopulationEDA::LOG_EXPER_EVALUATE = string("../log/EDA/case-8/experiment_");         // 程序运行日志，记录每一次实验的评估值
+string PopulationEDA::LOG_ANALYSE_OUTPUT = string("../log/EDA/case-8/result_");             // 分析程序运行的运行记录
 
 PopulationEDA::PopulationEDA()
 {
 	ENEMY_INPUT = string("../sample/4_case_20.txt");                           // enemy阵型的初始化编队
-	LOG_PM_NAME = string("../log/50^2,pop=50,ind=50/log_simpleEvaluate.txt");  // 概率矩阵日志
-	LOG_ANALYSE_INPUT = string("../log/50^2,pop=50,ind=50/log_analyze.txt");   // 程序运行日志，记录每一次实验的评估值
-	LOG_ANALYSE_OUTPUT = string("../log/50^2,pop=50,ind=50/9-11_0.8.txt");     // 分析程序运行的运行记录
-	MAX_UPDATE = 1000;
+	LOG_PM_NAME = string("../log/EDA/case-8/log_simpleEvaluate.txt");  // 概率矩阵日志
+	MAX_UPDATE = 10000;
 	MAX_EXPERIMENT = 15;
 
 	//SMALL_NUMBER = 0.01;
@@ -16,7 +15,12 @@ PopulationEDA::PopulationEDA()
 	m_appearTarget = false;
 	m_experimentTimes = 0;
 	m_updateCounter = 0;
+	m_evaluateCounter = 0;
 	m_stop = false;
+	m_isStagnate = false;
+	m_latestPopAvg = -Coalition::INDIVIDUAL_SIZE;
+	m_updateThreshhold = 10;
+	urd_0_1 = uniform_real_distribution<double>(0.0, 1.0);
 }
 
 void PopulationEDA::initialize(double selectRatio, int populationSize)
@@ -36,6 +40,8 @@ void PopulationEDA::initialize(double selectRatio, int populationSize)
 	m_populationSize = 5 * sqrt(avalablePlaceInPMatrix * m_dimension);
 	//m_populationSize = populationSize;  // 不再根据经验，而是依据一个比例
 	m_e = (m_populationSize*Coalition::INDIVIDUAL_SIZE) / (avalablePlaceInPMatrix)* m_bRatio;
+	m_stagnateCriteria = 200;
+	SAMPLE_INTERVAL = m_populationSize;
 
 	SELECT_RATIO = selectRatio;
 	m_selectNum = m_populationSize * SELECT_RATIO;
@@ -43,7 +49,6 @@ void PopulationEDA::initialize(double selectRatio, int populationSize)
 	
 	// 初始化日志文件名
 	LOG_PM.open(LOG_PM_NAME);
-	LOG_ANALYSE.open(LOG_ANALYSE_INPUT);
 
 	// 初始化 m_population
 	m_population.resize(m_populationSize);
@@ -60,8 +65,6 @@ void PopulationEDA::initialize(double selectRatio, int populationSize)
 	{
 		vec_double = tmpVector;
 	}
-	Global::dre.seed(0);
-	resetMe();
 }
 
 
@@ -103,6 +106,14 @@ int PopulationEDA::writeLoganalyse(int updateCounter)
 	avg = sum / m_population.size();
 	LOG_ANALYSE << updateCounter << ": " << avg << "\n\n";
 	return avg;
+}
+
+void PopulationEDA::setLogExperEvaluate(int ID)
+{
+	string logName = LOG_EXPER_EVALUATE;
+	logName += to_string(ID) + ".txt";
+
+	LOG_ANALYSE.open(logName);             // 设置日志文件名字，然后打开日志
 }
 
 void PopulationEDA::setResetMe(const bool & resetMe)
@@ -349,6 +360,25 @@ void PopulationEDA::updateEvaluations()
 	for (Coalition & c : m_population)
 	{
 		c.setSimpleEvaluate(Coalition::simpleEvalute(m_enemy, c));
+
+		if (++m_evaluateCounter % SAMPLE_INTERVAL == 0)
+		{
+			double latestBestEvaluate = m_population[m_bestCoalitionIndex[0]].getSimpleEvaluate();
+			LOG_ANALYSE << setw(8) << left << m_evaluateCounter << latestBestEvaluate << endl;  // 评价的次数，此时整个种群的最优适应值
+		}
+	}
+
+	if (m_updateCounter % m_stagnateCriteria == 0 && m_updateCounter != 0)
+	{
+		double newPopAvg = getPopAverageEvaluate();
+		if (isZero(newPopAvg - m_latestPopAvg))
+		{
+			m_isStagnate = true;
+		}
+		else
+		{
+			m_latestPopAvg = newPopAvg;
+		}
 	}
 }
 
@@ -388,6 +418,19 @@ void PopulationEDA::updateBestCoalitions()
 	}
 }
 
+void PopulationEDA::resetExperVariables()
+{
+	m_evaluateCounter = 0;                           // 重新计数评估次数
+	m_updateCounter = 0;                             // 重新计数代数
+	m_appearTarget = false;                          // 恢复没有找到目标
+	m_isStagnate = false;                            // 恢复为“不停滞”状态
+	m_bestEvaluation = -Coalition::INDIVIDUAL_SIZE;  // 重置最好评估值
+	m_latestPopAvg = -Coalition::INDIVIDUAL_SIZE;    // 重置上一次记录的平均评估值
+	SAMPLE_INTERVAL = m_populationSize;              // 重置采样间隔为种群里面的个体数
+	m_updateThreshhold = 10;                         // 恢复为10
+	LOG_ANALYSE.close();                             // 关闭当前的日子文件
+}
+
 vector<int> PopulationEDA::generateRandomIndex()
 {
 	vector<int> temp(m_dimension);
@@ -405,6 +448,18 @@ vector<int> PopulationEDA::generateRandomIndex()
 	}
 
 	return randomIndex;
+}
+
+double PopulationEDA::getPopAverageEvaluate()
+{
+	double sum = 0.0;
+	double avg = 0.0;
+	for (const Coalition &c : m_population)
+	{
+		sum += c.getSimpleEvaluate();
+	}
+	avg = sum / m_population.size();
+	return avg;
 }
 
 /*
@@ -458,6 +513,46 @@ vector<int> PopulationEDA::generateRandomIndex()
 //	writeLogMatrix(m_updateCounter);
 //}
 
-void PopulationEDA::run()
+void PopulationEDA::run(int ID)
 {
+	Global::dre.seed(ID);
+
+	resetMe();                       // 重置我方编队
+
+	while (m_appearTarget == false && m_isStagnate == false)  // 试验继续运行的条件：没有找到目标，并且没有停滞状态
+	{
+		selectIndividuals();
+		estimateDistribution();
+		for (int i = 0; i < m_populationSize; ++i)
+		{
+			sampleOneSolution(i);
+		}
+		updateEvaluations();
+		updateBestCoalitions();      //  更新最好的Coalitions
+		writeLogMatrix(++m_updateCounter);
+
+		if (m_updateCounter == m_updateThreshhold)
+		{
+			SAMPLE_INTERVAL *= 2;            // 评估次数*2之后，再sample
+			m_updateThreshhold *= 10;        // updateCounter的阈值*10
+		}
+		if (m_updateCounter == MAX_UPDATE)
+			break;
+	}
+
+	if (m_appearTarget == true)
+	{                           //当前评估次数          此时整个种群的最优适应值
+		LOG_ANALYSE << setw(8) << (m_evaluateCounter / 100 + 1) * 100 << m_population[m_bestCoalitionIndex[0]].getSimpleEvaluate();
+		LOG_ANALYSE << endl;
+
+		unique_lock<mutex> lock(Global::mtx);
+		cout << "Experiment " << setw(2) << ID << " found Global best(" << Coalition::target << ") after "
+			<< setw(4) << m_updateCounter - 1 << " generations, " << setw(5) << (m_updateCounter - 1)*m_populationSize << " evaluations" << endl;
+	}
+	else
+	{
+		unique_lock<mutex> lock(Global::mtx);
+		cout << "Experiment " << setw(2) << ID << " not found Global best. " << m_updateCounter << endl;
+	}
+	resetExperVariables();
 }

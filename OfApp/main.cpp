@@ -2,6 +2,7 @@
 #include "ofMain.h"
 #include "ofApp.h"
 #include "../Coalition/Population.h"
+#include "../Coalition/PopulationEDA.h"
 using namespace std;
 
 /*
@@ -10,8 +11,10 @@ using namespace std;
 */
 void doExperiments(const vector<int> &experiments)
 {
-	Population population;
-	population.initialize(0.1, 0.9, 500);
+	/*Population population;
+	population.initialize(0.1, 0.9, 500);*/
+	PopulationEDA population;
+	population.initialize(0.8, 100);
 	for (int i = 0; i < experiments.size(); ++i)
 	{
 		population.setLogExperEvaluate(experiments[i]);  // 依据本次实验的ID号，设置log文件名
