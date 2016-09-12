@@ -50,6 +50,15 @@ void Coalition::initialize(int individualSize)
 	//m_logPlace.open(logName);
 }
 
+void Coalition::initialize(int individualSize, int abilityDistance, bool isEnemy)
+{
+	m_coalition.reserve(individualSize);
+	m_abilityDistance = abilityDistance;
+	m_isEnemy = isEnemy;
+	setColor(m_isEnemy);
+	m_simpleEvaluate = m_fitness = m_weight = 0;
+}
+
 // 这种方法，在 INDIVIDUAL_SIZE 比较小（比如 8）的时候，效率不错；但是如果 INDIVIDUAL_SIZE，比较大（比如 40）的时候，效率可能不佳
 void Coalition::setup_8(double abilityDistance, bool isEnemy, const Coalition &enemy)
 {
@@ -555,5 +564,13 @@ void Coalition::writeLog()
 		m_logPlace << t.getArrayIndex() << '\n';
 	}
 	m_logPlace << '\n' << "-----------" << endl;
+}
+
+bool Coalition::decrease(const Coalition & c1, const Coalition & c2)
+{
+	if (c1.getSimpleEvaluate() > c2.getSimpleEvaluate())
+		return true;
+
+	return false;
 }
 
