@@ -12,7 +12,7 @@ public:
 	Coalition& operator=(const Coalition& c);          // 重载赋值函数
 	// 问题：是否要重载，比如析构函数
 	void initialize(int individualSize);               // 初始化，参数是联盟里面的元素个数
-	void initialize(int individualSize, int abilityDistance, bool isEnemy);               // 初始化，参数是联盟里面的元素个数
+	void initialize(int individualSize, int abilityDistance, bool isEnemy);         // 初始化，三个参数的版本
 	void setup_8(double abilityDistance, bool isEnemy, const Coalition &enemy);     // 初始化一个联盟，随机的8联通区域
 	void setup_CR(double abilityDistance, bool isEnemy, const Coalition &enemy);    // 初始化一个联盟，Complete Random
 	void setup_file(double abilityDistance, bool isEnemy, const string &filename);  // 从文件中输入一个联盟

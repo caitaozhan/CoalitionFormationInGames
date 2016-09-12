@@ -377,8 +377,6 @@ void Population::resetMe()
 	for (int i = 0; i < m_population.size(); ++i)
 	{
 		m_population[i].setup_CR(Tank::ABILITY_DISTANCE, false, m_enemy);  // 重新初始化种群里面所有个体
-		//m_population[i].setIsStangate(true);                             // 修复一个BUG
-		//m_population[i].setStagnate0(0);
 	}
 	updateWeight();   // 新的位置 --> 新的 weight
 	updatePMatrix();
@@ -410,7 +408,6 @@ void Population::updateWeight()
 	for (Coalition &c : m_population)                  // 更新每一个联盟的评估值
 	{
 		c.setSimpleEvaluate(Coalition::simpleEvalute(m_enemy, c));
-		//c.resetAtStagnate0(m_enemy, m_updateCounter);
 	}
 
 	int maxE = -Coalition::INDIVIDUAL_SIZE;
