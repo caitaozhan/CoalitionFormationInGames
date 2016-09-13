@@ -1,19 +1,18 @@
 #include "Population.h"
 
-string Population::LOG_EXPER_EVALUATE = string("../log/case-8/experiment_");         // 程序运行日志，记录每一次实验的评估值
-string Population::LOG_ANALYSE_OUTPUT = string("../log/case-8/result_");             // 分析程序运行的运行记录
+string Population::LOG_EXPER_EVALUATE = string("../log/MPL/case-1/experiment_");         // 程序运行日志，记录每一次实验的评估值
+string Population::LOG_ANALYSE_OUTPUT = string("../log/MPL/case-1/result_");             // 分析程序运行的运行记录
 
 Population::Population()
 {
 	PL = 0.9;    // Probability Learning
 	LS = 0.9;    // Local Search
 	
-	ENEMY_INPUT = string("../sample/8_case_48.txt");                                 // enemy阵型的初始化编队
-	LOG_PM_NAME = string("../log/case-8/log_simpleEvaluate.txt");                    // 概率矩阵日志
+	ENEMY_INPUT = string("../sample/1_case_10.txt");                                 // enemy阵型的初始化编队
+	LOG_PM_NAME = string("../log/MPL/case-1/log_simpleEvaluate.txt");                    // 概率矩阵日志
 	MAX_UPDATE = 10000;
 	MAX_EXPERIMENT = 15;
 
-	//SMALL_NUMBER = 0.01;
 	m_update = true;
 	m_appearTarget = false;
 	m_experimentTimes = 0;
@@ -39,7 +38,7 @@ void Population::initialize(double pl, double ls, int populationSize)
 	int avalablePlaceInPMatrix;
 	avalablePlaceInPMatrix = (Global::BF_LR.x - Global::BF_UL.x)*(Global::BF_UL.y - Global::BF_LR.y) - m_enemy.getSize();
 	m_populationSize = 2 * sqrt(avalablePlaceInPMatrix * m_dimension);
-	m_e = (m_populationSize*Coalition::INDIVIDUAL_SIZE) / (avalablePlaceInPMatrix)* m_bRatio;
+	m_e = m_bRatio * (m_populationSize*Coalition::INDIVIDUAL_SIZE) / (avalablePlaceInPMatrix);
 	m_stagnateCriteria = 200;               // 经过若干代数的进化，种群的fitness无变化，则终止程序
 	SAMPLE_INTERVAL = m_populationSize;     // 初始条件下，SAMPLE_INTERVAL 设为种群规模大小
 	
