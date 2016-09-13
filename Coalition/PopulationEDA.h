@@ -33,7 +33,6 @@ public:
 	
 	void resetEnemy(string &way);
 	void resetMe();
-	void resetExperVariable();
 	
 	static string LOG_EXPER_EVALUATE;
 	static string LOG_ANALYSE_OUTPUT;

@@ -1,12 +1,12 @@
 #include "PopulationEDA.h"
 
-string PopulationEDA::LOG_EXPER_EVALUATE = string("../log/EDA/case-4/experiment_");         // 程序运行日志，记录每一次实验的评估值
-string PopulationEDA::LOG_ANALYSE_OUTPUT = string("../log/EDA/case-4/result_");             // 分析程序运行的运行记录
+string PopulationEDA::LOG_EXPER_EVALUATE = string("../log/EDA/case-1/experiment_");         // 程序运行日志，记录每一次实验的评估值
+string PopulationEDA::LOG_ANALYSE_OUTPUT = string("../log/EDA/case-1/result_");             // 分析程序运行的运行记录
 
 PopulationEDA::PopulationEDA()
 {
-	ENEMY_INPUT = string("../sample/4_case_20.txt");                           // enemy阵型的初始化编队
-	LOG_PM_NAME = string("../log/EDA/case-4/log_simpleEvaluate.txt");  // 概率矩阵日志
+	ENEMY_INPUT = string("../sample/1_case_10.txt");                           // enemy阵型的初始化编队
+	LOG_PM_NAME = string("../log/EDA/case-1/log_simpleEvaluate.txt");  // 概率矩阵日志
 	MAX_UPDATE = 10000;
 	MAX_EXPERIMENT = 15;
 
@@ -19,7 +19,7 @@ PopulationEDA::PopulationEDA()
 	m_stop = false;
 	m_isStagnate = false;
 	m_latestPopAvg = -Coalition::INDIVIDUAL_SIZE;
-	m_updateThreshhold = 10;
+	m_updateThreshhold = 100;
 	urd_0_1 = uniform_real_distribution<double>(0.0, 1.0);
 }
 
@@ -213,20 +213,6 @@ void PopulationEDA::resetMe()
 	selectIndividuals();
 	estimateDistribution();
 	writeLogMatrix(0);
-}
-
-void PopulationEDA::resetExperVariable()
-{
-	// TODO: 可能有变动
-	m_evaluateCounter = 0;
-	m_updateCounter = 0;
-	m_appearTarget = false;
-	m_isStagnate = false;
-	m_bestEvaluation = -Coalition::INDIVIDUAL_SIZE;
-	m_latestPopAvg = -Coalition::INDIVIDUAL_SIZE;
-	SAMPLE_INTERVAL = m_populationSize;
-	m_updateThreshhold = 10;
-	LOG_ANALYSE.close();
 }
 
 /*
@@ -441,7 +427,7 @@ void PopulationEDA::resetExperVariables()
 	m_bestEvaluation = -Coalition::INDIVIDUAL_SIZE;  // 重置最好评估值
 	m_latestPopAvg = -Coalition::INDIVIDUAL_SIZE;    // 重置上一次记录的平均评估值
 	SAMPLE_INTERVAL = m_populationSize;              // 重置采样间隔为种群里面的个体数
-	m_updateThreshhold = 10;                         // 恢复为10
+	m_updateThreshhold = 100;                        // 恢复为100
 	LOG_ANALYSE.close();                             // 关闭当前的日子文件
 }
 
