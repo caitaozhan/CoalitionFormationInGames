@@ -1,7 +1,7 @@
 #include "Tank.h"
 
 const int Tank::PIXEL_PER_INDEX = 5;
-double Tank::ABILITY_DISTANCE = 5;
+double Tank::ABILITY_DISTANCE = 4;
 
 Tank::Tank()
 {
