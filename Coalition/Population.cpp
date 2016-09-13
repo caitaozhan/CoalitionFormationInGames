@@ -1,16 +1,16 @@
 #include "Population.h"
 
-string Population::LOG_EXPER_EVALUATE = string("../log/MPL/case-1/experiment_");         // 程序运行日志，记录每一次实验的评估值
-string Population::LOG_ANALYSE_OUTPUT = string("../log/MPL/case-1/result_");             // 分析程序运行的运行记录
+string Population::LOG_EXPER_EVALUATE = string("../log/MPL/case-2/experiment_");         // 程序运行日志，记录每一次实验的评估值
+string Population::LOG_ANALYSE_OUTPUT = string("../log/MPL/case-2/result_");             // 分析程序运行的运行记录
 
 Population::Population()
 {
 	PL = 0.9;    // Probability Learning
 	LS = 0.9;    // Local Search
 	
-	ENEMY_INPUT = string("../sample/1_case_10.txt");                                 // enemy阵型的初始化编队
-	LOG_PM_NAME = string("../log/MPL/case-1/log_simpleEvaluate.txt");                    // 概率矩阵日志
-	MAX_UPDATE = 10000;
+	ENEMY_INPUT = string("../sample/2_case_20.txt");                                 // enemy阵型的初始化编队
+	LOG_PM_NAME = string("../log/MPL/case-2/log_simpleEvaluate.txt");                    // 概率矩阵日志
+	MAX_UPDATE = 1000;
 	MAX_EXPERIMENT = 15;
 
 	m_update = true;
