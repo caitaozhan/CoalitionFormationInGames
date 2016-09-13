@@ -57,13 +57,16 @@ private:
 	int  m_updateThreshhold;                    // 更新代数的阈值，用来控制记录日志的频率
 	int  m_evaluateCounter;
 	int  SAMPLE_INTERVAL;                       // 采样间隔
+	int  m_dimension;                           // 问题的维度，在这里等于一个individual里面坦克的数量
 
 	bool m_appearTarget;
 	int  m_experimentTimes;
 
 	double PL;            // Probability Learning
 	double LS;			  // Local Search
-	double SMALL_NUMBER;
+	//double SMALL_NUMBER;
+	double m_bRatio;
+	double m_e;
 
 	int MAX_UPDATE;       // todo: 这个成员需要去掉
 	int MAX_EXPERIMENT;

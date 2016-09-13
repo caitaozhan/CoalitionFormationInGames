@@ -11,10 +11,10 @@ using namespace std;
 */
 void doExperiments(const vector<int> &experiments)
 {
-	/*Population population;
-	population.initialize(0.1, 0.9, 500);*/
-	PopulationEDA population;
-	population.initialize(0.8, 100);
+	Population population;
+	population.initialize(0.5, 1, 500);
+	//PopulationEDA population;
+	//population.initialize(0.8, 100);
 	for (int i = 0; i < experiments.size(); ++i)
 	{
 		population.setLogExperEvaluate(experiments[i]);  // 依据本次实验的ID号，设置log文件名
@@ -27,7 +27,7 @@ int main( )
 {
 	int numThread = thread::hardware_concurrency();
 	numThread = (numThread == 0 ? 2 : numThread);   // hardware_concurrency() 有可能返回 0
-	//numThread = 1;
+	numThread = 1;
 
 	// 把若干次实验，分为numThread个组，这些组同时进行实验。
 	vector<vector<int>> groups(numThread);       
@@ -58,7 +58,7 @@ int main( )
 	}
 
 	// todo: 调试
-	AnalyzeLog analyzeLog(totalExperiments, PopulationEDA::LOG_EXPER_EVALUATE, PopulationEDA::LOG_ANALYSE_OUTPUT);
+	AnalyzeLog analyzeLog(totalExperiments, Population::LOG_EXPER_EVALUATE, Population::LOG_ANALYSE_OUTPUT);
 	analyzeLog.analyze();
 
 	system("pause");

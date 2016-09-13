@@ -13,7 +13,7 @@ Population::Population()
 	MAX_UPDATE = 10000;
 	MAX_EXPERIMENT = 15;
 
-	SMALL_NUMBER = 0.01;
+	//SMALL_NUMBER = 0.01;
 	m_update = true;
 	m_appearTarget = false;
 	m_experimentTimes = 0;
@@ -22,7 +22,7 @@ Population::Population()
 	m_stop = false;
 	m_isStagnate = false;
 	m_latestPopAvg = -Coalition::INDIVIDUAL_SIZE;
-	m_updateThreshhold = 10;
+	m_updateThreshhold = 100;
 	urd_0_1 = uniform_real_distribution<double>(0.0, 1.0);
 }
 
@@ -30,16 +30,21 @@ void Population::initialize(double pl, double ls, int populationSize)
 {
 	PL = pl;
 	LS = ls;
-	m_populationSize = populationSize;
-	SAMPLE_INTERVAL = populationSize;   // 初始条件下，SAMPLE_INTERVAL 设为种群规模大小
-	m_stagnateCriteria = 200;             // 经过若干代数的进化，种群的fitness无变化，则终止程序
-
-	LOG_PM.open(LOG_PM_NAME);
 
 	m_enemy.initialize(Coalition::INDIVIDUAL_SIZE);                  // 修正BUG：之前 m_enemy 调用重载的默认构造函数，导致vector大小=0
 	m_enemy.setup_file(Tank::ABILITY_DISTANCE, true, ENEMY_INPUT);   // 从文件从读入数据，进行初始化
-	//m_enemy.setup_8(Tank::ABILITY_DISTANCE, true, Coalition()); 
-	//m_enemy.setup_CR(Tank::ABILITY_DISTANCE, true, Coalition());
+	m_dimension = Coalition::INDIVIDUAL_SIZE;
+	
+	m_bRatio = 0.0002;
+	int avalablePlaceInPMatrix;
+	avalablePlaceInPMatrix = (Global::BF_LR.x - Global::BF_UL.x)*(Global::BF_UL.y - Global::BF_LR.y) - m_enemy.getSize();
+	m_populationSize = 2 * sqrt(avalablePlaceInPMatrix * m_dimension);
+	m_e = (m_populationSize*Coalition::INDIVIDUAL_SIZE) / (avalablePlaceInPMatrix)* m_bRatio;
+	m_stagnateCriteria = 200;               // 经过若干代数的进化，种群的fitness无变化，则终止程序
+	SAMPLE_INTERVAL = m_populationSize;     // 初始条件下，SAMPLE_INTERVAL 设为种群规模大小
+	
+    // 初始化日志文件名
+	LOG_PM.open(LOG_PM_NAME);
 
 	// 初始化 m_population
 	m_population.resize(m_populationSize);                  
@@ -116,7 +121,7 @@ void Population::run(int ID)
 		updatePopluation();          //  新的全局概率矩阵 --> 更新种群位置
 		updateWeight();              //  新的种群位置     --> 更新种群的权值
 		updatePMatrix();             //  新的种群权值     --> 更新全局的概率矩阵
-		updateBestCoalitions();      //  更新最好的Coalitions
+		//updateBestCoalitions();      //  更新最好的Coalitions
 		writeLogMatrix(++m_updateCounter);
 		
 		if (m_updateCounter == m_updateThreshhold)
@@ -154,7 +159,7 @@ void Population::resetExperVariables()
 	m_bestEvaluation = -Coalition::INDIVIDUAL_SIZE;  // 重置最好评估值
 	m_latestPopAvg = -Coalition::INDIVIDUAL_SIZE;    // 重置上一次记录的平均评估值
 	SAMPLE_INTERVAL = m_populationSize;              // 重置采样间隔为种群里面的个体数
-	m_updateThreshhold = 10;                         // 恢复为10
+	m_updateThreshhold = 100;                         // 恢复为10
 	LOG_ANALYSE.close();                             // 关闭当前的日子文件
 }
 
@@ -206,7 +211,7 @@ void Population::updatePopluation()
 			{
 				c = backupC;
 			}
-			else if (evaluateBackupC == evaluateC && localSearch == true)  // 相等，但是如果是 local search
+			else if (evaluateBackupC == evaluateC /*&& localSearch == true*/)  // 相等，但是如果是 local search
 			{
 				if (urd_0_1(Global::dre) < 0.5)                            // 给 50% 概率更新
 				{
@@ -228,7 +233,7 @@ void Population::updatePMatrix()
 	{
 		for (double &p : vec_double)
 		{
-			p = SMALL_NUMBER;		             // 不再清零，初始化一个很小的数
+			p = m_e;		             // 不再清零，初始化一个很小的数
 		}
 	}
 
@@ -407,10 +412,8 @@ void Population::updateBestCoalitions()
 	if (newBestEvaluation > m_bestEvaluation)  // 最佳评估值有提高
 	{
 		m_bestEvaluation = newBestEvaluation;
-		//cout << "Best @" << m_updateCounter << "  " << m_bestEvaluation << '\n';        // Console版本注释掉
 		if (m_appearTarget == false && isZero(m_bestEvaluation - Coalition::target))
 		{
-			//LOG_ANALYSE << "Best @" << m_updateCounter << "  " << Coalition::target << '\n';  // Console版本注释掉
 			m_appearTarget = true;
 		}
 	}
@@ -478,12 +481,15 @@ void Population::updateWeight()
 	for (Coalition &c : m_population)                  // 更新每一个联盟的评估值
 	{
 		c.setSimpleEvaluate(Coalition::simpleEvalute(m_enemy, c));                  // 评价一次，原始目标值
-		
-		if (++m_evaluateCounter % SAMPLE_INTERVAL == 0)
-		{
-			double latestBestEvaluate = m_population[m_bestCoalitionIndex[0]].getSimpleEvaluate();
-			LOG_ANALYSE << setw(8) << left << m_evaluateCounter << latestBestEvaluate << endl;  // 评价的次数，此时整个种群的最优适应值
-		}
+		++m_evaluateCounter;
+	}
+
+	updateBestCoalitions();
+
+	if (m_evaluateCounter % SAMPLE_INTERVAL == 0)
+	{
+		double latestBestEvaluate = m_population[m_bestCoalitionIndex[0]].getSimpleEvaluate();
+		LOG_ANALYSE << setw(8) << left << m_evaluateCounter << latestBestEvaluate << endl;  // 评价的次数，此时整个种群的最优适应值
 	}
 
 	if (m_updateCounter % m_stagnateCriteria == 0 && m_updateCounter != 0)

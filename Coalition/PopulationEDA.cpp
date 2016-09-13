@@ -1,12 +1,12 @@
 #include "PopulationEDA.h"
 
-string PopulationEDA::LOG_EXPER_EVALUATE = string("../log/EDA/case-8/experiment_");         // 程序运行日志，记录每一次实验的评估值
-string PopulationEDA::LOG_ANALYSE_OUTPUT = string("../log/EDA/case-8/result_");             // 分析程序运行的运行记录
+string PopulationEDA::LOG_EXPER_EVALUATE = string("../log/MPL/case-1/experiment_");         // 程序运行日志，记录每一次实验的评估值
+string PopulationEDA::LOG_ANALYSE_OUTPUT = string("../log/MPL/case-1/result_");             // 分析程序运行的运行记录
 
 PopulationEDA::PopulationEDA()
 {
-	ENEMY_INPUT = string("../sample/8_case_48.txt");                           // enemy阵型的初始化编队
-	LOG_PM_NAME = string("../log/EDA/case-8/log_simpleEvaluate.txt");  // 概率矩阵日志
+	ENEMY_INPUT = string("../sample/1_case_10.txt");                           // enemy阵型的初始化编队
+	LOG_PM_NAME = string("../log/MPL/case-1/log_simpleEvaluate.txt");  // 概率矩阵日志
 	MAX_UPDATE = 10000;
 	MAX_EXPERIMENT = 15;
 
@@ -36,9 +36,8 @@ void PopulationEDA::initialize(double selectRatio, int populationSize)
 	if (m_n < 2)
 		m_n = 2;
 	int avalablePlaceInPMatrix;  // 概率矩阵中avalable的位置，等于战场的大小 - 敌人的数量
-	avalablePlaceInPMatrix = (Global::BF_LR.x - Global::BF_UL.x)*(Global::BF_UL.y - Global::BF_LR.y) - Coalition::INDIVIDUAL_SIZE;
+	avalablePlaceInPMatrix = (Global::BF_LR.x - Global::BF_UL.x)*(Global::BF_UL.y - Global::BF_LR.y) - m_enemy.getSize(); // todo，有一个test需要重测，不过影响应该很小
 	m_populationSize = 5 * sqrt(avalablePlaceInPMatrix * m_dimension);
-	//m_populationSize = populationSize;  // 不再根据经验，而是依据一个比例
 	m_e = (m_populationSize*Coalition::INDIVIDUAL_SIZE) / (avalablePlaceInPMatrix)* m_bRatio;
 	m_stagnateCriteria = 200;
 	SAMPLE_INTERVAL = m_populationSize;
@@ -401,7 +400,7 @@ void PopulationEDA::updateBestCoalitions()
 		}
 	}
 	int newBestEvaluation;
-	if (m_population[m_bestCoalitionIndex[0]].getSimpleEvaluate() < 0)  // TODO consolee: a bug, 高精度损失（对于负数）
+	if (m_population[m_bestCoalitionIndex[0]].getSimpleEvaluate() < 0) 
 		newBestEvaluation = m_population[m_bestCoalitionIndex[0]].getSimpleEvaluate() - Global::EPSILON;
 	else
 		newBestEvaluation = m_population[m_bestCoalitionIndex[0]].getSimpleEvaluate() + Global::EPSILON;
@@ -409,10 +408,8 @@ void PopulationEDA::updateBestCoalitions()
 	if (newBestEvaluation > m_bestEvaluation)  // 最佳评估值有提高
 	{
 		m_bestEvaluation = newBestEvaluation;
-		//cout << "Best @" << m_updateCounter << "  " << m_bestEvaluation << '\n';
 		if (m_appearTarget == false && isZero(m_bestEvaluation - Coalition::target))
 		{
-			//LOG_ANALYSE << "Best @" << m_updateCounter * m_populationSize << "  " << Coalition::target << '\n';
 			m_appearTarget = true;
 		}
 	}
