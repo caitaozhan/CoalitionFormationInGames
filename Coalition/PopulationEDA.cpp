@@ -209,7 +209,7 @@ void PopulationEDA::resetMe()
 	}
 	
 	updateEvaluations();
-	updateBestCoalitions();
+	//updateBestCoalitions();
 	selectIndividuals();
 	estimateDistribution();
 	writeLogMatrix(0);
@@ -218,11 +218,15 @@ void PopulationEDA::resetMe()
 void PopulationEDA::resetExperVariable()
 {
 	// TODO: 可能有变动
-	m_bestEvaluation = -Coalition::INDIVIDUAL_SIZE;
-	m_appearTarget = false;
+	m_evaluateCounter = 0;
 	m_updateCounter = 0;
-	m_experimentTimes++;
-	Global::dre.seed(m_experimentTimes);
+	m_appearTarget = false;
+	m_isStagnate = false;
+	m_bestEvaluation = -Coalition::INDIVIDUAL_SIZE;
+	m_latestPopAvg = -Coalition::INDIVIDUAL_SIZE;
+	SAMPLE_INTERVAL = m_populationSize;
+	m_updateThreshhold = 10;
+	LOG_ANALYSE.close();
 }
 
 /*
@@ -360,12 +364,22 @@ void PopulationEDA::updateEvaluations()
 	for (Coalition & c : m_population)
 	{
 		c.setSimpleEvaluate(Coalition::simpleEvalute(m_enemy, c));
+		++m_evaluateCounter;
 
-		if (++m_evaluateCounter % SAMPLE_INTERVAL == 0)
-		{
-			double latestBestEvaluate = m_population[m_bestCoalitionIndex[0]].getSimpleEvaluate();
-			LOG_ANALYSE << setw(8) << left << m_evaluateCounter << latestBestEvaluate << endl;  // 评价的次数，此时整个种群的最优适应值
-		}
+		//if (++m_evaluateCounter % SAMPLE_INTERVAL == 0)
+		//{
+		//	updateBestCoalitions();  // 不完美修复bug：“滞后”一代更新问题
+		//	double latestBestEvaluate = m_population[m_bestCoalitionIndex[0]].getSimpleEvaluate();
+		//	LOG_ANALYSE << setw(8) << left << m_evaluateCounter << latestBestEvaluate << endl;  // 评价的次数，此时整个种群的最优适应值
+		//}
+	}
+
+	updateBestCoalitions(); 
+	
+	if (m_evaluateCounter % SAMPLE_INTERVAL == 0)
+	{
+		double latestBestEvaluate = m_population[m_bestCoalitionIndex[0]].getSimpleEvaluate();
+		LOG_ANALYSE << setw(8) << left << m_evaluateCounter << latestBestEvaluate << endl;  // 评价的次数，此时整个种群的最优适应值
 	}
 
 	if (m_updateCounter % m_stagnateCriteria == 0 && m_updateCounter != 0)
@@ -409,10 +423,10 @@ void PopulationEDA::updateBestCoalitions()
 	if (newBestEvaluation > m_bestEvaluation)  // 最佳评估值有提高
 	{
 		m_bestEvaluation = newBestEvaluation;
-		cout << "Best @" << m_updateCounter << "  " << m_bestEvaluation << '\n';
+		//cout << "Best @" << m_updateCounter << "  " << m_bestEvaluation << '\n';
 		if (m_appearTarget == false && isZero(m_bestEvaluation - Coalition::target))
 		{
-			LOG_ANALYSE << "Best @" << m_updateCounter * m_populationSize << "  " << Coalition::target << '\n';
+			//LOG_ANALYSE << "Best @" << m_updateCounter * m_populationSize << "  " << Coalition::target << '\n';
 			m_appearTarget = true;
 		}
 	}
@@ -528,7 +542,7 @@ void PopulationEDA::run(int ID)
 			sampleOneSolution(i);
 		}
 		updateEvaluations();
-		updateBestCoalitions();      //  更新最好的Coalitions
+		//updateBestCoalitions();      //  更新最好的Coalitions
 		writeLogMatrix(++m_updateCounter);
 
 		if (m_updateCounter == m_updateThreshhold)

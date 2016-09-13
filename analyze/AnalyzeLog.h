@@ -21,7 +21,7 @@ public:
 
 	void setInputFile(const string &ifileName);
 	void setOutputFile(const string &ofileName);
-	void setPattern(const string &pattern);
+	//void setPattern(const string &pattern);
 	
 	void analyze();
 	double calcuVariance(const vector<double> &v);

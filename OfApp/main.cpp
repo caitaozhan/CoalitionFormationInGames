@@ -58,7 +58,7 @@ int main( )
 	}
 
 	// todo: ต๗สิ
-	AnalyzeLog analyzeLog(totalExperiments, Population::LOG_EXPER_EVALUATE, Population::LOG_ANALYSE_OUTPUT);
+	AnalyzeLog analyzeLog(totalExperiments, PopulationEDA::LOG_EXPER_EVALUATE, PopulationEDA::LOG_ANALYSE_OUTPUT);
 	analyzeLog.analyze();
 
 	system("pause");

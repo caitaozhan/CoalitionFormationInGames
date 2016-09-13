@@ -106,10 +106,7 @@ void AnalyzeLog::analyze()
 	{
 		cv.m_value /= m_totalExperNum;
 	}
-	/*for_each(avgInputData.begin(), avgInputData.end(), [this](CounterValue &cv)
-	{
-		cv.m_value /= this->m_totalExperNum;
-	});*/
+
 	m_ofile.open(m_outputBase + "avg.txt");
 	for (const CounterValue &cv : avgInputData)
 	{
