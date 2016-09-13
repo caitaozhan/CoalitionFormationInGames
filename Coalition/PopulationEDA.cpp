@@ -1,12 +1,12 @@
 #include "PopulationEDA.h"
 
-string PopulationEDA::LOG_EXPER_EVALUATE = string("../log/EDA/case-5/experiment_");         // 程序运行日志，记录每一次实验的评估值
-string PopulationEDA::LOG_ANALYSE_OUTPUT = string("../log/EDA/case-5/result_");             // 分析程序运行的运行记录
+string PopulationEDA::LOG_EXPER_EVALUATE = string("../log/EDA/case-6/experiment_");         // 程序运行日志，记录每一次实验的评估值
+string PopulationEDA::LOG_ANALYSE_OUTPUT = string("../log/EDA/case-6/result_");             // 分析程序运行的运行记录
 
 PopulationEDA::PopulationEDA()
 {
-	ENEMY_INPUT = string("../sample/5_case_50.txt");                           // enemy阵型的初始化编队
-	LOG_PM_NAME = string("../log/EDA/case-5/log_simpleEvaluate.txt");  // 概率矩阵日志
+	ENEMY_INPUT = string("../sample/6_case_10.txt");                           // enemy阵型的初始化编队
+	LOG_PM_NAME = string("../log/EDA/case-6/log_simpleEvaluate.txt");  // 概率矩阵日志
 	MAX_UPDATE = 10000;
 	MAX_EXPERIMENT = 15;
 
