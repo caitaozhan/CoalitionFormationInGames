@@ -8,8 +8,10 @@ Population::Population()
 	PL = 0.9;    // Probability Learning
 	LS = 0.9;    // Local Search
 	
-	ENEMY_INPUT = string("../sample/8_case_48.txt");                                 // enemy阵型的初始化编队
+
+	ENEMY_INPUT = string("../sample/8_case_48.txt");                                     // enemy阵型的初始化编队
 	LOG_PM_NAME = string("../log/MPL/case-8/log_simpleEvaluate.txt");                    // 概率矩阵日志
+
 	MAX_UPDATE = 5000;
 	MAX_EXPERIMENT = 15;
 

@@ -3,6 +3,7 @@
 const int Tank::PIXEL_PER_INDEX = 5;
 double Tank::ABILITY_DISTANCE = 6;
 
+
 Tank::Tank()
 {
 	m_arrayIndex = ofVec2f(0, 0);
