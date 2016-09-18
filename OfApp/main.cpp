@@ -27,7 +27,7 @@ int main( )
 {
 	int numThread = thread::hardware_concurrency();
 	numThread = (numThread == 0 ? 2 : numThread);   // hardware_concurrency() 有可能返回 0
-	//numThread = 1;
+	//numThread = 3;
 
 	// 把若干次实验，分为numThread个组，这些组同时进行实验。
 	vector<vector<int>> groups(numThread);       
