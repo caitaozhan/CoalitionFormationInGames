@@ -1,8 +1,6 @@
 # CoalitionFormationInGames
-A little research on coalition formation in games
 
-Coding in C++ under OpenFrameworks(version 0.9.3. An open source toolkit designed for "creative coding"). I use vs2015 community as my IDE. 
+Shape formation for a group of agents is crucial in many strategy games as it brings collective payoff through cooperation. Finding a good formation for a group of agents in games is considered as a combinatorial optimization problem in this paper. To address this issue, this paper proposes a novel and simple evolutionary algorithm based on a probability learning matrix, which is the foundation of a formation learning and discovery mechanism. Experimental results on several test problems show that the proposed algorithm works well in
+comparison with another peer algorithm.
 
-version_0.4.1: v_0.3.1 + local search
-注：这里的local search 是 big 版本
-    v_0.4 的 local search 是 small 版本
+Branch console do experiments and generate results, branch producer-consumer visualize experiments.
