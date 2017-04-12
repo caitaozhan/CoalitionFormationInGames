@@ -7,7 +7,7 @@ Population::Population()
 	PL = 0.9;    // Probability Learning
 	LS = 0.9;    // Local Search
 	
-	ENEMY_INPUT = string("../sample/8_case_50.txt");                           // enemy阵型的初始化编队
+	ENEMY_INPUT = string("../sample/1_case_10.txt");                           // enemy阵型的初始化编队
 	LOG_PM_NAME = string("../log/50^2,pop=50,ind=50/log_simpleEvaluate.txt");  // 概率矩阵日志
 	LOG_ANALYSE_INPUT = string("../log/50^2,pop=50,ind=50/log_analyze.txt");   // 程序运行日志，记录每一次实验的评估值
 	LOG_ANALYSE_OUTPUT = string("../log/50^2,pop=50,ind=50/9-1_0.9_0.9.txt");  // 分析程序运行的运行记录

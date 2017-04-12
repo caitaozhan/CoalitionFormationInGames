@@ -15,8 +15,8 @@ void producerCalculate()
 {
 	while (true)
 	{
-		//producerCalculating(Population());
-		producerCalculating(PopulationEDA());
+		producerCalculating(Population());
+		//producerCalculating(PopulationEDA());
 	}
 }
 

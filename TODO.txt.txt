@@ -1,0 +1,9 @@
+1. C++ 读取配置文件
+http://blog.csdn.net/thanklife/article/details/52953475
+http://www.cnblogs.com/tzhangofseu/archive/2011/10/02/2197966.html
+
+2. Population 超类
+
+3. console 和 producer_consumer 两个版本之间的更新同步问题
+
+上述三点不做，直接转移到 changheli 的平台
