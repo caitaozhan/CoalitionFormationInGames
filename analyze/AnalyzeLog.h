@@ -25,6 +25,7 @@ public:
 	
 	void analyze();
 	double calcuVariance(const vector<double> &v);
+	void   statistics(const vector<double> & v, double & min, double & max, double & avg);
 	double string2Double(const string &doubleStr);
 
 private:

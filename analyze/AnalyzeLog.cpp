@@ -81,7 +81,8 @@ void AnalyzeLog::analyze()
 		inputData[i] = move(oneExperiment);   // 本次实验的所有日志记录
 		m_ifile.close();
 	}
-
+	double minn, maxx, avg;
+	statistics(resultValue, minn, maxx, avg);
 	double variance = calcuVariance(resultValue);  // 计算标准差
 	vector<CounterValue> avgInputData(inputData[maxExperimentID]);  // 以所有实验中进化次数最大的为初始化值
 	for (int i = 0; i < m_totalExperNum; ++i)
@@ -114,11 +115,15 @@ void AnalyzeLog::analyze()
 	}
 	m_ofile.close();
 	m_ofile.open(m_outputBase + "variance.txt");
-	m_ofile << variance << endl;
+	m_ofile << "standard deviation: " << variance << endl;
+	m_ofile << "min: " << minn << endl;
+	m_ofile << "max: " << maxx << endl;
+	m_ofile << "avg: " << avg << endl;
+	m_ofile.close();
 }
 
 /*
-	计算标准差  // todo：标准差还是方差？
+	计算标准差 
 	@param v, 一组数值
 */
 double AnalyzeLog::calcuVariance(const vector<double>& v)
@@ -133,6 +138,13 @@ double AnalyzeLog::calcuVariance(const vector<double>& v)
 	return sqrt(numerator / (v.size() - 1));
 }
 
+void AnalyzeLog::statistics(const vector<double> & v, double & min, double & max, double & avg)
+{
+	min = *min_element(v.begin(), v.end());
+	max = *max_element(v.begin(), v.end());
+	avg = accumulate(v.begin(), v.end(), 0.0) / v.size();
+}
+
 double AnalyzeLog::string2Double(const string & doubleStr)
 {
 	double x = 0;
@@ -140,5 +152,3 @@ double AnalyzeLog::string2Double(const string & doubleStr)
 	cur >> x;
 	return x;
 }
-
-
