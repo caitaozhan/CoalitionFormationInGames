@@ -3,7 +3,7 @@
 //--------------------------------------------------------------
 void ofApp::setup(){
 
-	ofSetFrameRate(1000);
+	//ofSetFrameRate(1000);
 
 	HEIGHT = Global::HEIGHT;
 	WIDTH = Global::WIDTH;

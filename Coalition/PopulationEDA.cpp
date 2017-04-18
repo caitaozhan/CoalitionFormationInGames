@@ -204,7 +204,6 @@ void PopulationEDA::resetMe()
 
 void PopulationEDA::resetExperVariable()
 {
-	// TODO: 可能有变动
 	m_bestEvaluation = -Coalition::INDIVIDUAL_SIZE;
 	m_appearTarget = false;
 	m_updateCounter = 0;
@@ -369,7 +368,7 @@ void PopulationEDA::updateBestCoalitions()
 		}
 	}
 	int newBestEvaluation;
-	if (m_population[m_bestCoalitionIndex[0]].getSimpleEvaluate() < 0)  // TODO consolee: a bug, 高精度损失（对于负数）
+	if (m_population[m_bestCoalitionIndex[0]].getSimpleEvaluate() < 0) 
 		newBestEvaluation = m_population[m_bestCoalitionIndex[0]].getSimpleEvaluate() - Global::EPSILON;
 	else
 		newBestEvaluation = m_population[m_bestCoalitionIndex[0]].getSimpleEvaluate() + Global::EPSILON;
