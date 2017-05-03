@@ -24,7 +24,7 @@ BufferResponse::BufferResponse(bool resetMe, bool resetEnemy, bool update)
 	this->update = update;
 }
 
-void producerCalculating(Population && population)
+void producerCalculating(PopulationMPL && population)
 {
 	population.initialize(0.5, 0.9, 100);         // 初始化参数
 	{

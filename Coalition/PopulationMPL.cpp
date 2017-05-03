@@ -1,8 +1,8 @@
-#include "Population.h"
+#include "PopulationMPL.h"
 
-uniform_real_distribution<double> Population::urd_0_1 = uniform_real_distribution<double>(0.0, 1.0);
+uniform_real_distribution<double> PopulationMPL::urd_0_1 = uniform_real_distribution<double>(0.0, 1.0);
 
-Population::Population()
+PopulationMPL::PopulationMPL()
 {
 	PL = 0.9;    // Probability Learning
 	LS = 0.9;    // Local Search
@@ -22,7 +22,7 @@ Population::Population()
 	m_stop = false;
 }
 
-void Population::initialize(double pl, double ls, int populationSize)
+void PopulationMPL::initialize(double pl, double ls, int populationSize)
 {
 	PL = pl;
 	LS = ls;
@@ -58,7 +58,7 @@ void Population::initialize(double pl, double ls, int populationSize)
 /*
 	种群进化一代
 */
-void Population::update()
+void PopulationMPL::update()
 {
 	m_updateCounter++;
 
@@ -102,7 +102,7 @@ void Population::update()
 	//}
 }
 
-void Population::updatePopluation()
+void PopulationMPL::updatePopluation()
 {
 	for (Coalition &c : m_population)     // c          是论文中的 Si
 	{
@@ -165,7 +165,7 @@ void Population::updatePopluation()
 	更新Propability Matrix (这是个全局变量)
 	无法保证每一行的概率和 = 1 --> 没有除以一个“总和”之类的必要
 */
-void Population::updatePMatrix()
+void PopulationMPL::updatePMatrix()
 {
 	for (auto &vec_double : PROBABILITY_MATRIX)  // 问题：vector有没有一行代码解决？
 	{
@@ -211,7 +211,7 @@ void Population::updatePMatrix()
 	}
 }
 
-void Population::resetEnemy(string & way)
+void PopulationMPL::resetEnemy(string & way)
 {
 	if (way == string("8"))
 	{
@@ -223,7 +223,7 @@ void Population::resetEnemy(string & way)
 	}
 }
 
-void Population::writeLogMatrix(int updateCounter)
+void PopulationMPL::writeLogMatrix(int updateCounter)
 {
 	LOG_PM << '\n' << "update counter: " << updateCounter << '\n';
 	for (int y = Global::HEIGHT - 1; y >= 0; --y)
@@ -249,7 +249,7 @@ void Population::writeLogMatrix(int updateCounter)
 	@param:  更新的次数
 	@return: 此时整个population的平均估值
 */
-int Population::writeLogAnalyse(int updateCounter)
+int PopulationMPL::writeLogAnalyse(int updateCounter)
 {
 	double sum = 0.0;
 	double avg = 0.0;
@@ -262,42 +262,42 @@ int Population::writeLogAnalyse(int updateCounter)
 	return avg;
 }
 
-void Population::setResetMe(const bool & resetMe)
+void PopulationMPL::setResetMe(const bool & resetMe)
 {
 	m_resetMe = resetMe;
 }
 
-void Population::setResetEnemy(const bool & resetEnemy)
+void PopulationMPL::setResetEnemy(const bool & resetEnemy)
 {
 	m_resetEnemy = resetEnemy;
 }
 
-void Population::setUpdate(const bool & update)
+void PopulationMPL::setUpdate(const bool & update)
 {
 	m_update = update;
 }
 
-bool Population::getResetMe()
+bool PopulationMPL::getResetMe()
 {
 	return m_resetMe;
 }
 
-bool Population::getResetEnemy()
+bool PopulationMPL::getResetEnemy()
 {
 	return m_resetEnemy;
 }
 
-bool Population::getUpdate()
+bool PopulationMPL::getUpdate()
 {
 	return m_update;
 }
 
-bool Population::getStop()
+bool PopulationMPL::getStop()
 {
 	return m_stop;
 }
 
-int Population::getSize()
+int PopulationMPL::getSize()
 {
 	return m_population.size();
 }
@@ -305,7 +305,7 @@ int Population::getSize()
 /*
 	get coalitions with the highest evaluations, note that there could be tied best ones
 */
-void Population::updateBestCoalitions()
+void PopulationMPL::updateBestCoalitions()
 {
 	m_bestCoalitionIndex.clear();
 	int n = getSize();
@@ -346,7 +346,7 @@ void Population::updateBestCoalitions()
 	直接更改传进来的引用
 	@param bC, 保存最新最好联盟个体的vector
 */
-void Population::updateBestCoalitions(vector<Coalition> &bC)
+void PopulationMPL::updateBestCoalitions(vector<Coalition> &bC)
 {
 	bC.clear();
 	bC.reserve(m_bestCoalitionIndex.size());
@@ -356,12 +356,12 @@ void Population::updateBestCoalitions(vector<Coalition> &bC)
 	}
 }
 
-Coalition & Population::getEnemy()
+Coalition & PopulationMPL::getEnemy()
 {
 	return m_enemy;
 }
 
-bool Population::isZero(double d)
+bool PopulationMPL::isZero(double d)
 {
 	if (d<Global::EPSILON && d>-Global::EPSILON)
 		return true;
@@ -372,7 +372,7 @@ bool Population::isZero(double d)
 /*
 	重新初始化我方坦克阵型
 */
-void Population::resetMe()
+void PopulationMPL::resetMe()
 {
 	for (int i = 0; i < m_population.size(); ++i)
 	{
@@ -387,7 +387,7 @@ void Population::resetMe()
 /*
 	重新初始化实验的参数
 */
-void Population::resetExperVariable()
+void PopulationMPL::resetExperVariable()
 {
 	m_bestEvaluation = -Coalition::INDIVIDUAL_SIZE;
 	m_appearTarget = false;
@@ -403,7 +403,7 @@ void Population::resetExperVariable()
 	2. 更新 适应值
 	3. 更新 权值
 */
-void Population::updateWeight()
+void PopulationMPL::updateWeight()
 {
 	for (Coalition &c : m_population)                  // 更新每一个联盟的评估值
 	{

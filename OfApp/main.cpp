@@ -1,7 +1,7 @@
 #pragma once
 #include "ofMain.h"
 #include "ofApp.h"
-#include "../Coalition/Population.h"
+#include "../Coalition/PopulationMPL.h"
 #include "../Coalition/PopulationEDA.h"
 using namespace std;
 
@@ -15,7 +15,7 @@ void producerCalculate()
 {
 	while (true)
 	{
-		producerCalculating(Population());
+		producerCalculating(PopulationMPL());
 		//producerCalculating(PopulationEDA());
 	}
 }

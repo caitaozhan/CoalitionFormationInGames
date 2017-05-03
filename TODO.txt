@@ -1,0 +1,14 @@
+C++ 读取配置文件
+http://blog.csdn.net/thanklife/article/details/52953475
+http://www.cnblogs.com/tzhangofseu/archive/2011/10/02/2197966.html
+
+
+Population 超类
+
+
+console 和 producer_consumer 两个版本之间的更新同步问题
+1. 在写Population超类的时候，暂时不管这两个版本之间的差异问题
+2. producer_consumer版本的超类搞定之后，再研究 producer_consumer 和 console 之间的版本差异问题
+这两个版本的主要差距是日志系统，前者的日志简单的定性就可以了，后者的日志需要比较复杂的定量，为了制作论文的图。。。
+ 
+把population里面的大写的数据成员都该变成小写

@@ -5,10 +5,10 @@
 #include "../Analyze/AnalyzeLog.h"
 using namespace std;
 
-class Population
+class PopulationMPL
 {
 public:
-	Population();
+	PopulationMPL();
 	void initialize(double pl, double ls, int populationSize);
 
 	void update();                              // update the population
