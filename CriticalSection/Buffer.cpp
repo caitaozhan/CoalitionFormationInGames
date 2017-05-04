@@ -24,51 +24,52 @@ BufferResponse::BufferResponse(bool resetMe, bool resetEnemy, bool update)
 	this->update = update;
 }
 
-void producerCalculating(PopulationMPL && population)
+void producerCalculating(PopulationBase * popBase)
 {
-	population.initialize(0.5, 0.9, 100);         // 初始化参数
+	//population.initialize(0.5, 0.9, 100);         // 初始化参数
+	popBase->initialize();         // 初始化参数
 	{
 		unique_lock<mutex> lock(BUFFER_R.mtx);
-		BUFFER_R.enemy = population.getEnemy();     // 初始化BUFFER_R.enemy
+		BUFFER_R.enemy = popBase->getEnemy();     // 初始化BUFFER_R.enemy
 	}
 	{
 		unique_lock<mutex> lock(BUFFER.mtx);     // RAII写法
-		BUFFER.bufferSize = population.getSize() * 2;
+		BUFFER.bufferSize = popBase->getSize() * 2;
 	}
 	vector<Coalition> newBestCoalitions;
-	while (population.getStop() == false)        // when termination conditions are not satisfied
+	while (popBase->getStop() == false)        // when termination conditions are not satisfied
 	{
 		{// critical section
 			unique_lock<mutex> lock(BUFFER_R.mtx);
-			population.setResetEnemy(BUFFER_R.resetEnemy);   // 从 BUFFER_R 获取界面的响应信号
-			population.setResetMe(BUFFER_R.resetMe);
-			population.setUpdate(BUFFER_R.update);
+			popBase->setResetEnemy(BUFFER_R.resetEnemy);   // 从 BUFFER_R 获取界面的响应信号
+			popBase->setResetMe(BUFFER_R.resetMe);
+			popBase->setUpdate(BUFFER_R.update);
 		}
 
-		if(population.getUpdate() == false)
+		if(popBase->getUpdate() == false)
 		{
 			this_thread::sleep_for(chrono::milliseconds(200));
 			continue;
 		}
-		if (population.getResetEnemy() == true)
+		if (popBase->getResetEnemy() == true)
 		{
-			population.resetEnemy(string("8"));
-			population.resetMe();
+			popBase->resetEnemy(string("8"));
+			popBase->resetMe();
 			unique_lock<mutex> lock(BUFFER_R.mtx);
-			BUFFER_R.enemy = population.getEnemy();             // 更新 BUFFER.enemy
+			BUFFER_R.enemy = popBase->getEnemy();             // 更新 BUFFER.enemy
 
 			BUFFER_R.resetEnemy = false;
 		}
-		if (population.getResetMe() == true)
+		if (popBase->getResetMe() == true)
 		{
-			population.resetExperVariable();
-			population.resetMe();
+			popBase->resetExperVariable();
+			popBase->resetMe();
 			unique_lock<mutex> lock(BUFFER_R.mtx);
 			BUFFER_R.resetMe = false;
 		}
 
-		population.update();                     // this line of code should be time-costy
-		population.updateBestCoalitions(newBestCoalitions);
+		popBase->update();                     // this line of code should be time-costy
+		popBase->updateBestCoalitions(newBestCoalitions);
 
 		{// critical section
 			unique_lock<mutex> lock(BUFFER.mtx);

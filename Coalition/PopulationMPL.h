@@ -1,19 +1,22 @@
 #pragma once
 #include <iostream>
 #include <vector>
-
+#include "PopulationBase.h"
 #include "Coalition.h"
 #include "../Analyze/AnalyzeLog.h"
 using namespace std;
 
-class PopulationMPL
+class PopulationMPL : public PopulationBase
 {
 public:
 	PopulationMPL();
-	void initialize(double pl, double ls, int populationSize);
-
-	void update();                              // update the population
 	
+	void initialize() override;
+	void update()     override;                           // update the population
+	void resetMe()    override;
+	
+	/*
+	void initialize(double pl, double ls, int populationSize);
 	void writeLogMatrix(int updateCounter);     // 打印矩阵到log
 	int  writeLogAnalyse(int updateCounter);    // 打印算法的分析
 
@@ -31,17 +34,18 @@ public:
 	bool isZero(double d);                      
 
 	void resetEnemy(string &way);
-	void resetMe();
 	void resetExperVariable();
 	static uniform_real_distribution<double> urd_0_1;
+	*/
 
 private:
 	void updatePopluation();                    // 更新种群
-	void updateBestCoalitions();                // update m_bestCoalitions
+	//void updateBestCoalitions();                // update m_bestCoalitions
 	void updateWeight();                        // 计算估值 --> 适应值 --> 权值
 	void updatePMatrix();                       // update probability matrix
 
 private:
+	/*
 	vector<vector<double>> PROBABILITY_MATRIX;  // 概率矩阵
 	vector<double> SUM_OF_ROW;                  // 概率矩阵每行之和，PM的metadata
 	double TOTAL;                               // 概率矩阵所有元素之和，PM的metadata
@@ -55,11 +59,13 @@ private:
 	int  m_updateCounter;
 	bool m_appearTarget;
 	int  m_experimentTimes;
+	*/
 
 	double PL;            // Probability Learning
 	double LS;			  // Local Search
 	double SMALL_NUMBER;
 
+	/*
 	int MAX_UPDATE;
 	int MAX_EXPERIMENT;
 	
@@ -74,5 +80,5 @@ private:
 	bool m_resetMe;            // 是否重置我方坦克阵型
 	bool m_resetEnemy;         // 是否重置地方坦克阵型
 	bool m_update;             // population是否继续更新
-
+	*/
 };

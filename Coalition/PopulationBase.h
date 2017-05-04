@@ -7,7 +7,7 @@
 #include "../Analyze/AnalyzeLog.h"
 using namespace std;
 
-// This is an abstract class, which is not a completely defined class and can not create objects
+// This is an abstract class, which is not a completely defined class and can not implement objects
 class PopulationBase
 {
 public:
@@ -33,11 +33,11 @@ public:
 
 	void resetEnemy(const string & way);
 	void resetExperVariable();
+	void updateBestCoalitions(vector<Coalition> & bC);
 
 protected:
 	string getTimeNow();
 	bool isZero(double d);
-	void updateBestCoalitions(vector<Coalition> & bC);
 	void updateBestCoalitions();
 
 protected:

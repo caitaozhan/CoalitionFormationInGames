@@ -5,6 +5,7 @@
 #include <thread>
 #include <mutex>
 #include <condition_variable>
+#include "../Coalition/PopulationBase.h"
 #include "../Coalition/PopulationMPL.h"
 #include "../Coalition/PopulationEDA.h"
 #include "../Coalition/Global.h"
@@ -62,7 +63,7 @@ extern Buffer BUFFER;
 
 extern BufferResponse BUFFER_R;
 
-extern void producerCalculating(PopulationMPL && population);
+extern void producerCalculating(PopulationBase * popBase);
 
 extern void producerCalculating(PopulationEDA && population);
 
