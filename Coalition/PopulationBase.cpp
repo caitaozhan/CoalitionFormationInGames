@@ -4,6 +4,7 @@ uniform_real_distribution<double> PopulationBase::urd_0_1 = uniform_real_distrib
 
 PopulationBase::PopulationBase()
 {
+	/*
 	string timeNow = getTimeNow();
 
 	m_fileNameEnemyInput   = string("../sample/1_case_10.txt");                              // TODO: string should be in a file
@@ -13,6 +14,7 @@ PopulationBase::PopulationBase()
 	m_logNamePM.insert(m_logNamePM.length() - 4, timeNow);
 	m_logNameRunningResult.insert(m_logNamePM.length() - 4, timeNow);
 	m_logNameAnalyseResult.insert(m_logNamePM.length() - 4, timeNow);
+	*/
 
 	m_total              = 0;
 	m_maxUpdate          = 100;

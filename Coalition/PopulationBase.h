@@ -53,10 +53,6 @@ protected:
 	static uniform_real_distribution<double> urd_0_1;
 
 	// 构造函数里面初始化
-	string m_fileNameEnemyInput;                    // 敌军阵型输入文件的名字
-	string m_logNamePM;                             // 概率矩阵日志的名字
-	string m_logNameRunningResult;                  // 程序运行结果日志，同时也是日志分析的输入
-	string m_logNameAnalyseResult;                  // 日志分析输出文件的名字
 	double m_total;                                 // 概率矩阵所有元素之和，是PM的metadata
 	int m_maxUpdate;                                // 最大进化代数
 	int m_maxExperimentTimes;                       // 最大实验重复运行次数    
@@ -69,6 +65,10 @@ protected:
 	bool m_stop;                                    // 是否停止进化
 
 	// initialize函数里面初始化
+	string m_fileNameEnemyInput;                    // 敌军阵型输入文件的名字
+	string m_logNamePM;                             // 概率矩阵日志的名字
+	string m_logNameRunningResult;                  // 程序运行结果日志，同时也是日志分析的输入
+	string m_logNameAnalyseResult;                  // 日志分析输出文件的名字
 	int m_populationSize;                           // 种群规模的大小，即population里有多少个individual
 	int m_bestEvaluation;                           // 当前种群里面的最好（大）适应值
 
