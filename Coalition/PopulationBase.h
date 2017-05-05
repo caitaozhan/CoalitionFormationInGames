@@ -17,19 +17,16 @@ public:
 	virtual void update()     = 0;  // pure virtual function
 	virtual void resetMe()    = 0;  // pure virtual function
 
-	void writeLogMatrix(int updateCounter);   // 打印矩阵到log
-	int  writeLogAnalyse(int updateCounter);  // 打印算法的分析
-
 	void setResetMe(const bool & resetMe);
 	void setResetEnemy(const bool & resetEnemy);
 	void setUpdate(const bool & update);
 
-	bool getResetMe() const;
-	bool getResetEnemy() const;
-	bool getUpdate() const;
-	bool getStop() const;            // 暂时没有 setStop() 函数
-	int  getSize() const;
 	const Coalition & getEnemy() const;
+	int  getSize() const;
+	bool getStop() const;            // 暂时没有 setStop() 函数
+	bool getUpdate() const;
+	bool getResetEnemy() const;
+	bool getResetMe() const;
 
 	void resetEnemy(const string & way);
 	void resetExperVariable();
@@ -39,6 +36,8 @@ protected:
 	string getTimeNow();
 	bool isZero(double d);
 	void updateBestCoalitions();
+	void writeLogMatrix(int updateCounter);   // 打印矩阵到log
+	int  writeLogAnalyse(int updateCounter);  // 打印算法的分析
 
 protected:
 	vector<Coalition> m_population;                 // 一个种群, a group of Coalitions (个体, 又称solution)
