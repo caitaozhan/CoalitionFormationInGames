@@ -13,7 +13,7 @@ class PopulationBase
 public:
 	PopulationBase();
 
-	virtual void initialize() = 0;  // pure virtual function
+	virtual void initialize() = 0;  // pure virtual function TODO: 增加参数string filename，从这里读入程序需要的初始化参数
 	virtual void update()     = 0;  // pure virtual function
 	virtual void resetMe()    = 0;  // pure virtual function
 

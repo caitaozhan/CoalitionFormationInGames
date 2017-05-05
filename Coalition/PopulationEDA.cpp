@@ -431,8 +431,8 @@ void PopulationEDA::update()
 			AnalyzeLog analyzeLog(LOG_ANALYSE_INPUT, LOG_ANALYSE_OUTPUT);
 			analyzeLog.analyze();
 			cout << "\nEnd of " << MAX_EXPERIMENT << " times of experiments!" << endl;
-			cout << "Let's start over again in 5 seconds" << endl << endl;
-			this_thread::sleep_for(chrono::milliseconds(5000));
+			cout << "Let's start over again in 10 seconds" << endl << endl;
+			this_thread::sleep_for(chrono::milliseconds(10000));
 			resetExperVariable();
 			m_experimentTimes = 0;
 			Global::dre.seed(0);
