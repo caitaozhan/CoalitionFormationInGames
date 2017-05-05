@@ -4,6 +4,7 @@ PopulationMPL::PopulationMPL()
 {
 	PL = 0.5;    // Probability Learning
 	LS = 0.9;    // Local Search
+	SMALL_NUMBER = 0.01;
 	m_populationSize = 100;
 }
 
@@ -23,10 +24,10 @@ void PopulationMPL::initialize()
 	m_logNameRunningResult = string("../log/producer-consumer/running-result-.txt");
 	m_logNameAnalyseResult = string("../log/producer-consumer/analyse-result-.txt");
 	m_logNamePM.insert(m_logNamePM.length() - 4, timeNow);
-	m_logNameRunningResult.insert(m_logNamePM.length() - 4, timeNow);
-	m_logNameAnalyseResult.insert(m_logNamePM.length() - 4, timeNow);
+	m_logNameRunningResult.insert(m_logNameRunningResult.length() - 4, timeNow);
+	m_logNameAnalyseResult.insert(m_logNameAnalyseResult.length() - 4, timeNow);
 
-	LOG_PM.open(m_logNamePM);
+	LOG_PM.open(m_logNamePM);  // BUG: not working
 	LOG_ANALYSE.open(m_logNameRunningResult);
 
 	m_enemy.initialize(Coalition::INDIVIDUAL_SIZE);                   // 修正BUG：之前 m_enemy 调用重载的默认构造函数，导致vector大小=0
@@ -61,7 +62,7 @@ void PopulationMPL::update()
 {
 	m_updateCounter++;
 
-	if (/*m_appearTarget == true || */m_updateCounter == m_update)   // 一次实验结束：进化了 MAX_UPDATE 代
+	if (/*m_appearTarget == true || */m_updateCounter == m_maxUpdate)   // 一次实验结束：进化了 MAX_UPDATE 代
 	{
 		if (m_appearTarget == false)            // MAX_UPDATE 次之内没有找到 target
 		{

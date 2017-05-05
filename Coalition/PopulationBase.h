@@ -28,7 +28,7 @@ public:
 	bool getResetEnemy() const;
 	bool getUpdate() const;
 	bool getStop() const;            // 暂时没有 setStop() 函数
-	bool getSize() const;
+	int  getSize() const;
 	const Coalition & getEnemy() const;
 
 	void resetEnemy(const string & way);

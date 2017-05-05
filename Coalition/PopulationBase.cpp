@@ -91,7 +91,7 @@ bool PopulationBase::getStop() const
 	return m_stop;
 }
 
-bool PopulationBase::getSize() const
+int PopulationBase::getSize() const
 {
 	return m_population.size();
 }
