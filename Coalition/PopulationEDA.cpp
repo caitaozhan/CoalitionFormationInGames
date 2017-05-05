@@ -1,29 +1,31 @@
 #include "PopulationEDA.h"
 
-uniform_real_distribution<double> PopulationEDA::urd_0_1 = uniform_real_distribution<double>(0.0, 1.0);
-
 PopulationEDA::PopulationEDA()
 {
-	ENEMY_INPUT = string("../sample/4_case_20.txt");                           // enemy阵型的初始化编队
-	LOG_PM_NAME = string("../log/50^2,pop=50,ind=50/log_simpleEvaluate.txt");  // 概率矩阵日志
-	LOG_ANALYSE_INPUT = string("../log/50^2,pop=50,ind=50/log_analyze.txt");   // 程序运行日志，记录每一次实验的评估值
-	LOG_ANALYSE_OUTPUT = string("../log/50^2,pop=50,ind=50/9-11_0.8.txt");     // 分析程序运行的运行记录
-	MAX_UPDATE = 1000;
-	MAX_EXPERIMENT = 15;
-
-	//SMALL_NUMBER = 0.01;
-	m_update = true;
-	m_appearTarget = false;
+	m_update          = true;
+	m_appearTarget    = false;
+	m_stop            = false;
 	m_experimentTimes = 0;
-	m_updateCounter = 0;
-	m_stop = false;
+	m_updateCounter   = 0;
 }
 
-void PopulationEDA::initialize(double selectRatio, int populationSize)
+void PopulationEDA::initialize()
 {
+	m_selectRatio = 0.8;
+
+	string timeNow = getTimeNow();
+
+	m_fileNameEnemyInput = string("../sample/4_case_20.txt");                              // TODO: string should be in a file
+	m_logNamePM = string("../log/producer-consumer/logPM-simple-evaluate-.txt");  // all below should be in a file
+	m_logNameRunningResult = string("../log/producer-consumer/running-result-.txt");
+	m_logNameAnalyseResult = string("../log/producer-consumer/analyse-result-.txt");
+	m_logNamePM.insert(m_logNamePM.length() - 4, timeNow);
+	m_logNameRunningResult.insert(m_logNameRunningResult.length() - 4, timeNow);
+	m_logNameAnalyseResult.insert(m_logNameAnalyseResult.length() - 4, timeNow);
+
 	// 初始化 enemy
 	m_enemy.initialize(Coalition::INDIVIDUAL_SIZE);
-	m_enemy.setup_file(Tank::ABILITY_DISTANCE, true, ENEMY_INPUT);
+	m_enemy.setup_file(Tank::ABILITY_DISTANCE, true, m_fileNameEnemyInput);
 	m_dimension = Coalition::INDIVIDUAL_SIZE;
 
 	// 种群大小，初始化“变异系数”，问题的维度（个体里面坦克的数量）
@@ -37,13 +39,12 @@ void PopulationEDA::initialize(double selectRatio, int populationSize)
 	//m_populationSize = populationSize;  // 不再根据经验，而是依据一个比例
 	m_e = (m_populationSize*Coalition::INDIVIDUAL_SIZE) / (avalablePlaceInPMatrix)* m_bRatio;
 
-	SELECT_RATIO = selectRatio;
-	m_selectNum = m_populationSize * SELECT_RATIO;
+	m_selectNum = m_populationSize * m_selectRatio;
 	uid_selectPop = uniform_int_distribution<int>(0, m_selectNum - 1);
 	
 	// 初始化日志文件名
-	LOG_PM.open(LOG_PM_NAME);
-	LOG_ANALYSE.open(LOG_ANALYSE_INPUT);
+	LOG_PM.open(m_logNamePM);
+	LOG_ANALYSE.open(m_logNameRunningResult);
 
 	// 初始化 m_population
 	m_population.resize(m_populationSize);
@@ -64,130 +65,6 @@ void PopulationEDA::initialize(double selectRatio, int populationSize)
 	resetMe();
 }
 
-void PopulationEDA::writeLogMatrix(int updateCounter)
-{
-	LOG_PM << '\n' << "update counter: " << updateCounter << '\n';
-	for (int y = Global::HEIGHT - 1; y >= 0; --y)
-	{
-		for (int x = 0; x < Global::WIDTH - 1; ++x)
-		{
-			if (isZero(m_probabilityMatrix[y][x]))
-			{
-				LOG_PM << setprecision(0);
-			}
-			else
-			{
-				LOG_PM << setprecision(3);
-			}
-			LOG_PM << left << setw(7) << m_probabilityMatrix[y][x];  // (x,y) --> [y][x]
-		}
-		LOG_PM << '\n';
-	}
-	LOG_PM << '\n' << "*******************" << endl;
-}
-
-/*
-@param:  更新的次数
-@return: 此时整个population的平均估值
-*/
-int PopulationEDA::writeLoganalyse(int updateCounter)
-{
-	double sum = 0.0;
-	double avg = 0.0;
-	for (const Coalition &c : m_population)
-	{
-		sum += c.getSimpleEvaluate();
-	}
-	avg = sum / m_population.size();
-	LOG_ANALYSE << updateCounter << ": " << avg << "\n\n";
-	return avg;
-}
-
-void PopulationEDA::setResetMe(const bool & resetMe)
-{
-	m_resetMe = resetMe;
-}
-
-void PopulationEDA::setResetEnemy(const bool & resetEnemy)
-{
-	m_resetEnemy = resetEnemy;
-}
-
-void PopulationEDA::setUpdate(const bool & update)
-{
-	m_update = update;
-}
-
-bool PopulationEDA::getResetMe()
-{
-	return m_resetMe;
-}
-
-bool PopulationEDA::getResetEnemy()
-{
-	return m_resetEnemy;
-}
-
-bool PopulationEDA::getUpdate()
-{
-	return m_update;
-}
-
-bool PopulationEDA::getStop()
-{
-	return m_stop;
-}
-
-int PopulationEDA::getSize()
-{
-	return m_population.size();
-}
-
-/*
-	依据population的成员变量m_bestCoalitionIndex(仅保存最好个体的vector下标)，产生最好联盟个体
-	直接更改传进来的引用
-	@param bC, 保存最新最好联盟个体的vector
-*/
-void PopulationEDA::updateBestCoalitions(vector<Coalition>& bC)
-{
-	bC.clear();
-	bC.reserve(m_bestCoalitionIndex.size());
-	for (int & index : m_bestCoalitionIndex)
-	{
-		bC.push_back(m_population[index]);
-	}
-}
-
-/*
-	依据population的成员变量m_bestCoalitionIndex(仅保存最好个体的vector下标)，产生最好联盟个体
-	直接更改传进来的引用
-	@param bC, 保存最新最好联盟个体的vector
-*/
-Coalition & PopulationEDA::getEnemy()
-{
-	return m_enemy;
-}
-
-bool PopulationEDA::isZero(double d)
-{
-	if (d<Global::EPSILON && d>-Global::EPSILON)
-		return true;
-
-	return false;
-}
-
-void PopulationEDA::resetEnemy(string & way)
-{
-	if (way == string("8"))
-	{
-		m_enemy.setup_8(Tank::ABILITY_DISTANCE, true, Coalition());
-	}
-	else if (way == string("CR"))
-	{
-		m_enemy.setup_CR(Tank::ABILITY_DISTANCE, true, Coalition());
-	}
-}
-
 void PopulationEDA::resetMe()
 {
 	for (int i = 0; i < m_population.size(); ++i)
@@ -200,15 +77,6 @@ void PopulationEDA::resetMe()
 	selectIndividuals();
 	estimateDistribution();
 	writeLogMatrix(0);
-}
-
-void PopulationEDA::resetExperVariable()
-{
-	m_bestEvaluation = -Coalition::INDIVIDUAL_SIZE;
-	m_appearTarget = false;
-	m_updateCounter = 0;
-	m_experimentTimes++;
-	Global::dre.seed(m_experimentTimes);
 }
 
 /*
@@ -349,42 +217,6 @@ void PopulationEDA::updateEvaluations()
 	}
 }
 
-void PopulationEDA::updateBestCoalitions()
-{
-	m_bestCoalitionIndex.clear();
-	int n = getSize();
-	double bestEvaluation = -n;
-	for (int i = 0; i < n; ++i)
-	{
-		if (m_population[i].getSimpleEvaluate() > bestEvaluation + Global::EPSILON)
-		{
-			m_bestCoalitionIndex.clear();
-			bestEvaluation = m_population[i].getSimpleEvaluate();
-			m_bestCoalitionIndex.emplace_back(i);
-		}
-		else if (isZero(m_population[i].getSimpleEvaluate() - bestEvaluation))
-		{
-			m_bestCoalitionIndex.emplace_back(i);
-		}
-	}
-	int newBestEvaluation;
-	if (m_population[m_bestCoalitionIndex[0]].getSimpleEvaluate() < 0) 
-		newBestEvaluation = m_population[m_bestCoalitionIndex[0]].getSimpleEvaluate() - Global::EPSILON;
-	else
-		newBestEvaluation = m_population[m_bestCoalitionIndex[0]].getSimpleEvaluate() + Global::EPSILON;
-
-	if (newBestEvaluation > m_bestEvaluation)  // 最佳评估值有提高
-	{
-		m_bestEvaluation = newBestEvaluation;
-		cout << "Best @" << m_updateCounter << "  " << m_bestEvaluation << '\n';
-		if (m_appearTarget == false && isZero(m_bestEvaluation - Coalition::target))
-		{
-			LOG_ANALYSE << "Best @" << m_updateCounter * m_populationSize << "  " << Coalition::target << '\n';
-			m_appearTarget = true;
-		}
-	}
-}
-
 vector<int> PopulationEDA::generateRandomIndex()
 {
 	vector<int> temp(m_dimension);
@@ -411,7 +243,7 @@ void PopulationEDA::update()
 {
 	m_updateCounter++;
 
-	if (m_appearTarget == true || m_updateCounter == MAX_UPDATE)         // 在某一次试验中，到达最大进化次数
+	if (m_appearTarget == true || m_updateCounter == m_maxUpdate)         // 在某一次试验中，到达最大进化次数
 	{
 		if (m_appearTarget == false)            // MAX_UPDATE 次之内没有找到 target
 		{
@@ -422,15 +254,15 @@ void PopulationEDA::update()
 		cout << m_experimentTimes << "次试验\n-------\n";
 		resetExperVariable();
 
-		if (m_experimentTimes != MAX_EXPERIMENT)
+		if (m_experimentTimes != m_maxExperimentTimes)
 			resetMe();
 
-		if (m_experimentTimes == MAX_EXPERIMENT)  // 准备做 MAX_EXPERIMENT 次实验
+		if (m_experimentTimes == m_maxExperimentTimes)  // 准备做 MAX_EXPERIMENT 次实验
 		{
 			LOG_ANALYSE.close();                  // 先关闭，再由另外一个类打开“临界文件”
-			AnalyzeLog analyzeLog(LOG_ANALYSE_INPUT, LOG_ANALYSE_OUTPUT);
+			AnalyzeLog analyzeLog(m_logNameRunningResult, m_logNameAnalyseResult);
 			analyzeLog.analyze();
-			cout << "\nEnd of " << MAX_EXPERIMENT << " times of experiments!" << endl;
+			cout << "\nEnd of " << m_maxExperimentTimes << " times of experiments!" << endl;
 			cout << "Let's start over again in 10 seconds" << endl << endl;
 			this_thread::sleep_for(chrono::milliseconds(10000));
 			resetExperVariable();

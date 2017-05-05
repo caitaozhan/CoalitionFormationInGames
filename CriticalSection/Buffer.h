@@ -65,9 +65,6 @@ extern BufferResponse BUFFER_R;
 
 extern void producerCalculating(PopulationBase * popBase);
 
-extern void producerCalculating(PopulationEDA && population);
-
 extern const int HEIGHT;
 extern const int WIDTH;
 extern const double EPSILON;
-

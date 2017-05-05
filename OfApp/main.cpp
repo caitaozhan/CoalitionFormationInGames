@@ -18,9 +18,9 @@ void producerCalculate()
 	{
 		//PopulationBase * popBase = new PopulationMPL();
 
-		//producerCalculating(popBase);
+		PopulationBase * popBase = new PopulationEDA();
 
-		producerCalculating(PopulationEDA());
+		producerCalculating(popBase);
 	}
 }
 

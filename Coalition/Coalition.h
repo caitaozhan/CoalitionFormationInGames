@@ -49,9 +49,9 @@ public:
 
 	ofVec2f localSearch_small(const Coalition &enemy, int i);  // backupC 是调用者
 	ofVec2f localSearch_big(const Coalition &enemy);           // backupC 是调用者
-	ofVec2f localSearch_big_PM(const Coalition &enemy, const vector<vector<double>> &PROBABILITY_MATRIX);        // backupC 是调用者,加入概率矩阵
+	ofVec2f localSearch_big_PM(const Coalition &enemy, const vector<vector<double>> &probabilityMatrix);        // backupC 是调用者,加入概率矩阵
 
-	ofVec2f getPlaceFromPMatrix(const vector<vector<double>> &PROBABILITY_MATRIX, const vector<double> &SUM_OF_ROW, const double &TOTAL);
+	ofVec2f getPlaceFromPMatrix(const vector<vector<double>> &probabilityMatrix, const vector<double> &SUM_OF_ROW, const double &TOTAL);
 	//static ofVec2f getPlaceFromPMatrix();
 	static bool decrease(const Coalition & c1, const Coalition & c2);
 

@@ -24,5 +24,4 @@ private:
 	double PL;                         // Probability Learning
 	double LS;			               // Local Search
 	double m_smallNumber;              // 一个比较小的实数，用来填充
-
 };

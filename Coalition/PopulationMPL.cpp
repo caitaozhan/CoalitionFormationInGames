@@ -45,9 +45,9 @@ void PopulationMPL::initialize()
 	m_bestCoalitionIndex.emplace_back(0);                             // 就是初始化加入一个元素
 	m_bestEvaluation = -Coalition::INDIVIDUAL_SIZE;                   // 2016/8/4日，引入此成员变量，为了修复BUG，在multi-thread版本的updateBestCoalitions中出现的BUG
     // 初始化 概率矩阵
-	PROBABILITY_MATRIX.resize(Global::HEIGHT);                     
+	m_probabilityMatrix.resize(Global::HEIGHT);                     
 	vector<double> tmpVector(Global::WIDTH, 0.0);
-	for (auto & vec_double : PROBABILITY_MATRIX)
+	for (auto & vec_double : m_probabilityMatrix)
 	{
 		vec_double = tmpVector;
 	}
@@ -132,7 +132,7 @@ void PopulationMPL::updatePopluation()
 				ofVec2f arrayIndex;
 				do
 				{
-					arrayIndex = c.getPlaceFromPMatrix(PROBABILITY_MATRIX, SUM_OF_ROW, m_total);  // 问题：可供选择的点越来越少，可能一些很好的点，就“消失”了
+					arrayIndex = c.getPlaceFromPMatrix(m_probabilityMatrix, m_sumOfRow, m_PMtotal);  // 问题：可供选择的点越来越少，可能一些很好的点，就“消失”了
 				} while (c.contain(backupC, arrayIndex) == true || c.contain(m_enemy, arrayIndex) == true);  // 修复一个bug
 																											 // 当新选的点，如果是该联盟中已存在的点的话，继续选；如果可选择的点很少的话，循环次数较多
 				Tank newTank;
@@ -167,7 +167,7 @@ void PopulationMPL::updatePopluation()
 */
 void PopulationMPL::updatePMatrix()
 {
-	for (auto &vec_double : PROBABILITY_MATRIX)  // 问题：vector有没有一行代码解决？
+	for (auto &vec_double : m_probabilityMatrix)  // 问题：vector有没有一行代码解决？
 	{
 		for (double &p : vec_double)
 		{
@@ -179,7 +179,7 @@ void PopulationMPL::updatePMatrix()
 	{
 		int x = t.getArrayIndex().x;
 		int y = t.getArrayIndex().y;
-		PROBABILITY_MATRIX[y][x] = 0;
+		m_probabilityMatrix[y][x] = 0;
 	}
 
 	for (const Coalition &c : m_population)
@@ -188,25 +188,25 @@ void PopulationMPL::updatePMatrix()
 		{
 			int x = tank.getArrayIndex().x;
 			int y = tank.getArrayIndex().y;
-			PROBABILITY_MATRIX[y][x] += c.getWeight();
+			m_probabilityMatrix[y][x] += c.getWeight();
 		}
 	}
 	
 	// 增加空间，保存概率矩阵的metadata
 	int x1 = Global::BF_UL.x, x2 = Global::BF_LR.x;
 	int y1 = Global::BF_LR.y, y2 = Global::BF_UL.y;
-	m_total = 0.0;                                         // 总和
-	SUM_OF_ROW = vector<double>(y2 - y1 + 1, 0.0);       // 累积到该行之和
+	m_PMtotal = 0.0;                                         // 总和
+	m_sumOfRow = vector<double>(y2 - y1 + 1, 0.0);       // 累积到该行之和
 	for (int y = y1; y <= y2; ++y)
 	{
 		if (y - 1 >= y1)                                         // 先加上前面行的和        
 		{
-			SUM_OF_ROW[y - y1] = SUM_OF_ROW[y - y1 - 1];    // 修正BUG：下标错误
+			m_sumOfRow[y - y1] = m_sumOfRow[y - y1 - 1];    // 修正BUG：下标错误
 		}
 		for (int x = x1; x <= x2; ++x)
 		{
-			m_total += PROBABILITY_MATRIX[y][x];
-			SUM_OF_ROW[y - y1] += PROBABILITY_MATRIX[y][x];  // 修正BUG：下标错误
+			m_PMtotal += m_probabilityMatrix[y][x];
+			m_sumOfRow[y - y1] += m_probabilityMatrix[y][x];  // 修正BUG：下标错误
 		}
 	}
 }

@@ -7,7 +7,9 @@
 #include "../Analyze/AnalyzeLog.h"
 using namespace std;
 
-// This is an abstract class, which is not a completely defined class and can not implement objects
+/* 
+    This is an abstract class, which is not a completely defined class and can not implement objects
+*/
 class PopulationBase
 {
 public:
@@ -23,7 +25,7 @@ public:
 
 	const Coalition & getEnemy() const;
 	int  getSize() const;
-	bool getStop() const;            // 暂时没有 setStop() 函数
+	bool getStop() const;           // 暂时没有 setStop() 函数
 	bool getUpdate() const;
 	bool getResetEnemy() const;
 	bool getResetMe() const;
@@ -36,15 +38,15 @@ protected:
 	string getTimeNow();
 	bool isZero(double d);
 	void updateBestCoalitions();
-	void writeLogMatrix(int updateCounter);   // 打印矩阵到log
-	int  writeLogAnalyse(int updateCounter);  // 打印算法的分析
+	void writeLogMatrix(int updateCounter);         // 打印矩阵到log
+	int  writeLogAnalyse(int updateCounter);        // 打印算法的分析
 
 protected:
-	vector<Coalition> m_population;                 // 一个种群, a group of Coalitions (个体, 又称solution)
-	vector<vector<double>> PROBABILITY_MATRIX;      // 概率矩阵
-	vector<double> SUM_OF_ROW;                      // 概率矩阵所有元素之和，是PM的metadata
+	vector<Coalition>      m_population;            // 一个种群, a group of Coalitions (个体, 又称solution)
+	vector<vector<double>> m_probabilityMatrix;     // 概率矩阵
+	vector<double>         m_sumOfRow;              // 概率矩阵所有元素之和，是PM的metadata
 	vector<int> m_bestCoalitionIndex;               // The index of best coalitions in the population, there could be more than one 
-	Coalition m_enemy;                              // 敌军个体
+	Coalition   m_enemy;                            // 敌军个体
 
 	ofstream LOG_PM;                                // 概率矩阵的日志
 	ofstream LOG_ANALYSE;                           // 算法分析的日志
@@ -52,7 +54,7 @@ protected:
 	static uniform_real_distribution<double> urd_0_1;
 
 	// 构造函数里面初始化
-	double m_total;                                 // 概率矩阵所有元素之和，是PM的metadata
+	double m_PMtotal;                               // 概率矩阵所有元素之和，是PM的metadata
 	int m_maxUpdate;                                // 最大进化代数
 	int m_maxExperimentTimes;                       // 最大实验重复运行次数    
 	int m_experimentTimes;                          // 当前实验次数计数器

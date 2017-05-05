@@ -4,9 +4,9 @@ uniform_real_distribution<double> PopulationBase::urd_0_1 = uniform_real_distrib
 
 PopulationBase::PopulationBase()
 {
-	m_total              = 0;
 	m_maxUpdate          = 100;
 	m_maxExperimentTimes = 15;
+	m_PMtotal            = 0;
 	m_experimentTimes    = 0;
 	m_updateCounter      = 0;
 
@@ -24,7 +24,7 @@ void PopulationBase::writeLogMatrix(int updateCounter)
 	{
 		for (int x = 0; x < Global::WIDTH - 1; ++x)
 		{
-			if (isZero(PROBABILITY_MATRIX[y][x]))
+			if (isZero(m_probabilityMatrix[y][x]))
 			{
 				LOG_PM << setprecision(0);
 			}
@@ -32,7 +32,7 @@ void PopulationBase::writeLogMatrix(int updateCounter)
 			{
 				LOG_PM << setprecision(3);
 			}
-			LOG_PM << left << setw(7) << PROBABILITY_MATRIX[y][x];  // (x,y) --> [y][x]
+			LOG_PM << left << setw(7) << m_probabilityMatrix[y][x];  // (x,y) --> [y][x]
 		}
 		LOG_PM << '\n';
 	}
