@@ -16,9 +16,9 @@ void producerCalculate()
 {
 	while (true)
 	{
-		//PopulationBase * popBase = new PopulationMPL();
+		PopulationBase * popBase = new PopulationMPL();
 
-		PopulationBase * popBase = new PopulationEDA();
+		//PopulationBase * popBase = new PopulationEDA();
 
 		producerCalculating(popBase);
 	}

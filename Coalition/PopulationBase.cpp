@@ -175,7 +175,15 @@ string PopulationBase::getTimeNow()
 	char str[26];
 	ctime_s(str, sizeof str, &tt_now);
 	string timeNow(str);
-	return timeNow.substr(4, 15);
+	timeNow = timeNow.substr(11, 9);
+	for (size_t i = 0; i < timeNow.size(); ++i)
+	{
+		if (timeNow[i] == ':')
+		{
+			timeNow[i] = '_';
+		}
+	}
+	return timeNow;
 }
 
 /*

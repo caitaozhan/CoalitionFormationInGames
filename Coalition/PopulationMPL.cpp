@@ -20,14 +20,22 @@ void PopulationMPL::initialize()
 	string timeNow = getTimeNow();
 
 	m_fileNameEnemyInput   = string("../sample/1_case_10.txt");                              // TODO: string should be in a file
-	m_logNamePM            = string("../log/producer-consumer/logPM-simple-evaluate-.txt");  // all below should be in a file
-	m_logNameRunningResult = string("../log/producer-consumer/running-result-.txt");
-	m_logNameAnalyseResult = string("../log/producer-consumer/analyse-result-.txt");
+	m_logNamePM            = string("../log/producer_consumer/logPM_simple_evaluate_.txt");  // all below should be in a file
+	m_logNameRunningResult = string("../log/producer_consumer/running_result_.txt");
+	m_logNameAnalyseResult = string("../log/producer_consumer/analyse_result_.txt");
 	m_logNamePM.insert(m_logNamePM.length() - 4, timeNow);
 	m_logNameRunningResult.insert(m_logNameRunningResult.length() - 4, timeNow);
 	m_logNameAnalyseResult.insert(m_logNameAnalyseResult.length() - 4, timeNow);
 
 	LOG_PM.open(m_logNamePM);  // BUG: not working
+	if (LOG_PM.is_open())
+	{
+		cout << "open success" << endl;
+	}
+	else
+	{
+		cout << "open failed..." << endl;
+	}
 	LOG_ANALYSE.open(m_logNameRunningResult);
 
 	m_enemy.initialize(Coalition::INDIVIDUAL_SIZE);                   // 修正BUG：之前 m_enemy 调用重载的默认构造函数，导致vector大小=0
