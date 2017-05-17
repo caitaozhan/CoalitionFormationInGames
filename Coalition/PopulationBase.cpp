@@ -4,7 +4,7 @@ uniform_real_distribution<double> PopulationBase::urd_0_1 = uniform_real_distrib
 
 PopulationBase::PopulationBase()
 {
-	m_maxUpdate          = 200;
+	m_maxUpdate          = 100;
 	m_maxExperimentTimes = 15;
 	m_PMtotal            = 0;
 	m_experimentTimes    = 0;
@@ -43,7 +43,7 @@ void PopulationBase::writeLogMatrix(int updateCounter)
     @param:  更新的次数
     @return: 此时整个population的平均估值
 */
-int PopulationBase::writeLogAnalyse(int updateCounter)
+int PopulationBase::writeLogPopAverage(int updateCounter)
 {
 	double sum = 0.0;
 	double avg = 0.0;
@@ -175,7 +175,7 @@ string PopulationBase::getTimeNow()
 	char str[26];
 	ctime_s(str, sizeof str, &tt_now);
 	string timeNow(str);
-	timeNow = timeNow.substr(11, 9);
+	timeNow = timeNow.substr(11, 8);
 	for (size_t i = 0; i < timeNow.size(); ++i)
 	{
 		if (timeNow[i] == ':')

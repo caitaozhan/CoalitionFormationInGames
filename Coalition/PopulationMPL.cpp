@@ -72,7 +72,9 @@ void PopulationMPL::update()
 			cout << "target not found @" << m_updateCounter << '\n';
 			LOG_ANALYSE << "target not found @" << m_updateCounter << '\n';
 		}
-		
+
+		writeLogPopAverage(m_updateCounter);
+
 		cout << m_experimentTimes << "次试验\n-------\n";
 		resetExperVariable();
 		
@@ -85,8 +87,8 @@ void PopulationMPL::update()
 			AnalyzeLog analyzeLog(m_logNameRunningResult, m_logNameAnalyseResult);
 			analyzeLog.analyze();
 			cout << "\nEnd of " << m_maxExperimentTimes << " times of experiments!" << endl;
-			cout << "Let's start over again in 5 seconds" << endl << endl;
-			this_thread::sleep_for(chrono::milliseconds(5000));
+			cout << "Let's start over again in 10 seconds" << endl << endl;
+			this_thread::sleep_for(chrono::milliseconds(10000));
 			resetExperVariable();
 			m_experimentTimes = 0;
 			Global::dre.seed(0);
@@ -113,19 +115,8 @@ void PopulationMPL::updatePopluation()
 			bool localSearch = false;
 			if (urd_0_1(Global::dre) < PL)      // todo: 这里还有一个&&
 			{
-				if (urd_0_1(Global::dre) < LS)
-				{// 不做变化，直接复制过去
-					constructC.pushBackTank(backupC.getCoalition(i));
-				}
-				else
-				{// local search
-					localSearch = true;
-					ofVec2f arrayIndex;
-					arrayIndex = backupC.localSearch_big(m_enemy);
-					Tank newTank;
-					newTank.setup(arrayIndex, Tank::ABILITY_DISTANCE, false);
-					constructC.pushBackTank(move(newTank));  // TODO:可以用 emplace_back
-				}
+				constructC.pushBackTank(backupC.getCoalition(i));
+				urd_0_1(Global::dre);   // 加了这行代码，在 test case-1 的测试实验结果就好很多。。。
 			}
 			else
 			{
@@ -139,6 +130,7 @@ void PopulationMPL::updatePopluation()
 				newTank.setup(arrayIndex, Tank::ABILITY_DISTANCE, false);
 				constructC.pushBackTank(move(newTank));
 			}
+
 			if (backupC.getCoalition()[i] != constructC.getCoalition()[i])
 			{
 				backupC.setCoalition(i, constructC.getCoalition(i));
@@ -157,6 +149,18 @@ void PopulationMPL::updatePopluation()
 					c = backupC;
 				}
 			}
+		}
+
+		if (urd_0_1(Global::dre) < LS)
+		{
+
+			// TODO: local search
+
+			/*ofVec2f arrayIndex;
+			arrayIndex = backupC.localSearch_big(m_enemy);
+			Tank newTank;
+			newTank.setup(arrayIndex, Tank::ABILITY_DISTANCE, false);
+			constructC.pushBackTank(move(newTank));  // TODO:可以用 emplace_back*/
 		}
 	}
 }
