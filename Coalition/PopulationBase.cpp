@@ -4,7 +4,7 @@ uniform_real_distribution<double> PopulationBase::urd_0_1 = uniform_real_distrib
 
 PopulationBase::PopulationBase()
 {
-	m_maxUpdate          = 100;
+	m_maxUpdate          = 200;
 	m_maxExperimentTimes = 15;
 	m_PMtotal            = 0;
 	m_experimentTimes    = 0;

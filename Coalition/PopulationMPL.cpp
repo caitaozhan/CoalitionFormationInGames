@@ -4,7 +4,7 @@ PopulationMPL::PopulationMPL()
 {
 	PL = 0.5;    // Probability Learning
 	LS = 0.9;    // Local Search
-	m_smallNumber = 0.01;
+	m_e = 0.01;
 	m_populationSize = 100;
 }
 
@@ -14,8 +14,7 @@ PopulationMPL::PopulationMPL()
 void PopulationMPL::initialize()
 {
 	PL = 0.5;
-	LS = 0.9;
-	m_populationSize = 100;
+	LS = 1;
 
 	string timeNow = getTimeNow();
 
@@ -26,22 +25,18 @@ void PopulationMPL::initialize()
 	m_logNamePM.insert(m_logNamePM.length() - 4, timeNow);
 	m_logNameRunningResult.insert(m_logNameRunningResult.length() - 4, timeNow);
 	m_logNameAnalyseResult.insert(m_logNameAnalyseResult.length() - 4, timeNow);
-
-	LOG_PM.open(m_logNamePM);  // BUG: not working
-	if (LOG_PM.is_open())
-	{
-		cout << "open success" << endl;
-	}
-	else
-	{
-		cout << "open failed..." << endl;
-	}
+	
+	LOG_PM.open(m_logNamePM);
 	LOG_ANALYSE.open(m_logNameRunningResult);
-
 	m_enemy.initialize(Coalition::INDIVIDUAL_SIZE);                   // 修正BUG：之前 m_enemy 调用重载的默认构造函数，导致vector大小=0
 	m_enemy.setup_file(Tank::ABILITY_DISTANCE, true, m_fileNameEnemyInput);    // 从文件从读入数据，进行初始化
-	//m_enemy.setup_8(Tank::ABILITY_DISTANCE, true, Coalition()); 
-	//m_enemy.setup_CR(Tank::ABILITY_DISTANCE, true, Coalition());
+																			   //m_enemy.setup_8(Tank::ABILITY_DISTANCE, true, Coalition()); 
+	m_dimension = Coalition::INDIVIDUAL_SIZE;
+	m_bRatio = 0.0002;
+	int avalablePlaceInPMatrix;
+	avalablePlaceInPMatrix = (Global::BF_LR.x - Global::BF_UL.x)*(Global::BF_UL.y - Global::BF_LR.y) - m_enemy.getSize();
+	m_populationSize = 2 * sqrt(avalablePlaceInPMatrix * m_dimension);
+	m_e = m_bRatio*(m_populationSize*Coalition::INDIVIDUAL_SIZE) / (avalablePlaceInPMatrix);
 
 	// 初始化 m_population
 	m_population.resize(m_populationSize);                  
@@ -100,14 +95,11 @@ void PopulationMPL::update()
 		}
 	}
 
-	//if(m_experimentTimes == 16)
-	//{
 	updatePopluation();          //  新的全局概率矩阵 --> 更新种群位置
 	updateWeight();              //  新的种群位置     --> 更新种群的权值
 	updatePMatrix();             //  新的种群权值     --> 更新全局的概率矩阵
 	updateBestCoalitions();      //  更新最好的Coalitions
 	writeLogMatrix(m_updateCounter);
-	//}
 }
 
 void PopulationMPL::updatePopluation()
@@ -158,7 +150,7 @@ void PopulationMPL::updatePopluation()
 			{
 				c = backupC;
 			}
-			else if (evaluateBackupC == evaluateC && localSearch == true)  // 相等，但是如果是 local search // TODO console: 把localSearch这个限制去掉？
+			else if (evaluateBackupC == evaluateC /*&& localSearch == true*/)  // 相等，但是如果是 local search // 把localSearch这个限制去掉之后，算法的性能大幅度提升
 			{
 				if (urd_0_1(Global::dre) < 0.5)                            // 给 50% 概率更新
 				{
@@ -175,17 +167,17 @@ void PopulationMPL::updatePopluation()
 */
 void PopulationMPL::updatePMatrix()
 {
-	for (auto &vec_double : m_probabilityMatrix)  // 问题：vector有没有一行代码解决？
+	for (auto &vec_double : m_probabilityMatrix) // 问题：vector有没有一行代码解决？
 	{
 		for (double &p : vec_double)
 		{
-			p = m_smallNumber;		             // 不再清零，初始化一个很小的数
+			p = m_e;		                     // 不再清零，初始化一个很小的数
 		}
 	}
 
 	for (const Tank &t : m_enemy.getCoalition()) // 敌人的地方，还是零
 	{
-		int x = t.getArrayIndex().x;
+		int x = t.getArrayIndex().x;             // Warning: 这里会有精度损失么的风险。但是做了很多单步调试，没有发现诸如 1.9999999998 --> 1 的例子
 		int y = t.getArrayIndex().y;
 		m_probabilityMatrix[y][x] = 0;
 	}

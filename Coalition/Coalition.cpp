@@ -523,12 +523,10 @@ ofVec2f Coalition::localSearch_big_PM(const Coalition & enemy, const vector<vect
 }
 
 /*
-这里出现了大量下标错误：probabilityMatrix这个“大矩形”里面有一个BattleField“小矩形”
-要搞清楚这里的相对差“offset”
+    这里出现了大量下标错误：probabilityMatrix这个“大矩形”里面有一个BattleField“小矩形”
+    要搞清楚这里的相对差“offset”
 
-可以优化：累和的时候，使用一维数组
-
-不使用轮盘赌？
+    不使用轮盘赌？
 */
 ofVec2f Coalition::getPlaceFromPMatrix(const vector<vector<double>> &probabilityMatrix, const vector<double> &SUM_OF_ROW, const double &TOTAL)
 {
