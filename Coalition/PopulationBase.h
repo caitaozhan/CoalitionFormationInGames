@@ -4,6 +4,7 @@
 #include <ctime>
 #include <chrono>
 #include "Coalition.h"
+#include "../Apriori/ItemSet.h"
 #include "../Analyze/AnalyzeLog.h"
 using namespace std;
 
@@ -40,7 +41,8 @@ protected:
 	void updateBestCoalitions();
 	void writeLogMatrix(int updateCounter);         // 打印矩阵到log
 	int  writeLogPopAverage(int updateCounter);     // 打印算法的分析
-	
+	void population2transaction(const vector<Coalition> & population, vector<vector<ItemSet>> & transaction);
+	void printTransaction(vector<vector<ItemSet>> & transactions, int transactionID);
 
 protected:
 	vector<Coalition>      m_population;            // 一个种群, a group of Coalitions (个体, 又称solution)
@@ -49,8 +51,9 @@ protected:
 	vector<int> m_bestCoalitionIndex;               // The index of best coalitions in the population, there could be more than one 
 	Coalition   m_enemy;                            // 敌军个体
 
-	ofstream LOG_PM;                                // 概率矩阵的日志
-	ofstream LOG_ANALYSE;                           // 算法分析的日志
+	ofstream m_logPM;                               // 概率矩阵的日志
+	ofstream m_logAnalyse;                          // 算法分析的日志
+	ofstream m_logTransaction;                      // population的transaction日志
 
 	static uniform_real_distribution<double> urd_0_1;
 
@@ -71,6 +74,7 @@ protected:
 	string m_logNamePM;                             // 概率矩阵日志的名字
 	string m_logNameRunningResult;                  // 程序运行结果日志，同时也是日志分析的输入
 	string m_logNameAnalyseResult;                  // 日志分析输出文件的名字
+	string m_logNameTransaction;                    // 一个transaction就是一个population的数据
 	int m_populationSize;                           // 种群规模的大小，即population里有多少个individual
 	int m_bestEvaluation;                           // 当前种群里面的最好（大）适应值
 

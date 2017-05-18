@@ -22,4 +22,3 @@ public:
 
 	static mutex mtx; 
 };
-

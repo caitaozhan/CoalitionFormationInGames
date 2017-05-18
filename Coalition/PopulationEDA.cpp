@@ -43,8 +43,8 @@ void PopulationEDA::initialize()
 	uid_selectPop = uniform_int_distribution<int>(0, m_selectNum - 1);
 	
 	// 初始化日志文件名
-	LOG_PM.open(m_logNamePM);
-	LOG_ANALYSE.open(m_logNameRunningResult);
+	m_logPM.open(m_logNamePM);
+	m_logAnalyse.open(m_logNameRunningResult);
 
 	// 初始化 m_population
 	m_population.resize(m_populationSize);
@@ -248,7 +248,7 @@ void PopulationEDA::update()
 		if (m_appearTarget == false)            // MAX_UPDATE 次之内没有找到 target
 		{
 			cout << "target not found @" << m_updateCounter << '\n';
-			LOG_ANALYSE << "target not found @" << m_updateCounter << '\n';
+			m_logAnalyse << "target not found @" << m_updateCounter << '\n';
 		}
 
 		cout << m_experimentTimes << "次试验\n-------\n";
@@ -259,7 +259,7 @@ void PopulationEDA::update()
 
 		if (m_experimentTimes == m_maxExperimentTimes)  // 准备做 MAX_EXPERIMENT 次实验
 		{
-			LOG_ANALYSE.close();                  // 先关闭，再由另外一个类打开“临界文件”
+			m_logAnalyse.close();                  // 先关闭，再由另外一个类打开“临界文件”
 			AnalyzeLog analyzeLog(m_logNameRunningResult, m_logNameAnalyseResult);
 			analyzeLog.analyze();
 			cout << "\nEnd of " << m_maxExperimentTimes << " times of experiments!" << endl;

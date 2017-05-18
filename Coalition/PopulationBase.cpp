@@ -5,7 +5,7 @@ uniform_real_distribution<double> PopulationBase::urd_0_1 = uniform_real_distrib
 PopulationBase::PopulationBase()
 {
 	m_maxUpdate          = 100;
-	m_maxExperimentTimes = 15;
+	m_maxExperimentTimes = 1;
 	m_PMtotal            = 0;
 	m_experimentTimes    = 0;
 	m_updateCounter      = 0;
@@ -19,24 +19,24 @@ PopulationBase::PopulationBase()
 
 void PopulationBase::writeLogMatrix(int updateCounter)
 {
-	LOG_PM << '\n' << "update counter: " << updateCounter << '\n';
+	m_logPM << '\n' << "update counter: " << updateCounter << '\n';
 	for (int y = Global::HEIGHT - 1; y >= 0; --y)
 	{
 		for (int x = 0; x < Global::WIDTH - 1; ++x)
 		{
 			if (isZero(m_probabilityMatrix[y][x]))
 			{
-				LOG_PM << setprecision(0);
+				m_logPM << setprecision(0);
 			}
 			else
 			{
-				LOG_PM << setprecision(3);
+				m_logPM << setprecision(3);
 			}
-			LOG_PM << left << setw(7) << m_probabilityMatrix[y][x];  // (x,y) --> [y][x]
+			m_logPM << left << setw(7) << m_probabilityMatrix[y][x];  // (x,y) --> [y][x]
 		}
-		LOG_PM << '\n';
+		m_logPM << '\n';
 	}
-	LOG_PM << '\n' << "*******************" << endl;
+	m_logPM << '\n' << "*******************" << endl;
 }
 
 /*
@@ -52,8 +52,43 @@ int PopulationBase::writeLogPopAverage(int updateCounter)
 		sum += c.getSimpleEvaluate();
 	}
 	avg = sum / m_population.size();
-	LOG_ANALYSE << updateCounter << ": " << avg << "\n\n";
+	m_logAnalyse << updateCounter << ": " << avg << "\n\n";
 	return avg;
+}
+
+void PopulationBase::population2transaction(const vector<Coalition>& population, vector<vector<ItemSet>>& transaction)
+{
+	vector<ItemSet> oneTransaction;
+	for (const Coalition & c : population)
+	{
+		oneTransaction.clear();
+
+		vector<Tank> tanks = c.getCoalition();
+		for (const Tank & t : tanks)
+		{
+			ofVec2f arrayIndex = t.getArrayIndex();
+			Item item(static_cast<int>(arrayIndex.x + Global::EPSILON), static_cast<int>(arrayIndex.y + Global::EPSILON));
+			ItemSet oneItemSet;
+			oneItemSet.insert(item);
+			oneTransaction.emplace_back(oneItemSet);
+		}
+
+		transaction.emplace_back(oneTransaction);
+	}
+}
+
+void PopulationBase::printTransaction(vector<vector<ItemSet>>& transactions, int transactionID)
+{
+	m_logTransaction << endl << "Transaction #" << transactionID << endl;
+	for (vector<ItemSet> & oneTransaction : transactions)
+	{
+		for (ItemSet & oneItemSet : oneTransaction)
+		{
+			m_logTransaction << oneItemSet;
+		}
+		m_logTransaction << endl;
+	}
+	m_logTransaction << endl;
 }
 
 void PopulationBase::setResetMe(const bool & resetMe)
@@ -144,7 +179,7 @@ void PopulationBase::updateBestCoalitions()
 		cout << "Best @" << m_updateCounter << "  " << m_bestEvaluation << '\n';
 		if (m_appearTarget == false && isZero(m_bestEvaluation - Coalition::target))
 		{
-			LOG_ANALYSE << "Best @" << m_updateCounter * m_populationSize << "  " << Coalition::target << '\n';
+			m_logAnalyse << "Best @" << m_updateCounter * m_populationSize << "  " << Coalition::target << '\n';
 			m_appearTarget = true;
 		}
 	}

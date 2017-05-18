@@ -182,15 +182,13 @@ const set<Item>& ItemSet::getItemSet() const
 
 ostream & operator<<(ostream & output, const ItemSet & itemSet)
 {
-	output << "{";
 	set<Item>::const_iterator iter = itemSet.m_itemSet.begin();
-	output << *iter;
+	output << *iter << " ";
 	iter++;
 	while (iter != itemSet.m_itemSet.end())
 	{
-		output << "," << *iter;
+		output << " " << *iter;
 		iter++;
 	}
-	output << "}";
 	return output;
 }

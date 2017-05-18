@@ -22,12 +22,15 @@ void PopulationMPL::initialize()
 	m_logNamePM            = string("../log/producer_consumer/logPM_simple_evaluate_.txt");  // all below should be in a file
 	m_logNameRunningResult = string("../log/producer_consumer/running_result_.txt");
 	m_logNameAnalyseResult = string("../log/producer_consumer/analyse_result_.txt");
+	m_logNameTransaction   = string("../log/producer_consumer/transaction_.txt");
 	m_logNamePM.insert(m_logNamePM.length() - 4, timeNow);
 	m_logNameRunningResult.insert(m_logNameRunningResult.length() - 4, timeNow);
 	m_logNameAnalyseResult.insert(m_logNameAnalyseResult.length() - 4, timeNow);
+	m_logNameTransaction.insert(m_logNameTransaction.length() - 4, timeNow);
 	
-	LOG_PM.open(m_logNamePM);
-	LOG_ANALYSE.open(m_logNameRunningResult);
+	m_logPM.open(m_logNamePM);
+	m_logAnalyse.open(m_logNameRunningResult);
+	m_logTransaction.open(m_logNameTransaction);
 	m_enemy.initialize(Coalition::INDIVIDUAL_SIZE);                   // 修正BUG：之前 m_enemy 调用重载的默认构造函数，导致vector大小=0
 	m_enemy.setup_file(Tank::ABILITY_DISTANCE, true, m_fileNameEnemyInput);    // 从文件从读入数据，进行初始化
 																			   //m_enemy.setup_8(Tank::ABILITY_DISTANCE, true, Coalition()); 
@@ -70,7 +73,7 @@ void PopulationMPL::update()
 		if (m_appearTarget == false)            // MAX_UPDATE 次之内没有找到 target
 		{
 			cout << "target not found @" << m_updateCounter << '\n';
-			LOG_ANALYSE << "target not found @" << m_updateCounter << '\n';
+			m_logAnalyse << "target not found @" << m_updateCounter << '\n';
 		}
 
 		writeLogPopAverage(m_updateCounter);
@@ -83,7 +86,7 @@ void PopulationMPL::update()
 		
 		if (m_experimentTimes == m_maxExperimentTimes)  // 准备做 m_maxExperimentTimes 次实验
 		{
-			LOG_ANALYSE.close();                  // 先关闭，再由另外一个类打开“临界文件”
+			m_logAnalyse.close();                  // 先关闭，再由另外一个类打开“临界文件”
 			AnalyzeLog analyzeLog(m_logNameRunningResult, m_logNameAnalyseResult);
 			analyzeLog.analyze();
 			cout << "\nEnd of " << m_maxExperimentTimes << " times of experiments!" << endl;
@@ -155,12 +158,17 @@ void PopulationMPL::updatePopluation()
 		{
 
 			// TODO: local search
+			
+			vector<vector<ItemSet>> populationTransaction;
+			population2transaction(m_population, populationTransaction);
+			printTransaction(populationTransaction, m_updateCounter);
 
-			ofVec2f arrayIndex;
+
+			/*ofVec2f arrayIndex;
 			arrayIndex = backupC.localSearch_big(m_enemy);
 			Tank newTank;
 			newTank.setup(arrayIndex, Tank::ABILITY_DISTANCE, false);
-			constructC.pushBackTank(move(newTank));  // TODO:可以用 emplace_back
+			constructC.pushBackTank(move(newTank));  // TODO:可以用 emplace_back*/
 		}
 	}
 }
@@ -259,4 +267,3 @@ void PopulationMPL::updateWeight()
 		c.setWeight(c.calculateWeight(c.getFitness()));
 	}
 }
-
