@@ -39,7 +39,8 @@ protected:
 	bool isZero(double d);
 	void updateBestCoalitions();
 	void writeLogMatrix(int updateCounter);         // 打印矩阵到log
-	int  writeLogPopAverage(int updateCounter);        // 打印算法的分析
+	int  writeLogPopAverage(int updateCounter);     // 打印算法的分析
+	
 
 protected:
 	vector<Coalition>      m_population;            // 一个种群, a group of Coalitions (个体, 又称solution)

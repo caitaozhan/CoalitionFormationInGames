@@ -156,11 +156,11 @@ void PopulationMPL::updatePopluation()
 
 			// TODO: local search
 
-			/*ofVec2f arrayIndex;
+			ofVec2f arrayIndex;
 			arrayIndex = backupC.localSearch_big(m_enemy);
 			Tank newTank;
 			newTank.setup(arrayIndex, Tank::ABILITY_DISTANCE, false);
-			constructC.pushBackTank(move(newTank));  // TODO:可以用 emplace_back*/
+			constructC.pushBackTank(move(newTank));  // TODO:可以用 emplace_back
 		}
 	}
 }
