@@ -97,7 +97,7 @@ void PopulationBase::takeActionToKnowledge(const map<pair<ItemSet, ItemSet>, dou
 {
 	for (Coalition & c : m_population)
 	{
-		pair<ItemSet, ItemSet> matchedRule = matchRules(c, associateRules);
+		//pair<ItemSet, ItemSet> matchedRule = matchRules(c, associateRules);
 		// TODO: 已经找到了最佳匹配规则了，接下来就是做具体的调整了
 
 	}
@@ -135,7 +135,7 @@ pair<ItemSet, ItemSet> PopulationBase::matchRules(const Coalition & coalition, c
 		if (iter->second > maxConfidence)
 		{
 			maxConfidence = iter->second;
-			bestMatchedRule = *iter;
+			bestMatchedRule = iter->first;
 		}
 		iter++;
 	}
