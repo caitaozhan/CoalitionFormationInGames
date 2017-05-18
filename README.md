@@ -1,8 +1,9 @@
 # CoalitionFormationInGames
-A little research on coalition formation in games
 
-Coding in C++ under OpenFrameworks(version 0.9.3. An open source toolkit designed for "creative coding"). I use vs2015 community as my IDE. 
+Shape formation for a group of agents is crucial in many strategy games as it brings collective payoff through cooperation. A group of agents with a good formation will gain advantages while fighting against another group of agents with a bad formation. Finding a good formation for a group of agents in games is considered as a combinatorial optimization problem in this paper. 
 
-version_0.4.1: v_0.3.1 + local search
-注：这里的local search 是 big 版本
-    v_0.4 的 local search 是 small 版本
+To address this issue, this paper proposes a novel and simple metaheuristic evolutionary algorithm based on a probability learning matrix, which is the foundation of a formation learning and discovery mechanism. Evolutionary computation (EC) is the science of designing and applying algorithms based on Darwinian principles of natural selection. It is a universal problem solver that gives an optimal/near-optimal solution to combinatorial problems, function optimizations, and many real world problems. The proposed evolutionary algorithm in this paper tries to inherit the core spirit of the classic EC and develop some new ideas and methodologies to solve difficult real world challenges.
+
+Also, this paper utilized a classic data mining algorithm, apriori algorithm, to enhance the performance of the proposed evolutionary algorithm. The main idea is that during the search of an EC algorithm, many data is generated, such as the population information including the fitness, frequencies, and locations of the individuals. Thus the data mining technique is helpful in analyzing these data for enhancing the search performance. In this paper, apriori algorithm is used to dig out the potential association between the variables in individuals. The relationship between variables is the valuable knowledge digged out from raw data. Then the action taken based on the knowledge is helpful in improving the quality of the individuals, i.e. the solutions.
+
+Experimental results on several test problems show that the proposed algorithm works well in comparison with another peer algorithm named EDA. And the apriori algorithm can effectively enhance the performance of the proposed algorithm.

@@ -24,10 +24,14 @@ public:
 	Apriori(double minSupportRatio, double minConfidence);
 
 public:
-	void inputTransactions(const string &fileName);   // 读入数据到m_transactions中
-	void findAllFrequentItemSets();                   // 找到所有的频繁项     
-	void findStrongestAssociateRules();               // 找到所有的关联规则
-	void printRules(const string &fileName);          // 打印所有的关联规则
+	void setParam(double minSupportRatio, double minConfidence);           // 设置参数
+	void inputTransactions(const string &fileName);                        // 读入数据到m_transactions中
+	void inputTransactions(vector<vector<ItemSet>> && transactions);       // 读入数据到m_transactions中
+	void findAllFrequentItemSets();                                        // 找到所有的频繁项     
+	void findStrongestAssociateRules();                                    // 找到所有的关联规则
+	void printRules(const string &fileName);                               // 打印所有的关联规则
+
+	const map<pair<ItemSet, ItemSet>, double>& getAssociateRules()const;   // getter函数
 
 private:
 	void findFrequentOneItemSets();                   // 从原始的 transaction 里面，找到频繁的 one-item set

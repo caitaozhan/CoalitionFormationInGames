@@ -14,6 +14,14 @@ Apriori::Apriori(double minSupportRatio, double minConfidence)
 	m_transactionCounter = 0;
 }
 
+
+void Apriori::setParam(double minSupportRatio, double minConfidence)
+{
+	m_minSupportRatio = minSupportRatio;
+	m_minConfidence = minConfidence;
+	m_transactionCounter = 0;
+}
+
 /*
 	@param fileName:待输入的原始数据的文件名
 */
@@ -56,6 +64,11 @@ void Apriori::inputTransactions(const string &fileName)
 		}
 	}
 	inFile.close();
+}
+
+void Apriori::inputTransactions(vector<vector<ItemSet>>&& transactions)
+{
+	m_transactions = transactions;
 }
 
 
@@ -182,6 +195,11 @@ void Apriori::printRules(const string &fileName)
 		iter++;
 	}
 	outFile.close();
+}
+
+const map<pair<ItemSet, ItemSet>, double>& Apriori::getAssociateRules() const
+{
+	return m_associationRule;
 }
 
 void Apriori::generateCandidates(vector<ItemSet>& candidateKItemSets, int k)

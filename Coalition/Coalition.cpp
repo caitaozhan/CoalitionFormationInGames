@@ -556,3 +556,16 @@ bool Coalition::decrease(const Coalition & c1, const Coalition & c2)
 
 	return false;
 }
+
+ItemSet Coalition::toItemSet() const
+{
+	ItemSet itemSet;
+	for (const Tank & t : m_coalition)
+	{
+		int x = static_cast<int>(t.getArrayIndex().x + Global::EPSILON);
+		int y = static_cast<int>(t.getArrayIndex().x + Global::EPSILON);
+		Item item(x, y);
+		itemSet.insert(item);
+	}
+	return itemSet;
+}

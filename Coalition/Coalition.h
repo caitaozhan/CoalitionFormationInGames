@@ -1,5 +1,6 @@
 #pragma once
 #include <ofMain.h>
+#include "../Apriori/ItemSet.h"
 #include "Tank.h"
 #include "Global.h"
 
@@ -63,6 +64,8 @@ public:
 	static uniform_real_distribution<double> urd_0_1;
 	static uniform_int_distribution<int> uid_x;
 	static uniform_int_distribution<int> uid_y;
+
+	ItemSet toItemSet() const;
 
 private:
 	vector<Tank> m_coalition;

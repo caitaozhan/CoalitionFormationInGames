@@ -15,6 +15,8 @@ PopulationBase::PopulationBase()
 	m_resetEnemy         = false;
 	m_appearTarget       = false;
 	m_stop               = false;
+
+	apriori.setParam(0.3, 0.8);
 }
 
 void PopulationBase::writeLogMatrix(int updateCounter)
@@ -89,6 +91,56 @@ void PopulationBase::printTransaction(vector<vector<ItemSet>>& transactions, int
 		m_logTransaction << endl;
 	}
 	m_logTransaction << endl;
+}
+
+void PopulationBase::takeActionToKnowledge(const map<pair<ItemSet, ItemSet>, double> & associateRules)
+{
+	for (Coalition & c : m_population)
+	{
+		pair<ItemSet, ItemSet> matchedRule = matchRules(c, associateRules);
+		// TODO: 已经找到了最佳匹配规则了，接下来就是做具体的调整了
+
+	}
+}
+
+/*
+	itemSet = coalition.toItemSet()
+    匹配的标准是：left 是 itemSet 的子集，但是 right 不是 itemSet 的子集
+*/
+pair<ItemSet, ItemSet> PopulationBase::matchRules(const Coalition & coalition, const map<pair<ItemSet, ItemSet>, double>& associateRules)
+{
+	map<pair<ItemSet, ItemSet>, double> candidateRules;
+
+	ItemSet coalitionItemSet = coalition.toItemSet();
+	map<pair<ItemSet, ItemSet>, double>::const_iterator iter = associateRules.begin();
+	while (iter != associateRules.end())
+	{
+		ItemSet left = iter->first.first;
+		if (coalitionItemSet.hasSubset(left) == true)         // 规则的左手边在 coalition 里面
+		{
+			ItemSet right = iter->first.second;
+			if (coalitionItemSet.hasSubset(right) == false)   // 规则的右手边不在 coalition 里面
+			{
+				candidateRules.emplace(*iter);
+			}
+		}
+		iter++;
+	}
+
+	iter = candidateRules.begin();
+	double maxConfidence = 0;
+	pair<ItemSet, ItemSet> bestMatchedRule;
+	while (iter != candidateRules.end())
+	{
+		if (iter->second > maxConfidence)
+		{
+			maxConfidence = iter->second;
+			bestMatchedRule = *iter;
+		}
+		iter++;
+	}
+
+	return bestMatchedRule;
 }
 
 void PopulationBase::setResetMe(const bool & resetMe)

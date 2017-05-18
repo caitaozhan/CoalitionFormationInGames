@@ -87,6 +87,42 @@ Item ItemSet::lastItem() const
 	return *m_itemSet.rbegin();
 }
 
+/*
+    判断 @param subset 是不是 *this 的子集
+*/
+bool ItemSet::hasSubset(const ItemSet & subset) const
+{
+	if (size() < subset.size())
+		return false;
+
+	set<Item>::const_iterator iterThis = m_itemSet.begin();
+	set<Item>::const_iterator iterSubset = subset.getItemSet().end();
+
+	while (iterThis != m_itemSet.end() && iterSubset != subset.getItemSet().end())   // set 里面的元素是排序好的，可以借鉴 merge sort 里面的 merge 思想
+	{
+		if (*iterSubset > *iterThis)
+		{
+			return false;
+		}
+		else if (*iterSubset == *iterThis)
+		{
+			iterThis++, iterSubset++;
+		}
+		else
+		{
+			iterThis++;
+		}
+	}
+	if (iterSubset == subset.getItemSet().end())
+	{
+		return true;
+	}
+	else
+	{
+		return false;
+	}
+}
+
 bool ItemSet::operator==(const ItemSet & itemSet) const
 {
 	if (m_itemSet.size() != itemSet.size())   // 如果大小不相等，两个 set 一定不相等

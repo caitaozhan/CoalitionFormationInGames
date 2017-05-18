@@ -4,7 +4,7 @@
 #include <ctime>
 #include <chrono>
 #include "Coalition.h"
-#include "../Apriori/ItemSet.h"
+#include "../Apriori/Apriori.h"
 #include "../Analyze/AnalyzeLog.h"
 using namespace std;
 
@@ -43,6 +43,8 @@ protected:
 	int  writeLogPopAverage(int updateCounter);     // 打印算法的分析
 	void population2transaction(const vector<Coalition> & population, vector<vector<ItemSet>> & transaction);
 	void printTransaction(vector<vector<ItemSet>> & transactions, int transactionID);
+	void takeActionToKnowledge(const map<pair<ItemSet, ItemSet>, double> & associateRules);
+	pair<ItemSet, ItemSet> matchRules(const Coalition & coalition, const map<pair<ItemSet, ItemSet>, double> & associateRules);
 
 protected:
 	vector<Coalition>      m_population;            // 一个种群, a group of Coalitions (个体, 又称solution)
@@ -77,5 +79,7 @@ protected:
 	string m_logNameTransaction;                    // 一个transaction就是一个population的数据
 	int m_populationSize;                           // 种群规模的大小，即population里有多少个individual
 	int m_bestEvaluation;                           // 当前种群里面的最好（大）适应值
+
+	Apriori apriori;
 
 };

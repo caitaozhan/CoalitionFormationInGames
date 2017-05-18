@@ -153,23 +153,17 @@ void PopulationMPL::updatePopluation()
 				}
 			}
 		}
-
-		if (urd_0_1(Global::dre) < LS)
-		{
-
-			// TODO: local search
-			
-			vector<vector<ItemSet>> populationTransaction;
-			population2transaction(m_population, populationTransaction);
-			printTransaction(populationTransaction, m_updateCounter);
-
-
-			/*ofVec2f arrayIndex;
-			arrayIndex = backupC.localSearch_big(m_enemy);
-			Tank newTank;
-			newTank.setup(arrayIndex, Tank::ABILITY_DISTANCE, false);
-			constructC.pushBackTank(move(newTank));  // TODO:©иртсц emplace_back*/
-		}
+	}
+	if (urd_0_1(Global::dre) < LS) //  local search
+	{
+		vector<vector<ItemSet>> populationTransaction;
+		population2transaction(m_population, populationTransaction);
+		//printTransaction(populationTransaction, m_updateCounter);
+		apriori.inputTransactions(move(populationTransaction));
+		apriori.findAllFrequentItemSets();
+		apriori.findStrongestAssociateRules();
+	
+		takeActionToKnowledge(apriori.getAssociateRules());
 	}
 }
 
