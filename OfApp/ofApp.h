@@ -3,8 +3,8 @@
 #include "ofMain.h"
 #include <mutex>
 #include <thread>
-#include "../Coalition/Coalition.h"
-#include "../Coalition/Global.h"
+#include "../Population/Coalition.h"
+#include "../Population/Global.h"
 #include "../CriticalSection/Buffer.h"
 using namespace std;
 

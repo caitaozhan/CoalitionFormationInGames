@@ -5,10 +5,10 @@
 #include <thread>
 #include <mutex>
 #include <condition_variable>
-#include "../Coalition/PopulationBase.h"
-#include "../Coalition/PopulationMPL.h"
-#include "../Coalition/PopulationEDA.h"
-#include "../Coalition/Global.h"
+#include "../Population/PopulationBase.h"
+#include "../Population/PopulationMPL.h"
+#include "../Population/PopulationEDA.h"
+#include "../Population/Global.h"
 using namespace std;
 
 /*

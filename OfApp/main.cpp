@@ -1,9 +1,9 @@
 #pragma once
 #include "ofMain.h"
 #include "ofApp.h"
-#include "../Coalition/PopulationBase.h"
-#include "../Coalition/PopulationMPL.h"
-#include "../Coalition/PopulationEDA.h"
+#include "../Population/PopulationBase.h"
+#include "../Population/PopulationMPL.h"
+#include "../Population/PopulationEDA.h"
 using namespace std;
 
 void consumerDraw()
