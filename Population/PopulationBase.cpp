@@ -97,9 +97,10 @@ void PopulationBase::takeActionToKnowledge(const map<pair<ItemSet, ItemSet>, dou
 {
 	for (Coalition & c : m_population)
 	{
-		//pair<ItemSet, ItemSet> matchedRule = matchRules(c, associateRules);
+		pair<ItemSet, ItemSet> matchedRule = matchRules(c, associateRules);  // 如果没有匹配的话，应该是 (-1, -1) --> (-1, -1)
 		// TODO: 已经找到了最佳匹配规则了，接下来就是做具体的调整了
-
+		ItemSet moveDestination = findDestination(c, matchedRule);
+		ItemSet moveSource = findSource(moveDestination.size(), c, matchedRule, associateRules);
 	}
 }
 
@@ -137,10 +138,71 @@ pair<ItemSet, ItemSet> PopulationBase::matchRules(const Coalition & coalition, c
 			maxConfidence = iter->second;
 			bestMatchedRule = iter->first;
 		}
+		else if (isZero(iter->second - maxConfidence) == true)
+		{
+			bestMatchedRule = iter->first;
+		}
 		iter++;
 	}
 
 	return bestMatchedRule;
+}
+
+/*
+    规则的右手边的 ItemSet 不是 coalition 的子集，找到“属于右手边，但是不属于coalition的部分”。注意set里面的Item是排好序的
+	假设 coalition = {A B D E F G}, matchedRule.second = {A C F}
+	return {C}
+*/ 
+ItemSet PopulationBase::findDestination(const Coalition & coalition, const pair<ItemSet, ItemSet> & matchedRule)
+{
+	ItemSet coalitionItemSet = coalition.toItemSet();
+	set<Item> setCoalition = coalitionItemSet.getItemSet();
+	set<Item>::const_iterator iterC = setCoalition.begin();
+
+	ItemSet rightItemSet = matchedRule.second.getItemSet();
+	set<Item> setRight = rightItemSet.getItemSet();
+	set<Item>::const_iterator iterRule = setRight.begin();
+
+	ItemSet destination;
+
+	while (iterRule != setRight.end() && iterC != setCoalition.end())
+	{
+		if (*iterRule == *iterC)
+		{
+			iterC++, iterRule++;
+		}
+		else if (*iterRule > *iterC)
+		{
+			iterC++;
+		}
+		else  // *iterRule < *iterC
+		{
+			destination.insert(*iterRule);
+			iterRule++;
+		}
+	}
+	while (iterRule != setRight.end())
+	{
+		destination.insert(*iterRule);
+		iterRule++;
+	}
+
+	return destination;
+}
+
+/*
+    local search 的时候，需要对一些智能体作调整，就是把一些智能体作为source，转移到destination
+	@param moveSize 是转移的智能体的个数
+	@c              是个体（阵型，解）
+	@matchedRule    是匹配的规则
+	@associateRules 是当前 population 生成的所有的规则
+	找出来的 source，应该是一些费频繁的 Item
+*/
+ItemSet PopulationBase::findSource(size_t moveSize, const Coalition & c, const pair<ItemSet, ItemSet>& matchedRule, const map<pair<ItemSet, ItemSet>, double>& associateRules)
+{
+	ItemSet coalitionItemSet = c.toItemSet();
+	// TODO: overload operator-
+	return ItemSet();
 }
 
 void PopulationBase::setResetMe(const bool & resetMe)

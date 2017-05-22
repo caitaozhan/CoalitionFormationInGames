@@ -25,6 +25,7 @@ public:
 	bool operator< (const ItemSet & itemSet) const;
 	bool operator> (const ItemSet & itemSet) const;  // жиди operator< ашвЊТњзу strict weak ordering
 
+
 	const set<Item>& getItemSet() const;
 	
 	friend ostream& operator<<(ostream& output, const ItemSet& item);

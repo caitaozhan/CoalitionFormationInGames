@@ -2,8 +2,8 @@
 
 Item::Item()
 {
-	m_x = 0;
-	m_y = 0;
+	m_x = -1;
+	m_y = -1;
 }
 
 Item::Item(string itemStr)

@@ -45,6 +45,8 @@ protected:
 	void printTransaction(vector<vector<ItemSet>> & transactions, int transactionID);
 	void takeActionToKnowledge(const map<pair<ItemSet, ItemSet>, double> & associateRules);
 	pair<ItemSet, ItemSet> matchRules(const Coalition & coalition, const map<pair<ItemSet, ItemSet>, double> & associateRules);
+	ItemSet findDestination(const Coalition & coalition, const pair<ItemSet, ItemSet> & matchedRule);
+	ItemSet findSource(size_t moveSize, const Coalition & c, const pair<ItemSet, ItemSet> & matchedRule, const map<pair<ItemSet, ItemSet>, double> & associateRules);
 
 protected:
 	vector<Coalition>      m_population;            // 一个种群, a group of Coalitions (个体, 又称solution)
