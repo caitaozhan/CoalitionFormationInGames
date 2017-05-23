@@ -1,6 +1,8 @@
 #pragma once
 #include <iostream>
 #include <vector>
+#include <forward_list>
+#include <climits>
 #include <ctime>
 #include <chrono>
 #include "Coalition.h"

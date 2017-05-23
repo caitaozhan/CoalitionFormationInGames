@@ -158,14 +158,63 @@ pair<ItemSet, ItemSet> PopulationBase::matchRules(const Coalition & coalition, c
 	@param associateRules 是当前 population 生成的所有的规则
 	找出来的 source，应该是一些费频繁的 Item
 */
-ItemSet PopulationBase::findSource(size_t moveSize, const Coalition & coalition, const pair<ItemSet, ItemSet>& matchedRule, const map<pair<ItemSet, ItemSet>, double>& associateRules)
+ItemSet PopulationBase::findSource(size_t moveSize, const Coalition & coalition, const pair<ItemSet, ItemSet>& matchedRule, 
+	                               const map<pair<ItemSet, ItemSet>, double>& associateRules)
 {
 	ItemSet source;
 	ItemSet candidate(coalition.toItemSet());
 	candidate -= matchedRule.first;
 	candidate -= matchedRule.second;
-
+	map<Item, int> itemCount;
 	// TODO: 从candidate里面选择
+	map<pair<ItemSet, ItemSet>, double>::const_iterator iterMap = associateRules.begin();
+	while (iterMap != associateRules.end())
+	{
+		ItemSet leftSet(iterMap->first.first);
+		set<Item> setLeft = leftSet.getItemSet();
+		set<Item>::const_iterator iterSet = setLeft.begin();
+		while (iterSet != setLeft.end())
+		{
+			itemCount[*iterSet]++;
+			iterSet++;
+		}
+
+		ItemSet rightSet(iterMap->first.second);
+		set<Item> setRight = rightSet.getItemSet();
+		iterSet = setRight.begin();
+		while (iterSet != setRight.end())
+		{
+			itemCount[*iterSet]++;
+			iterSet++;
+		}
+
+		iterMap++;
+	}
+
+	forward_list<pair<Item, int>> sourceCount;
+	sourceCount.emplace_front(Item(), INT_MAX);
+
+	map<Item, int>::const_iterator iterItemCount = itemCount.begin();
+	while (iterItemCount != itemCount.end())
+	{
+		forward_list<pair<Item, int>>::const_iterator iterList = sourceCount.before_begin();
+		
+		while (iterList != sourceCount.end())
+		{
+			//if(iterItemCount->second < )
+		}
+
+		/*for (size_t i = 0; i < sourceCount.size(); ++i)
+		{
+			if (iterItemCount->second < sourceCount[i].second)
+			{
+				sourceCount[i] = *iterItemCount; // 这样不行，要找一个list
+				break;
+			}
+		}*/
+
+		iterItemCount++;
+	}
 
 	return source;
 }
