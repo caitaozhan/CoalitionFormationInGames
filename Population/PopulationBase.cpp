@@ -152,19 +152,21 @@ pair<ItemSet, ItemSet> PopulationBase::matchRules(const Coalition & coalition, c
 
 /*
     local search 的时候，需要对一些智能体作调整，就是把一些智能体作为source，转移到destination
-	@param moveSize 是转移的智能体的个数
-	@c              是个体（阵型，解）
-	@matchedRule    是匹配的规则
-	@associateRules 是当前 population 生成的所有的规则
+	@param moveSize       是转移的智能体的个数
+	@param coalition      是个体（阵型，解）
+	@param matchedRule    是匹配的规则
+	@param associateRules 是当前 population 生成的所有的规则
 	找出来的 source，应该是一些费频繁的 Item
 */
-ItemSet PopulationBase::findSource(size_t moveSize, const Coalition & c, const pair<ItemSet, ItemSet>& matchedRule, const map<pair<ItemSet, ItemSet>, double>& associateRules)
+ItemSet PopulationBase::findSource(size_t moveSize, const Coalition & coalition, const pair<ItemSet, ItemSet>& matchedRule, const map<pair<ItemSet, ItemSet>, double>& associateRules)
 {
-	ItemSet coalitionItemSet, candidate, source;
-	coalitionItemSet = c.toItemSet();
-	candidate = coalitionItemSet - matchedRule.first;
-	candidate = candidate - matchedRule.second;
-	// TODO: 从candidate里面选择，然后 -= 需要重载一下
+	ItemSet source;
+	ItemSet candidate(coalition.toItemSet());
+	candidate -= matchedRule.first;
+	candidate -= matchedRule.second;
+
+	// TODO: 从candidate里面选择
+
 	return source;
 }
 
