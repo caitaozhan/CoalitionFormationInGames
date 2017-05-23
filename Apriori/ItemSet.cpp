@@ -211,6 +211,57 @@ bool ItemSet::operator>(const ItemSet & itemSet) const
 	}
 }
 
+/*
+    Calculate the difference set A - B.
+	A - B = { x | every x that belongs to A, and not belongs to B }
+	For example, A = { a c h i j }, B = { a b c e f g i } ==> A - B = { h j }   (Note: elements in a set are ordered by operator<)
+	Sine operator- is a member function of class ItemSet, 
+	A is *this, and B is the @param itemSet.
+*/
+ItemSet ItemSet::operator-(const ItemSet & itemSet) const
+{
+	ItemSet differenceSet;
+
+	set<Item> itemSetA = this->getItemSet();
+	set<Item> itemSetB = itemSet.getItemSet();
+	set<Item>::const_iterator iterA = itemSetA.begin();
+	set<Item>::const_iterator iterB = itemSetB.begin();
+
+	while (iterA != itemSetA.end() && iterB != itemSetB.end())
+	{
+		if (*iterA == *iterB)
+		{
+			iterA++, iterB++;
+		}
+		else if (*iterA > *iterB)
+		{
+			iterB++;
+		}
+		else  // *iterA < *iterB
+		{
+			differenceSet.insert(*iterA);
+			iterA++;
+		}
+	}
+	while (iterA != itemSetA.end())
+	{
+		differenceSet.insert(*iterA);
+		iterA++;
+	}
+
+	return differenceSet;
+}
+
+ItemSet & ItemSet::operator=(const ItemSet & itemSet)
+{
+	if (this != &itemSet)
+	{
+		m_itemSet.clear();
+		m_itemSet = itemSet.getItemSet();
+	}
+	return *this;
+}
+
 const set<Item>& ItemSet::getItemSet() const
 {
 	return m_itemSet;

@@ -20,11 +20,13 @@ public:
 	Item lastItem() const;
 	bool hasSubset(const ItemSet & subset) const;
 
-	bool operator==(const ItemSet & itemSet) const;  // 如果不重载 operator== 的话，std::sort 会出bug
+	bool operator==(const ItemSet & itemSet) const;   // 如果不重载 operator== 的话，std::sort 会出bug
 	bool operator!=(const ItemSet & itemSet) const;
 	bool operator< (const ItemSet & itemSet) const;
-	bool operator> (const ItemSet & itemSet) const;  // 重载 operator< 需要满足 strict weak ordering
-
+	bool operator> (const ItemSet & itemSet) const;   // 重载 operator< 需要满足 strict weak ordering
+	
+	ItemSet operator-(const ItemSet & itemSet) const; // 集合的差集
+	ItemSet& operator=(const ItemSet & itemSet);      // assignment operators
 
 	const set<Item>& getItemSet() const;
 	
