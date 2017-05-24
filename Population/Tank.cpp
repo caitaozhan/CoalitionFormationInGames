@@ -35,7 +35,7 @@ void Tank::draw(const ofColor &color)
 
 void Tank::setTankPosition(double x, double y, double z)
 {
-	m_position = ofPoint(x, y, z);
+	m_position.set(x, y, z);
 }
 
 void Tank::setTankArrayIndex(int x, int y)
@@ -120,6 +120,9 @@ bool Tank::checkInBoundary(const ofVec2f &arrayIndex)
 	return true;
 }
 
+/*
+    检查 @param arrayIndex 是否在地图战场 Battle Field 之内
+*/
 bool Tank::ckeckInBF(const ofVec2f & arrayIndex)
 {
 	if (arrayIndex.x > Global::BF_LR.x || arrayIndex.x < Global::BF_UL.x || arrayIndex.y < Global::BF_LR.y || arrayIndex.y > Global::BF_UL.y)
@@ -127,4 +130,13 @@ bool Tank::ckeckInBF(const ofVec2f & arrayIndex)
 		return false;
 	}
 	return true;
+}
+
+/*
+    同时更新 arrayIndex 和 真实地图里面的 position
+*/
+void Tank::updateLocation(int x, int y)
+{
+	setTankArrayIndex(x, y);
+	setTankPosition(x, y, 0);
 }

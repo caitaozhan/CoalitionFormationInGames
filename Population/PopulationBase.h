@@ -48,7 +48,6 @@ protected:
 	void takeActionToKnowledge(const map<pair<ItemSet, ItemSet>, double> & associateRules);
 	pair<ItemSet, ItemSet> matchRules(const Coalition & coalition, const map<pair<ItemSet, ItemSet>, double> & associateRules);
 	ItemSet findSource(size_t moveSize, const Coalition & c, const pair<ItemSet, ItemSet> & matchedRule, const map<pair<ItemSet, ItemSet>, double> & associateRules);
-	void actionMove(Coalition & coalition, const ItemSet & sourceSet, const ItemSet & destinationSet);
 
 protected:
 	vector<Coalition>      m_population;            // 一个种群, a group of Coalitions (个体, 又称solution)

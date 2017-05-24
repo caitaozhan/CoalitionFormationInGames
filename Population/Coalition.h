@@ -64,6 +64,7 @@ public:
 	static uniform_int_distribution<int> uid_y;
 
 	ItemSet toItemSet() const;
+	void actionMove(const ItemSet & sourceSet, const ItemSet & destinationSet);
 
 private:
 	vector<Tank> m_coalition;

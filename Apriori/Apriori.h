@@ -32,7 +32,7 @@ public:
 	const map<pair<ItemSet, ItemSet>, double>& getAssociateRules()const;   // getter函数
 
 private:
-	void findFrequentOneItemSets();                   // 从原始的 transaction 里面，找到频繁的 one-item set
+	void findFrequentOneItemSets();                                                 // 从原始的 transaction 里面，找到频繁的 one-item set
 	void generateCandidates(vector<ItemSet>& candidateItemSets, int k);             // 产生候选的 item set
 	void findFrequentItemsFromCandidate(const vector<ItemSet>& candidateKItemSets); // A frequent item is a item with sufficient coverage(support)
 	void removeUnfrequentCandidates(map<ItemSet, int>& candidateKItemSetCount);     // 从候选的 item set 里面,删除 support 不足的,从而得到频繁 item set
