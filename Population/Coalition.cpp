@@ -569,3 +569,8 @@ ItemSet Coalition::toItemSet() const
 	}
 	return itemSet;
 }
+
+void Coalition::actionMove(const ItemSet & sourceSet, const ItemSet & destinationSet)
+{
+	
+}

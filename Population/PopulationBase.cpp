@@ -99,8 +99,10 @@ void PopulationBase::takeActionToKnowledge(const map<pair<ItemSet, ItemSet>, dou
 	{
 		pair<ItemSet, ItemSet> matchedRule = matchRules(c, associateRules);  // 如果没有匹配的话，应该是 (-1, -1) --> (-1, -1)
 		// TODO: 已经找到了最佳匹配规则了，接下来就是做具体的调整了
-		ItemSet moveDestination = findDestination(c, matchedRule);
-		ItemSet moveSource = findSource(moveDestination.size(), c, matchedRule, associateRules);
+		ItemSet moveDestination, moveSource;
+		moveDestination = matchedRule.second - c.toItemSet();
+		moveSource = findSource(moveDestination.size(), c, matchedRule, associateRules);
+		c.actionMove(moveSource, moveDestination);
 	}
 }
 
@@ -112,7 +114,8 @@ pair<ItemSet, ItemSet> PopulationBase::matchRules(const Coalition & coalition, c
 {
 	map<pair<ItemSet, ItemSet>, double> candidateRules;
 
-	ItemSet coalitionItemSet = coalition.toItemSet();
+	ItemSet coalitionItemSet;
+	coalitionItemSet = coalition.toItemSet();
 	map<pair<ItemSet, ItemSet>, double>::const_iterator iter = associateRules.begin();
 	while (iter != associateRules.end())
 	{
@@ -149,60 +152,96 @@ pair<ItemSet, ItemSet> PopulationBase::matchRules(const Coalition & coalition, c
 }
 
 /*
-    规则的右手边的 ItemSet 不是 coalition 的子集，找到“属于右手边，但是不属于coalition的部分”。注意set里面的Item是排好序的
-	假设 coalition = {A B D E F G}, matchedRule.second = {A C F}
-	return {C}
-*/ 
-ItemSet PopulationBase::findDestination(const Coalition & coalition, const pair<ItemSet, ItemSet> & matchedRule)
-{
-	ItemSet coalitionItemSet = coalition.toItemSet();
-	set<Item> setCoalition = coalitionItemSet.getItemSet();
-	set<Item>::const_iterator iterC = setCoalition.begin();
-
-	ItemSet rightItemSet = matchedRule.second.getItemSet();
-	set<Item> setRight = rightItemSet.getItemSet();
-	set<Item>::const_iterator iterRule = setRight.begin();
-
-	ItemSet destination;
-
-	while (iterRule != setRight.end() && iterC != setCoalition.end())
-	{
-		if (*iterRule == *iterC)
-		{
-			iterC++, iterRule++;
-		}
-		else if (*iterRule > *iterC)
-		{
-			iterC++;
-		}
-		else  // *iterRule < *iterC
-		{
-			destination.insert(*iterRule);
-			iterRule++;
-		}
-	}
-	while (iterRule != setRight.end())
-	{
-		destination.insert(*iterRule);
-		iterRule++;
-	}
-
-	return destination;
-}
-
-/*
     local search 的时候，需要对一些智能体作调整，就是把一些智能体作为source，转移到destination
-	@param moveSize 是转移的智能体的个数
-	@c              是个体（阵型，解）
-	@matchedRule    是匹配的规则
-	@associateRules 是当前 population 生成的所有的规则
+	@param moveSize       是转移的智能体的个数
+	@param coalition      是个体（阵型，解）
+	@param matchedRule    是匹配的规则
+	@param associateRules 是当前 population 生成的所有的规则
 	找出来的 source，应该是一些费频繁的 Item
 */
-ItemSet PopulationBase::findSource(size_t moveSize, const Coalition & c, const pair<ItemSet, ItemSet>& matchedRule, const map<pair<ItemSet, ItemSet>, double>& associateRules)
+ItemSet PopulationBase::findSource(size_t moveSize, const Coalition & coalition, const pair<ItemSet, ItemSet>& matchedRule,
+	const map<pair<ItemSet, ItemSet>, double>& associateRules)
 {
-	ItemSet coalitionItemSet = c.toItemSet();
-	// TODO: overload operator-
-	return ItemSet();
+	ItemSet source;
+	ItemSet candidate(coalition.toItemSet());
+	candidate -= matchedRule.first;
+	candidate -= matchedRule.second;           // matchedRule 规则里面出现的智能体排除
+	map<Item, int> itemCount;
+	// TODO: 从candidate里面选择
+	map<pair<ItemSet, ItemSet>, double>::const_iterator iterMap = associateRules.begin();
+	while (iterMap != associateRules.end())    // 统计 associateRules 里面规则的 Item 的出现次数
+	{
+		ItemSet leftSet(iterMap->first.first);
+		set<Item> setLeft = leftSet.getItemSet();
+		set<Item>::const_iterator iterSet = setLeft.begin();
+		while (iterSet != setLeft.end())
+		{
+			itemCount[*iterSet]++;
+			iterSet++;
+		}
+
+		ItemSet rightSet(iterMap->first.second);
+		set<Item> setRight = rightSet.getItemSet();
+		iterSet = setRight.begin();
+		while (iterSet != setRight.end())
+		{
+			itemCount[*iterSet]++;
+			iterSet++;
+		}
+
+		iterMap++;
+	}
+
+	forward_list<pair<Item, int>> itemCountList;   // 要选择出 Item 出现次数少的
+	itemCountList.emplace_front(Item(), INT_MAX);
+	forward_list<pair<Item, int>>::const_iterator iterListA;
+	forward_list<pair<Item, int>>::const_iterator iterListB;
+
+	map<Item, int>::const_iterator iterItemCount = itemCount.begin();
+	while (iterItemCount != itemCount.end())
+	{
+		size_t counter = 0;
+		iterListA = itemCountList.before_begin();
+		iterListB = itemCountList.begin();          // 把 itemCount 里面是按照 key 排序的，现在的需求是找到 value 较小的
+		while (iterListB != itemCountList.end())    // 找到插入 list 的位置，list 的前 moveSize 个数的 item 是出现次数最小的
+		{
+			if (counter >= moveSize)
+				break;
+
+			if (iterItemCount->second > iterListB->second)
+			{
+				iterListA++;
+				iterListB++;
+			}
+			else if (iterItemCount->second == iterListB->second)
+			{
+				iterListA++;
+				iterListB = itemCountList.emplace_after(iterListB, iterItemCount->first, iterItemCount->second);
+			}
+			else  // iterItemCount->second  < iterListB->second
+			{
+				iterListA = itemCountList.emplace_after(iterListA, iterItemCount->first, iterItemCount->second);
+				iterListB++;
+			}
+			counter++;
+		}
+		iterItemCount++;
+	}
+
+	iterListA = itemCountList.begin();
+	size_t counter = 0;
+	while (iterListA != itemCountList.end())
+	{
+		if (counter >= moveSize)
+		{
+			break;
+		}
+		source.insert(iterListA->first);
+		counter++;
+		iterListA++;
+	}
+
+	return source;
 }
 
 void PopulationBase::setResetMe(const bool & resetMe)

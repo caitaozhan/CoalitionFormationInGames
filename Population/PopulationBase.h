@@ -1,6 +1,8 @@
 #pragma once
 #include <iostream>
 #include <vector>
+#include <forward_list>
+#include <climits>
 #include <ctime>
 #include <chrono>
 #include "Coalition.h"
@@ -45,7 +47,6 @@ protected:
 	void printTransaction(vector<vector<ItemSet>> & transactions, int transactionID);
 	void takeActionToKnowledge(const map<pair<ItemSet, ItemSet>, double> & associateRules);
 	pair<ItemSet, ItemSet> matchRules(const Coalition & coalition, const map<pair<ItemSet, ItemSet>, double> & associateRules);
-	ItemSet findDestination(const Coalition & coalition, const pair<ItemSet, ItemSet> & matchedRule);
 	ItemSet findSource(size_t moveSize, const Coalition & c, const pair<ItemSet, ItemSet> & matchedRule, const map<pair<ItemSet, ItemSet>, double> & associateRules);
 
 protected:
