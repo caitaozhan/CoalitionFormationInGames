@@ -102,6 +102,8 @@ void PopulationBase::takeActionToKnowledge(const map<pair<ItemSet, ItemSet>, dou
 		ItemSet moveDestination, moveSource;
 		moveDestination = matchedRule.second - c.toItemSet();
 		moveSource = findSource(moveDestination.size(), c, matchedRule, associateRules);
+
+		actionMove(c, moveSource, moveDestination);
 	}
 }
 
@@ -241,6 +243,11 @@ ItemSet PopulationBase::findSource(size_t moveSize, const Coalition & coalition,
 	}
 
 	return source;
+}
+
+void PopulationBase::actionMove(Coalition & coalition, const ItemSet & sourceSet, const ItemSet & destinationSet)
+{
+
 }
 
 void PopulationBase::setResetMe(const bool & resetMe)
