@@ -8,6 +8,7 @@ class ItemSet
 {
 public:
 	ItemSet();
+	ItemSet(const Item & item);         // 构造函数，构造大小等于 1 的ItemSet
 	ItemSet(const set<Item> & itemSet); // 构造函数
 	ItemSet(const ItemSet & itemSet);   // 拷贝构造函数
 

@@ -4,6 +4,11 @@ ItemSet::ItemSet()
 {
 }
 
+ItemSet::ItemSet(const Item & item)
+{
+	m_itemSet.emplace(item);
+}
+
 ItemSet::ItemSet(const set<Item>& itemSet)
 {
 	m_itemSet = itemSet;
@@ -27,17 +32,12 @@ void ItemSet::erase(size_t index)
 	}
 	else
 	{
-		size_t counter = 0;
 		set<Item>::iterator iter = m_itemSet.begin();
-		while (iter != m_itemSet.end())
+		for (size_t i = 0; i != index; ++i)
 		{
-			if (counter == index)
-			{
-				iter = m_itemSet.erase(iter);
-				break;
-			}
-			counter++, iter++;
+			iter++;
 		}
+		iter = m_itemSet.erase(iter);
 	}
 }
 
@@ -47,16 +47,7 @@ void ItemSet::erase(size_t index)
 */
 void ItemSet::erase(const Item & item)
 {
-	set<Item>::iterator iter = m_itemSet.begin();
-	while (iter != m_itemSet.end())
-	{
-		if (*iter == item)
-		{
-			iter = m_itemSet.erase(iter);
-			break;
-		}
-		iter++;
-	}
+	m_itemSet.erase(item);
 }
 
 size_t ItemSet::size() const
@@ -101,19 +92,19 @@ bool ItemSet::hasSubset(const ItemSet & subset) const
 		return false;
 
 	set<Item>::const_iterator iterThis = m_itemSet.begin();
-	set<Item>::const_iterator iterSubset = subset.getItemSet().end();
+	set<Item>::const_iterator iterSubset = subset.getItemSet().begin();
 
 	while (iterThis != m_itemSet.end() && iterSubset != subset.getItemSet().end())   // set 里面的元素是排序好的，可以借鉴 merge sort 里面的 merge 思想
 	{
-		if (*iterSubset > *iterThis)
+		if (*iterThis > *iterSubset)
 		{
 			return false;
 		}
-		else if (*iterSubset == *iterThis)
+		else if (*iterThis == *iterSubset)
 		{
 			iterThis++, iterSubset++;
 		}
-		else
+		else  // *iterThis < *iterSubset
 		{
 			iterThis++;
 		}
@@ -243,6 +234,7 @@ ItemSet & ItemSet::operator-=(const ItemSet & itemSet)
 	{
 		if (*iterA == *iterB)
 		{
+			this->erase(*iterA);
 			iterA = itemSetA.erase(iterA);
 			iterB++;
 		}

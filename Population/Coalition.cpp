@@ -563,7 +563,7 @@ ItemSet Coalition::toItemSet() const
 	for (const Tank & t : m_coalition)
 	{
 		int x = static_cast<int>(t.getArrayIndex().x + Global::EPSILON);
-		int y = static_cast<int>(t.getArrayIndex().x + Global::EPSILON);
+		int y = static_cast<int>(t.getArrayIndex().y + Global::EPSILON);
 		Item item(x, y);
 		itemSet.insert(item);
 	}

@@ -58,24 +58,29 @@ int PopulationBase::writeLogPopAverage(int updateCounter)
 	return avg;
 }
 
+/*
+    把 population 转换成 Apriori 对应的数据集
+	one coalition 对应 one transaction
+*/
 void PopulationBase::population2transaction(const vector<Coalition>& population, vector<vector<ItemSet>>& transaction)
 {
 	vector<ItemSet> oneTransaction;
-	for (const Coalition & c : population)
-	{
-		oneTransaction.clear();
+	oneTransaction.reserve(Coalition::INDIVIDUAL_SIZE);
+	transaction.reserve(population.size());
 
+	for (const Coalition & c: population)
+	{
 		vector<Tank> tanks = c.getCoalition();
 		for (const Tank & t : tanks)
 		{
 			ofVec2f arrayIndex = t.getArrayIndex();
 			Item item(static_cast<int>(arrayIndex.x + Global::EPSILON), static_cast<int>(arrayIndex.y + Global::EPSILON));
-			ItemSet oneItemSet;
-			oneItemSet.insert(item);
-			oneTransaction.emplace_back(oneItemSet);
+			//ItemSet oneItemSet;
+			//oneItemSet.insert(item);
+			//oneTransaction.emplace_back(move(oneItemSet)); // TODO: reserve 然后 push_back 或 emplace_back 快一些，还是 resize 然后 赋值 move 快一些
+			oneTransaction.emplace_back(item);
 		}
-
-		transaction.emplace_back(oneTransaction);
+		transaction.emplace_back(move(oneTransaction));
 	}
 }
 
@@ -95,10 +100,16 @@ void PopulationBase::printTransaction(vector<vector<ItemSet>>& transactions, int
 
 void PopulationBase::takeActionToKnowledge(const map<pair<ItemSet, ItemSet>, double> & associateRules)
 {
+	if (associateRules.size() == 0)
+		return;
+
 	for (Coalition & c : m_population)
 	{
 		pair<ItemSet, ItemSet> matchedRule = matchRules(c, associateRules);  // 如果没有匹配的话，应该是 (-1, -1) --> (-1, -1)
-		// TODO: 已经找到了最佳匹配规则了，接下来就是做具体的调整了
+		if (matchedRule.first.size() == 0)
+		{
+			continue;
+		}
 		ItemSet moveDestination, moveSource;
 		moveDestination = matchedRule.second - c.toItemSet();
 		moveSource = findSource(moveDestination.size(), c, matchedRule, associateRules);
@@ -167,30 +178,9 @@ ItemSet PopulationBase::findSource(size_t moveSize, const Coalition & coalition,
 	candidate -= matchedRule.first;
 	candidate -= matchedRule.second;           // matchedRule 规则里面出现的智能体排除
 	map<Item, int> itemCount;
-	// TODO: 从candidate里面选择
-	map<pair<ItemSet, ItemSet>, double>::const_iterator iterMap = associateRules.begin();
-	while (iterMap != associateRules.end())    // 统计 associateRules 里面规则的 Item 的出现次数
-	{
-		ItemSet leftSet(iterMap->first.first);
-		set<Item> setLeft = leftSet.getItemSet();
-		set<Item>::const_iterator iterSet = setLeft.begin();
-		while (iterSet != setLeft.end())
-		{
-			itemCount[*iterSet]++;
-			iterSet++;
-		}
+	// TODO: 从candidate里面选择出现次数较低的。出现次数从 m_oneItemSetCount 里面选择
+	// 把 map<Item, int> 改成 ItemSeta
 
-		ItemSet rightSet(iterMap->first.second);
-		set<Item> setRight = rightSet.getItemSet();
-		iterSet = setRight.begin();
-		while (iterSet != setRight.end())
-		{
-			itemCount[*iterSet]++;
-			iterSet++;
-		}
-
-		iterMap++;
-	}
 
 	forward_list<pair<Item, int>> itemCountList;   // 要选择出 Item 出现次数少的
 	itemCountList.emplace_front(Item(), INT_MAX);

@@ -47,6 +47,7 @@ private:
 	int    m_transactionCounter;                 // 事务计数器
 
 	vector<vector<ItemSet>>   m_transactions;                 // 原始数据集，在vector中顺序存储，顺序和原始数据的顺序一样
+	map<ItemSet, int>         m_oneItemSetCount;              // transaction 原始数据集里面的 one-item set 统计计数
 	vector<map<ItemSet, int>> m_frequentKItemSetCount;        // 记录 K:0~N 的频繁 K-item set，以及对应的统计计数
 	map<ItemSet, int>         m_representativeItemSetCount;   // Instead of forming rules from frequent item sets, form rules from representative item sets	
 															  // 现在的item是string，是排好序的，未来这里需要替换成MyPoint。值得注意的是：string的set还是string，MyPoint的set。。。
