@@ -15,6 +15,12 @@ public:
 	Item();
 	Item(string itemStr);
 	Item(int x, int y);
+	
+	void set(int x, int y);
+	void setX(int x);
+	void setY(int y);
+	const int& getX()const;
+	const int& getY()const;
 
 	string toString();
 
