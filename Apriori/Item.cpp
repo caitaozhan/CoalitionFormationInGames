@@ -29,6 +29,32 @@ Item::Item(int x, int y)
 	m_y = y;
 }
 
+void Item::set(int x, int y)
+{
+	m_x = x;
+	m_y = y;
+}
+
+void Item::setX(int x)
+{
+	m_x = x;
+}
+
+void Item::setY(int y)
+{
+	m_y = y;
+}
+
+const int & Item::getX() const
+{
+	return m_x;
+}
+
+const int & Item::getY() const
+{
+	return m_y;
+}
+
 string Item::toString()
 {
 	string str("()");

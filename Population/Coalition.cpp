@@ -570,7 +570,32 @@ ItemSet Coalition::toItemSet() const
 	return itemSet;
 }
 
+/*
+     把位于 sourceSet 的 Tank 转移到位于 destinationSet 的地方
+	 sourceSet 和 destinationSet 的大小应该是一样的
+*/
 void Coalition::actionMove(const ItemSet & sourceSet, const ItemSet & destinationSet)
 {
-	
+	Item tempItem;
+	set<Item> setSource = sourceSet.getItemSet();
+	set<Item> setDestination = destinationSet.getItemSet();
+	set<Item>::const_iterator iterSource;
+	set<Item>::const_iterator iterDestination = setDestination.begin();
+
+	for (Tank & tank : m_coalition)
+	{
+		if (iterDestination == setDestination.end())
+			break;
+
+		int x = static_cast<int>(tank.getArrayIndex().x + Global::EPSILON);
+		int y = static_cast<int>(tank.getArrayIndex().y + Global::EPSILON);
+		tempItem.set(x, y);
+		iterSource = setSource.find(tempItem);
+		if (iterSource != setSource.end())
+		{
+			tank.updateLocation(iterDestination->getX(), iterDestination->getY());   // Action is here
+			iterSource = setSource.erase(iterSource);
+			iterDestination++;
+		}
+	}
 }
