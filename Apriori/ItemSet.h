@@ -13,6 +13,7 @@ public:
 	ItemSet(const ItemSet & itemSet);   // 拷贝构造函数
 
 	void insert(const Item & item);
+	void insert(const ItemSet & itemSet);
 	void erase(size_t index);           // set 里面的元素是排序的，erase 删除掉第 index 个元素
 	void erase(const Item & item);
 	size_t  size() const;

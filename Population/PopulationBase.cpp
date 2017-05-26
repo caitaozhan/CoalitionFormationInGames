@@ -16,7 +16,7 @@ PopulationBase::PopulationBase()
 	m_appearTarget       = false;
 	m_stop               = false;
 
-	apriori.setParam(0.3, 0.8);
+	m_apriori.setParam(0.3, 0.8);
 }
 
 void PopulationBase::writeLogMatrix(int updateCounter)
@@ -176,51 +176,56 @@ ItemSet PopulationBase::findSource(size_t moveSize, const Coalition & coalition,
 	ItemSet source;
 	ItemSet candidate(coalition.toItemSet());
 	candidate -= matchedRule.first;
-	candidate -= matchedRule.second;           // matchedRule 规则里面出现的智能体排除
-	map<Item, int> itemCount;
+	candidate -= matchedRule.second;           // matchedRule 规则里面已经出现过的智能体排除
+	set<Item> setCandidate = candidate.getItemSet();
 	// TODO: 从candidate里面选择出现次数较低的。出现次数从 m_oneItemSetCount 里面选择
-	// 把 map<Item, int> 改成 ItemSeta
+	map<ItemSet, int> candidateCount;
+	for (const Item & item : setCandidate)
+	{
+		ItemSet oneItemSet(item);
+		int count = m_apriori.getOneItemSetCount(oneItemSet);
+		candidateCount.emplace(move(oneItemSet), count);
+	}
 
+	forward_list<pair<ItemSet, int>> candidateList;   // 要选择出 Item 出现次数少的
+	candidateList.emplace_front(ItemSet(), INT_MAX);
+	forward_list<pair<ItemSet, int>>::const_iterator iterListA;
+	forward_list<pair<ItemSet, int>>::const_iterator iterListB;
 
-	forward_list<pair<Item, int>> itemCountList;   // 要选择出 Item 出现次数少的
-	itemCountList.emplace_front(Item(), INT_MAX);
-	forward_list<pair<Item, int>>::const_iterator iterListA;
-	forward_list<pair<Item, int>>::const_iterator iterListB;
-
-	map<Item, int>::const_iterator iterItemCount = itemCount.begin();
-	while (iterItemCount != itemCount.end())
+	map<ItemSet, int>::const_iterator iterCandidateCount = candidateCount.begin();
+	while (iterCandidateCount != candidateCount.end())
 	{
 		size_t counter = 0;
-		iterListA = itemCountList.before_begin();
-		iterListB = itemCountList.begin();          // 把 itemCount 里面是按照 key 排序的，现在的需求是找到 value 较小的
-		while (iterListB != itemCountList.end())    // 找到插入 list 的位置，list 的前 moveSize 个数的 item 是出现次数最小的
+		iterListA = candidateList.before_begin();
+		iterListB = candidateList.begin();          // 把 itemCount 里面是按照 key 排序的，现在的需求是找到 value 较小的
+		while (iterListB != candidateList.end())    // 找到插入 list 的位置，list 的前 moveSize 个数的 item 是出现次数最小的
 		{
-			if (counter >= moveSize)
+			if (counter >= moveSize)                // 只需要关注最小的 moveSize 个
 				break;
 
-			if (iterItemCount->second > iterListB->second)
+			if (iterCandidateCount->second > iterListB->second)
 			{
 				iterListA++;
 				iterListB++;
 			}
-			else if (iterItemCount->second == iterListB->second)
+			else if (iterCandidateCount->second == iterListB->second)
 			{
-				iterListA++;
-				iterListB = itemCountList.emplace_after(iterListB, iterItemCount->first, iterItemCount->second);
+				iterListB = candidateList.emplace_after(iterListB, iterCandidateCount->first, iterCandidateCount->second);
+				break;                              // 完成了插入之后，就可以退出循环了
 			}
-			else  // iterItemCount->second  < iterListB->second
+			else  // iterCandidateCount->second  < iterListB->second
 			{
-				iterListA = itemCountList.emplace_after(iterListA, iterItemCount->first, iterItemCount->second);
-				iterListB++;
+				iterListA = candidateList.emplace_after(iterListA, iterCandidateCount->first, iterCandidateCount->second);
+				break;                              // 完成了插入之后，就可以退出循环了
 			}
 			counter++;
 		}
-		iterItemCount++;
+		iterCandidateCount++;
 	}
 
-	iterListA = itemCountList.begin();
+	iterListA = candidateList.begin();
 	size_t counter = 0;
-	while (iterListA != itemCountList.end())
+	while (iterListA != candidateList.end())
 	{
 		if (counter >= moveSize)
 		{

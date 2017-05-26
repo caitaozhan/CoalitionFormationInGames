@@ -24,6 +24,17 @@ void ItemSet::insert(const Item & item)
 	m_itemSet.insert(item);
 }
 
+void ItemSet::insert(const ItemSet & itemSet)
+{
+	set<Item> setItem = itemSet.getItemSet();
+	set<Item>::iterator iter = setItem.begin();
+	while (iter != setItem.end())
+	{
+		m_itemSet.insert(*iter);
+		iter++;
+	}
+}
+
 void ItemSet::erase(size_t index)
 {
 	if (index >= m_itemSet.size())

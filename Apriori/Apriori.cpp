@@ -82,7 +82,7 @@ void Apriori::inputTransactions(vector<vector<ItemSet>>&& transactions)
 
 void Apriori::findFrequentOneItemSets()
 {
-	 
+	m_oneItemSetCount.clear();
 	for (size_t i = 0; i != m_transactions.size(); ++i)
 	{
 		for (size_t j = 0; j != m_transactions[i].size(); ++j)
@@ -208,6 +208,20 @@ void Apriori::printRules(const string &fileName)
 const map<pair<ItemSet, ItemSet>, double>& Apriori::getAssociateRules() const
 {
 	return m_associationRule;
+}
+
+/*
+    成员 m_oneItemSetCount 保存了从原始 transaction data set 里面的 item 的统计个数
+*/
+int Apriori::getOneItemSetCount(const ItemSet & itemSet)
+{
+	map<ItemSet, int>::iterator iter;
+	iter = m_oneItemSetCount.find(itemSet);
+	if (iter != m_oneItemSetCount.end())
+	{
+		return iter->second;
+	}
+	return -1;
 }
 
 void Apriori::generateCandidates(vector<ItemSet>& candidateKItemSets, int k)
