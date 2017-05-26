@@ -103,6 +103,7 @@ void PopulationBase::takeActionToKnowledge(const map<pair<ItemSet, ItemSet>, dou
 	if (associateRules.size() == 0)
 		return;
 
+	Coalition newCoalition;
 	for (Coalition & c : m_population)
 	{
 		pair<ItemSet, ItemSet> matchedRule = matchRules(c, associateRules);  // 如果没有匹配的话，应该是 (-1, -1) --> (-1, -1)
@@ -113,7 +114,22 @@ void PopulationBase::takeActionToKnowledge(const map<pair<ItemSet, ItemSet>, dou
 		ItemSet moveDestination, moveSource;
 		moveDestination = matchedRule.second - c.toItemSet();
 		moveSource = findSource(moveDestination.size(), c, matchedRule, associateRules);
-		c.actionMove(moveSource, moveDestination);
+		
+		newCoalition = c;
+		newCoalition.actionMove(moveSource, moveDestination);
+		int evaluateOld = c.getSimpleEvaluate();
+		int evaluateNew = Coalition::simpleEvalute(m_enemy, newCoalition);
+		if (evaluateNew > evaluateOld)
+		{
+			c = newCoalition;
+		}
+		else if (evaluateNew == evaluateOld)
+		{
+			if (urd_0_1(Global::dre) < 0.5)        // 给 50% 概率更新
+			{
+				c = newCoalition;
+			}
+		}
 	}
 }
 

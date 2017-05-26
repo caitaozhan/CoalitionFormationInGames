@@ -117,6 +117,7 @@ void Apriori::findAllFrequentItemSets()
 */
 void Apriori::findStrongestAssociateRules()
 {
+	m_representativeItemSetCount.clear();
 	// Find the representative K-item sets and their counts
 	for (size_t i = m_frequentKItemSetCount.size() - 2; i > 1; --i)  // [0] 和 [size()-1] 是空元素，[1] 是 one-item set 不能形成rule
 	{

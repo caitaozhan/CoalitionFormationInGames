@@ -141,13 +141,13 @@ void PopulationMPL::updatePopluation()
 
 			int evaluateBackupC = Coalition::simpleEvalute(m_enemy, backupC);
 			int evaluateC = Coalition::simpleEvalute(m_enemy, c);
-			if (evaluateBackupC > evaluateC)  // 如果 backup 比 m_population 中的 c 更好，就更新 c
+			if (evaluateBackupC > evaluateC)           // 如果 backup 比 m_population 中的 c 更好，就更新 c
 			{
 				c = backupC;
 			}
-			else if (evaluateBackupC == evaluateC /*&& localSearch == true*/)  // 相等，但是如果是 local search // 把localSearch这个限制去掉之后，算法的性能大幅度提升
+			else if (evaluateBackupC == evaluateC)     // 相等，但是如果是 local search 
 			{
-				if (urd_0_1(Global::dre) < 0.5)                            // 给 50% 概率更新
+				if (urd_0_1(Global::dre) < 0.5)        // 给 50% 概率更新
 				{
 					c = backupC;
 				}
