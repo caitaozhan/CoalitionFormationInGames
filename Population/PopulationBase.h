@@ -83,6 +83,6 @@ protected:
 	int m_populationSize;                           // 种群规模的大小，即population里有多少个individual
 	int m_bestEvaluation;                           // 当前种群里面的最好（大）适应值
 
-	Apriori apriori;
+	Apriori m_apriori;                              // 关联规则对象，在 local search 部分进行数据挖掘
 
 };

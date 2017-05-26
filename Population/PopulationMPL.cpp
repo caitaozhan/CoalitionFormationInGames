@@ -158,12 +158,11 @@ void PopulationMPL::updatePopluation()
 	{
 		vector<vector<ItemSet>> populationTransaction;
 		population2transaction(m_population, populationTransaction);
-		//printTransaction(populationTransaction, m_updateCounter);
-		apriori.inputTransactions(move(populationTransaction));
-		apriori.findAllFrequentItemSets();
-		apriori.findStrongestAssociateRules();
-	
-		takeActionToKnowledge(apriori.getAssociateRules());
+		printTransaction(populationTransaction, m_updateCounter);
+		m_apriori.inputTransactions(move(populationTransaction));
+		m_apriori.findAllFrequentItemSets();
+		m_apriori.findStrongestAssociateRules();
+		takeActionToKnowledge(m_apriori.getAssociateRules());
 	}
 }
 
