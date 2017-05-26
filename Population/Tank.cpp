@@ -138,5 +138,5 @@ bool Tank::ckeckInBF(const ofVec2f & arrayIndex)
 void Tank::updateLocation(int x, int y)
 {
 	setTankArrayIndex(x, y);
-	setTankPosition(x, y, 0);
+	setTankPosition(xArrayIndx2Coordi(x), yArrayIndx2Coordi(y), 0);
 }

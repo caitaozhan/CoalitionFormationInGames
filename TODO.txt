@@ -1,6 +1,3 @@
-有待解决的BUG：日志无法打印（猜测是文件名里面有空格。。。）
-
-
 C++ 读取配置文件
 http://blog.csdn.net/thanklife/article/details/52953475
 http://www.cnblogs.com/tzhangofseu/archive/2011/10/02/2197966.html
