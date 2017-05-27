@@ -14,11 +14,13 @@ Apriori::Apriori(double minSupportRatio, double minConfidence)
 	m_transactionCounter = 0;
 }
 
-
-void Apriori::setParam(double minSupportRatio, double minConfidence)
+void Apriori::setParam(double minSupportRatio, double minConfidence, double maxRepresentativeItemSet, double maxAssociateRule)
 {
 	m_minSupportRatio = minSupportRatio;
 	m_minConfidence = minConfidence;
+	m_maxRepresentativeItemSet = maxRepresentativeItemSet;
+	m_maxAssociateRule = maxAssociateRule;                      // 赋值都是 population.size()
+	m_supportRatioStep = 1 / maxAssociateRule;
 	m_transactionCounter = 0;
 }
 
@@ -118,6 +120,7 @@ void Apriori::findAllFrequentItemSets()
 void Apriori::findStrongestAssociateRules()
 {
 	m_representativeItemSetCount.clear();
+	m_associationRule.clear();
 	// Find the representative K-item sets and their counts
 	for (size_t i = m_frequentKItemSetCount.size() - 2; i > 1; --i)  // [0] 和 [size()-1] 是空元素，[1] 是 one-item set 不能形成rule
 	{
@@ -192,6 +195,17 @@ void Apriori::findStrongestAssociateRules()
 	}
 }
 
+/*
+    更新参数 m_minSupportRatio 和 m_minConfidence，使得
+	m_frequentKItemSetCount 和 m_associationRule 的大小 分别小于maxRepresentativeItemSet 和 maxAssociationRule
+	相当于是提高产生规则的“门槛”
+	这主要是出于时间的考虑，特别是m_minSupportRatio比例比较低的话，产生的频繁项太多的话，时间成指数上涨
+*/			
+void Apriori::updateParamters(int maxRepresentativeItemSet, int maxAssociationRule)
+{
+
+}
+
 void Apriori::printRules(const string &fileName)
 {
 	ofstream outFile(fileName);
@@ -223,6 +237,29 @@ int Apriori::getOneItemSetCount(const ItemSet & itemSet)
 		return iter->second;
 	}
 	return -1;
+}
+
+/*
+    更新m_minSupportRatio和m_minConfidence
+	需要调整（目前只有提高）最小支持度和最小置信度，用来提高生成规则的门槛，防止生成的频繁项和规则太多（非常花费时间）
+*/
+void Apriori::updateMin()
+{
+	if (m_representativeItemSetCount.size() > m_maxRepresentativeItemSet)
+	{
+		if (m_minSupportRatio < 0.990000001)
+		{
+			m_minSupportRatio += 0.01;       // 提高生成频繁项的门槛
+		}
+	}
+
+	if (m_associationRule.size() > m_maxAssociateRule)
+	{
+		if (m_minConfidence < 0.990000001)
+		{
+			m_minConfidence += 0.005;                       // 提高生成规则的门槛
+		}
+	}
 }
 
 void Apriori::generateCandidates(vector<ItemSet>& candidateKItemSets, int k)

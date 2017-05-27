@@ -5,7 +5,7 @@ uniform_real_distribution<double> PopulationBase::urd_0_1 = uniform_real_distrib
 PopulationBase::PopulationBase()
 {
 	m_maxUpdate          = 100;
-	m_maxExperimentTimes = 1;
+	m_maxExperimentTimes = 15;
 	m_PMtotal            = 0;
 	m_experimentTimes    = 0;
 	m_updateCounter      = 0;
@@ -16,7 +16,6 @@ PopulationBase::PopulationBase()
 	m_appearTarget       = false;
 	m_stop               = false;
 
-	m_apriori.setParam(0.3, 0.8);
 }
 
 void PopulationBase::writeLogMatrix(int updateCounter)
@@ -75,9 +74,6 @@ void PopulationBase::population2transaction(const vector<Coalition>& population,
 		{
 			ofVec2f arrayIndex = t.getArrayIndex();
 			Item item(static_cast<int>(arrayIndex.x + Global::EPSILON), static_cast<int>(arrayIndex.y + Global::EPSILON));
-			//ItemSet oneItemSet;
-			//oneItemSet.insert(item);
-			//oneTransaction.emplace_back(move(oneItemSet)); // TODO: reserve 然后 push_back 或 emplace_back 快一些，还是 resize 然后 赋值 move 快一些
 			oneTransaction.emplace_back(item);
 		}
 		transaction.emplace_back(move(oneTransaction));
@@ -125,7 +121,7 @@ void PopulationBase::takeActionToKnowledge(const map<pair<ItemSet, ItemSet>, dou
 		}
 		else if (evaluateNew == evaluateOld)
 		{
-			if (urd_0_1(Global::dre) < 0.5)        // 给 50% 概率更新
+			if (urd_0_1(Global::dre) < 0.1)        // 给一定的概率更新
 			{
 				c = newCoalition;
 			}
@@ -174,7 +170,6 @@ pair<ItemSet, ItemSet> PopulationBase::matchRules(const Coalition & coalition, c
 		}
 		iter++;
 	}
-
 	return bestMatchedRule;
 }
 

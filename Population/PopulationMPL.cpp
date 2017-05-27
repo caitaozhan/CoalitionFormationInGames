@@ -41,6 +41,10 @@ void PopulationMPL::initialize()
 	m_populationSize = 2 * sqrt(avalablePlaceInPMatrix * m_dimension);
 	m_e = m_bRatio*(m_populationSize*Coalition::INDIVIDUAL_SIZE) / (avalablePlaceInPMatrix);
 
+	// 设置 apriori 的参数
+	m_apriori.setParam(0.3, 0.8, 100, m_populationSize);
+
+
 	// 初始化 m_population
 	m_population.resize(m_populationSize);                  
 	for (int i = 0; i < m_population.size(); ++i)
@@ -68,7 +72,7 @@ void PopulationMPL::update()
 {
 	m_updateCounter++;
 
-	if (/*m_appearTarget == true || */m_updateCounter == m_maxUpdate)   // 一次实验结束：进化了 MAX_UPDATE 代
+	if (/*m_appearTarget == true ||*/ m_updateCounter == m_maxUpdate)   // 一次实验结束：进化了 MAX_UPDATE 代
 	{
 		if (m_appearTarget == false)            // MAX_UPDATE 次之内没有找到 target
 		{
@@ -163,6 +167,7 @@ void PopulationMPL::updatePopluation()
 		m_apriori.findAllFrequentItemSets();
 		m_apriori.findStrongestAssociateRules();
 		takeActionToKnowledge(m_apriori.getAssociateRules());
+		m_apriori.updateMin();
 	}
 }
 

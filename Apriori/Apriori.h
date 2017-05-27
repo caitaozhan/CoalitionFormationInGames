@@ -22,14 +22,16 @@ public:
 	Apriori(double minSupportRatio, double minConfidence);
 
 public:
-	void setParam(double minSupportRatio, double minConfidence);           // 设置参数
-	void inputTransactions(const string &fileName);                        // 读入数据到m_transactions中
-	void inputTransactions(vector<vector<ItemSet>> && transactions);       // 读入数据到m_transactions中
-	void findAllFrequentItemSets();                                        // 找到所有的频繁项     
-	void findStrongestAssociateRules();                                    // 找到所有的关联规则
-	void printRules(const string &fileName);                               // 打印所有的关联规则
-	const map<pair<ItemSet, ItemSet>, double>& getAssociateRules()const;   // getter函数
-	int  getOneItemSetCount(const ItemSet & itemSet);
+	void setParam(double minSupportRatio, double minConfidence, double maxRepresentativeItemSet, double maxAssociateRule); // 设置参数
+	void inputTransactions(const string &fileName);                              // 读入数据到m_transactions中
+	void inputTransactions(vector<vector<ItemSet>> && transactions);             // 读入数据到m_transactions中
+	void findAllFrequentItemSets();                                              // 找到所有的频繁项     
+	void findStrongestAssociateRules();                                          // 找到所有的关联规则
+	void updateParamters(int maxRepresentativeItemSet, int maxAssociationRule);  // 更新参数
+	void printRules(const string &fileName);                                     // 打印所有的关联规则
+	const map<pair<ItemSet, ItemSet>, double>& getAssociateRules()const;         // getter函数
+	int  getOneItemSetCount(const ItemSet & itemSet);                            // 获得m_oneItemSetCount里面的数据
+	void updateMin();                                                            // 更新m_minSupportRatio和m_minConfidence
 
 private:
 	void findFrequentOneItemSets();                                                 // 从原始的 transaction 里面，找到频繁的 one-item set
@@ -45,6 +47,9 @@ private:
 	double m_minSupportRatio;                    // 最小支持度
 	double m_minConfidence;                      // 最小可信度
 	int    m_transactionCounter;                 // 事务计数器
+	int    m_maxRepresentativeItemSet;           // 最大代表项集个数，控制 m_minSupportRatio 和 m_minConfidence
+	int    m_maxAssociateRule;                   // 最大生成规则个数，控制 m_minConfidence
+	double m_supportRatioStep;                   // 支持度增加的步长
 
 	vector<vector<ItemSet>>   m_transactions;                 // 原始数据集，在vector中顺序存储，顺序和原始数据的顺序一样
 	map<ItemSet, int>         m_oneItemSetCount;              // transaction 原始数据集里面的 one-item set 统计计数
