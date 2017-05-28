@@ -4,7 +4,7 @@ uniform_real_distribution<double> PopulationBase::urd_0_1 = uniform_real_distrib
 
 PopulationBase::PopulationBase()
 {
-	m_maxUpdate          = 100;
+	m_maxUpdate          = 5000;
 	m_maxExperimentTimes = 15;
 	m_PMtotal            = 0;
 	m_experimentTimes    = 0;
@@ -121,7 +121,7 @@ void PopulationBase::takeActionToKnowledge(const map<pair<ItemSet, ItemSet>, dou
 		}
 		else if (evaluateNew == evaluateOld)
 		{
-			if (urd_0_1(Global::dre) < 0.1)        // 给一定的概率更新
+			if (urd_0_1(Global::dre) < 0.5)        // 给一定的概率更新
 			{
 				c = newCoalition;
 			}

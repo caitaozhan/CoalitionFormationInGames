@@ -14,11 +14,11 @@ PopulationMPL::PopulationMPL()
 void PopulationMPL::initialize()
 {
 	PL = 0.5;
-	LS = 1;
+	LS = 0.5;
 
 	string timeNow = getTimeNow();
 
-	m_fileNameEnemyInput   = string("../sample/1_case_10.txt");                              // TODO: string should be in a file
+	m_fileNameEnemyInput   = string("../sample/5_case_50.txt");                              // TODO: string should be in a file
 	m_logNamePM            = string("../log/producer_consumer/logPM_simple_evaluate_.txt");  // all below should be in a file
 	m_logNameRunningResult = string("../log/producer_consumer/running_result_.txt");
 	m_logNameAnalyseResult = string("../log/producer_consumer/analyse_result_.txt");
@@ -72,7 +72,7 @@ void PopulationMPL::update()
 {
 	m_updateCounter++;
 
-	if (/*m_appearTarget == true ||*/ m_updateCounter == m_maxUpdate)   // 一次实验结束：进化了 MAX_UPDATE 代
+	if (m_appearTarget == true || m_updateCounter == m_maxUpdate)   // 一次实验结束：进化了 MAX_UPDATE 代
 	{
 		if (m_appearTarget == false)            // MAX_UPDATE 次之内没有找到 target
 		{
@@ -123,7 +123,6 @@ void PopulationMPL::updatePopluation()
 			if (urd_0_1(Global::dre) < PL)      // todo: 这里还有一个&&
 			{
 				constructC.pushBackTank(backupC.getCoalition(i));
-				urd_0_1(Global::dre);   // 加了这行代码，在 test case-1 的测试实验结果就好很多。。。
 			}
 			else
 			{
@@ -160,14 +159,14 @@ void PopulationMPL::updatePopluation()
 	}
 	if (urd_0_1(Global::dre) < LS) //  local search
 	{
-		vector<vector<ItemSet>> populationTransaction;
+		/*vector<vector<ItemSet>> populationTransaction;
 		population2transaction(m_population, populationTransaction);
 		printTransaction(populationTransaction, m_updateCounter);
 		m_apriori.inputTransactions(move(populationTransaction));
 		m_apriori.findAllFrequentItemSets();
 		m_apriori.findStrongestAssociateRules();
-		takeActionToKnowledge(m_apriori.getAssociateRules());
-		m_apriori.updateMin();
+		takeActionToKnowledge(m_apriori.getAssociateRules());*/
+		//m_apriori.updateMin();
 	}
 }
 
