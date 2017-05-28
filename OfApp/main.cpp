@@ -11,15 +11,15 @@ using namespace std;
 */
 void doExperiments(const vector<int> &experiments)
 {
-	//Population population;
-	//population.initialize(0.5, 1, 500);
+	Population population;
+	population.initialize(0.5, 1);
 	////PopulationEDA population;
 	////population.initialize(0.8, 100);
-	//for (int i = 0; i < experiments.size(); ++i)
-	//{
-	//	population.setLogExperEvaluate(experiments[i]);  // 依据本次实验的ID号，设置log文件名
-	//	population.run(experiments[i]);
-	//}
+	for (int i = 0; i < experiments.size(); ++i)
+	{
+		population.setLogExperEvaluate(experiments[i]);  // 依据本次实验的ID号，设置log文件名
+		population.run(experiments[i]);
+	}
 }
 
 //========================================================================

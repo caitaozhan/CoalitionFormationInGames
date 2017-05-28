@@ -89,8 +89,8 @@ void AnalyzeLog::analyze()
 	{
 		if (i != maxExperimentID)                  // 进化次数最大的在已经初始化里面了，在这里就跳过去
 		{
-			int j = 0;
-			int size = inputData[i].size();
+			size_t j = 0;
+			size_t size = inputData[i].size();
 			while (j < size)
 			{
 				avgInputData[j].m_value += inputData[i][j].m_value;

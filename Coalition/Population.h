@@ -9,7 +9,7 @@ class Population
 {
 public:
 	Population();
-	void initialize(double pl, double ls, int populationSize);
+	void initialize(double pl, double ls);
 
 	void update();                              // update the population
 	void run(int ID);                           // run one experiment, set default_random_engine's seed with ID

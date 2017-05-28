@@ -1,7 +1,7 @@
 #include "Population.h"
 
-string Population::LOG_EXPER_EVALUATE = string("../log/MPL/case-8/experiment_");         // 程序运行日志，记录每一次实验的评估值
-string Population::LOG_ANALYSE_OUTPUT = string("../log/MPL/case-8/result_");             // 分析程序运行的运行记录
+string Population::LOG_EXPER_EVALUATE = string("../log/MPL/case-1/experiment_");         // 程序运行日志，记录每一次实验的评估值
+string Population::LOG_ANALYSE_OUTPUT = string("../log/MPL/case-1/result_");             // 分析程序运行的运行记录
 
 Population::Population()
 {
@@ -9,8 +9,8 @@ Population::Population()
 	LS = 0.9;    // Local Search
 	
 
-	ENEMY_INPUT = string("../sample/8_case_48.txt");                                     // enemy阵型的初始化编队
-	LOG_PM_NAME = string("../log/MPL/case-8/log_simpleEvaluate.txt");                    // 概率矩阵日志
+	ENEMY_INPUT = string("../sample/1_case_10.txt");                                     // enemy阵型的初始化编队
+	LOG_PM_NAME = string("../log/MPL/case-1/log_simpleEvaluate.txt");                    // 概率矩阵日志
 
 	MAX_UPDATE = 5000;
 	MAX_EXPERIMENT = 15;
@@ -27,7 +27,7 @@ Population::Population()
 	urd_0_1 = uniform_real_distribution<double>(0.0, 1.0);
 }
 
-void Population::initialize(double pl, double ls, int populationSize)
+void Population::initialize(double pl, double ls)
 {
 	PL = pl;
 	LS = ls;
