@@ -115,6 +115,11 @@ void Population::run(int ID)
 {
 	Global::dre.seed(ID);
 
+	if (ID == 28)
+	{
+		Global::dre.seed(1);
+	}
+
 	resetMe();                       // 重置我方编队
 
 	while (m_appearTarget == false && m_isStagnate == false)  // 试验继续运行的条件：没有找到目标，并且没有停滞状态
@@ -122,7 +127,6 @@ void Population::run(int ID)
 		updatePopluation();          //  新的全局概率矩阵 --> 更新种群位置
 		updateWeight();              //  新的种群位置     --> 更新种群的权值
 		updatePMatrix();             //  新的种群权值     --> 更新全局的概率矩阵
-		//updateBestCoalitions();      //  更新最好的Coalitions
 		writeLogMatrix(++m_updateCounter);
 		
 		if (m_updateCounter == m_updateThreshhold)
@@ -220,8 +224,194 @@ void Population::updatePopluation()
 				}
 			}
 		}
-		//c.writeLog();
+
+		vector<vector<ItemSet>> populationTransaction;
+		population2transaction(m_population, populationTransaction);
+		m_apriori.inputTransactions(move(populationTransaction));
+		m_apriori.findAllFrequentItemSets();
+		m_apriori.findStrongestAssociateRules();
+		takeActionToKnowledge(m_apriori.getAssociateRules());
 	}
+}
+
+/*
+    把 population 转换成 Apriori 对应的数据集
+    one coalition 对应 one transaction
+*/
+void Population::population2transaction(const vector<Coalition>& population, vector<vector<ItemSet>>& transaction)
+{
+	vector<ItemSet> oneTransaction;
+	oneTransaction.reserve(Coalition::INDIVIDUAL_SIZE);
+	transaction.reserve(population.size());
+
+	for (const Coalition & c : population)
+	{
+		vector<Tank> tanks = c.getCoalition();
+		for (const Tank & t : tanks)
+		{
+			ofVec2f arrayIndex = t.getArrayIndex();
+			Item item(static_cast<int>(arrayIndex.x + Global::EPSILON), static_cast<int>(arrayIndex.y + Global::EPSILON));
+			oneTransaction.emplace_back(item);
+		}
+		transaction.emplace_back(move(oneTransaction));
+	}
+}
+
+
+void Population::takeActionToKnowledge(const map<pair<ItemSet, ItemSet>, double> & associateRules)
+{
+	if (associateRules.size() == 0)
+		return;
+
+	Coalition newCoalition;
+	for (Coalition & c : m_population)
+	{
+		pair<ItemSet, ItemSet> matchedRule = matchRules(c, associateRules);  // 如果没有匹配的话，应该是 (-1, -1) --> (-1, -1)
+		if (matchedRule.first.size() == 0)
+		{
+			continue;
+		}
+		ItemSet moveDestination, moveSource;
+		moveDestination = matchedRule.second - c.toItemSet();
+		moveSource = findSource(moveDestination.size(), c, matchedRule, associateRules);
+
+		newCoalition = c;
+		newCoalition.actionMove(moveSource, moveDestination);
+		int evaluateOld = c.getSimpleEvaluate();
+		int evaluateNew = Coalition::simpleEvalute(m_enemy, newCoalition);
+		if (evaluateNew > evaluateOld)
+		{
+			c = newCoalition;
+		}
+		else if (evaluateNew == evaluateOld)
+		{
+			//if (urd_0_1(Global::dre) < 0.1)        // 给一定的概率更新
+			//{
+			//	c = newCoalition;
+			//}
+		}
+	}
+}
+
+/*
+    itemSet = coalition.toItemSet()
+    匹配的标准是：left 是 itemSet 的子集，但是 right 不是 itemSet 的子集
+*/
+pair<ItemSet, ItemSet> Population::matchRules(const Coalition & coalition, const map<pair<ItemSet, ItemSet>, double>& associateRules)
+{
+	map<pair<ItemSet, ItemSet>, double> candidateRules;
+
+	ItemSet coalitionItemSet;
+	coalitionItemSet = coalition.toItemSet();
+	map<pair<ItemSet, ItemSet>, double>::const_iterator iter = associateRules.begin();
+	while (iter != associateRules.end())
+	{
+		ItemSet left = iter->first.first;
+		if (coalitionItemSet.hasSubset(left) == true)         // 规则的左手边在 coalition 里面
+		{
+			ItemSet right = iter->first.second;
+			if (coalitionItemSet.hasSubset(right) == false)   // 规则的右手边不在 coalition 里面
+			{
+				candidateRules.emplace(*iter);
+			}
+		}
+		iter++;
+	}
+
+	iter = candidateRules.begin();
+	double maxConfidence = 0;
+	pair<ItemSet, ItemSet> bestMatchedRule;
+	while (iter != candidateRules.end())
+	{
+		if (iter->second > maxConfidence)
+		{
+			maxConfidence = iter->second;
+			bestMatchedRule = iter->first;
+		}
+		else if (isZero(iter->second - maxConfidence) == true)
+		{
+			bestMatchedRule = iter->first;
+		}
+		iter++;
+	}
+	return bestMatchedRule;
+}
+
+/*
+    local search 的时候，需要对一些智能体作调整，就是把一些智能体作为source，转移到destination
+    @param moveSize       是转移的智能体的个数
+    @param coalition      是个体（阵型，解）
+    @param matchedRule    是匹配的规则
+    @param associateRules 是当前 population 生成的所有的规则
+    找出来的 source，应该是一些费频繁的 Item
+*/
+ItemSet Population::findSource(size_t moveSize, const Coalition & coalition, const pair<ItemSet, ItemSet>& matchedRule,
+	const map<pair<ItemSet, ItemSet>, double>& associateRules)
+{
+	ItemSet source;
+	ItemSet candidate(coalition.toItemSet());
+	candidate -= matchedRule.first;
+	candidate -= matchedRule.second;           // matchedRule 规则里面已经出现过的智能体排除
+	set<Item> setCandidate = candidate.getItemSet();
+	// TODO: 从candidate里面选择出现次数较低的。出现次数从 m_oneItemSetCount 里面选择
+	map<ItemSet, int> candidateCount;
+	for (const Item & item : setCandidate)
+	{
+		ItemSet oneItemSet(item);
+		int count = m_apriori.getOneItemSetCount(oneItemSet);
+		candidateCount.emplace(move(oneItemSet), count);
+	}
+
+	forward_list<pair<ItemSet, int>> candidateList;   // 要选择出 Item 出现次数少的
+	candidateList.emplace_front(ItemSet(), INT_MAX);
+	forward_list<pair<ItemSet, int>>::const_iterator iterListA;
+	forward_list<pair<ItemSet, int>>::const_iterator iterListB;
+
+	map<ItemSet, int>::const_iterator iterCandidateCount = candidateCount.begin();
+	while (iterCandidateCount != candidateCount.end())
+	{
+		size_t counter = 0;
+		iterListA = candidateList.before_begin();
+		iterListB = candidateList.begin();          // 把 itemCount 里面是按照 key 排序的，现在的需求是找到 value 较小的
+		while (iterListB != candidateList.end())    // 找到插入 list 的位置，list 的前 moveSize 个数的 item 是出现次数最小的
+		{
+			if (counter >= moveSize)                // 只需要关注最小的 moveSize 个
+				break;
+
+			if (iterCandidateCount->second > iterListB->second)
+			{
+				iterListA++;
+				iterListB++;
+			}
+			else if (iterCandidateCount->second == iterListB->second)
+			{
+				iterListB = candidateList.emplace_after(iterListB, iterCandidateCount->first, iterCandidateCount->second);
+				break;                              // 完成了插入之后，就可以退出循环了
+			}
+			else  // iterCandidateCount->second  < iterListB->second
+			{
+				iterListA = candidateList.emplace_after(iterListA, iterCandidateCount->first, iterCandidateCount->second);
+				break;                              // 完成了插入之后，就可以退出循环了
+			}
+			counter++;
+		}
+		iterCandidateCount++;
+	}
+
+	iterListA = candidateList.begin();
+	size_t counter = 0;
+	while (iterListA != candidateList.end())
+	{
+		if (counter >= moveSize)
+		{
+			break;
+		}
+		source.insert(iterListA->first);
+		counter++;
+		iterListA++;
+	}
+
+	return source;
 }
 
 /*

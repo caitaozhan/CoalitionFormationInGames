@@ -14,6 +14,7 @@ Apriori::Apriori(double minSupportRatio, double minConfidence)
 	m_transactionCounter = 0;
 }
 
+
 void Apriori::setParam(double minSupportRatio, double minConfidence, int maxRepresentativeItemSet, int maxAssociateRule)
 {
 	m_minSupportRatio = minSupportRatio;

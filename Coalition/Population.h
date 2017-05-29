@@ -1,7 +1,12 @@
 #pragma once
 #include <iostream>
 #include <vector>
+#include <forward_list>
+#include <climits>
+#include <ctime>
+#include <chrono>
 #include "Coalition.h"
+#include "../Apriori/Apriori.h"
 #include "../Analyze/AnalyzeLog.h"
 using namespace std;
 
@@ -43,6 +48,12 @@ public:
 	static string LOG_EXPER_EVALUATE;
 	static string LOG_ANALYSE_OUTPUT;
 
+
+	void population2transaction(const vector<Coalition> & population, vector<vector<ItemSet>> & transaction);
+	void takeActionToKnowledge(const map<pair<ItemSet, ItemSet>, double> & associateRules);
+	pair<ItemSet, ItemSet> matchRules(const Coalition & coalition, const map<pair<ItemSet, ItemSet>, double> & associateRules);
+	ItemSet findSource(size_t moveSize, const Coalition & c, const pair<ItemSet, ItemSet> & matchedRule, const map<pair<ItemSet, ItemSet>, double> & associateRules);
+
 private:
 	vector<vector<double>> PROBABILITY_MATRIX;  // 概率矩阵
 	vector<double> SUM_OF_ROW;                  // 概率矩阵每行之和，PM的metadata
@@ -64,7 +75,6 @@ private:
 
 	double PL;            // Probability Learning
 	double LS;			  // Local Search
-	//double SMALL_NUMBER;
 	double m_bRatio;
 	double m_e;
 
@@ -87,4 +97,6 @@ private:
 	bool m_isStagnate;         // 是否陷入停滞
 	int  m_stagnateCriteria;   // 停滞的标准，即多次代进化之后，种群的平均fitness依然没有提升
 	int  m_latestPopAvg;       // 记录上一次的种群平均评估值
+
+	Apriori m_apriori;
 };
