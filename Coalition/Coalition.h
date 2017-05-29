@@ -1,7 +1,7 @@
 #pragma once
 #include <ofMain.h>
 #include "Tank.h"
-#include "Global.h"
+#include "../Apriori/ItemSet.h"
 
 
 class Coalition
@@ -64,6 +64,9 @@ public:
 	static uniform_int_distribution<int> uid_x;
 	static uniform_int_distribution<int> uid_y;
 	static bool decrease(const Coalition & c1, const Coalition & c2);
+
+	ItemSet toItemSet() const;
+	void actionMove(const ItemSet & sourceSet, const ItemSet & destinationSet);
 
 private:
 	vector<Tank> m_coalition;

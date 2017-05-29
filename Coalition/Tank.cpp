@@ -128,3 +128,11 @@ bool Tank::ckeckInBF(const ofVec2f & arrayIndex)
 	}
 	return true;
 }
+/*
+   同时更新 arrayIndex 和 真实地图里面的 position
+*/
+void Tank::updateLocation(int x, int y)
+{
+	setTankArrayIndex(x, y);
+	setTankPosition(xArrayIndx2Coordi(x), yArrayIndx2Coordi(y), 0);
+}

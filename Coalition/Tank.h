@@ -32,6 +32,8 @@ public:
 
 	static double ABILITY_DISTANCE;
 
+	void updateLocation(int x, int y);
+
 private:
 	ofPoint m_position;           // 几何坐标
 	ofVec2f m_arrayIndex;         // 数组下标
